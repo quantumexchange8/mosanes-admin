@@ -13,7 +13,7 @@ return [
     |
     */
 
-    'name' => env('APP_NAME', 'Mosane Admin'),
+    'name' => env('APP_NAME', 'Mosanes Admin'),
 
     /*
     |--------------------------------------------------------------------------

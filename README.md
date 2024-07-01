@@ -1,6 +1,6 @@
 <p align="center"><a href="https://laravel.com" target="_blank"><img src="/public/img/mosane-logo.svg" width="200" alt="Laravel Logo"></a></p>
 
-## About Mosane
+## About Mosanes
 
 This project is a Customer Relationship Management (CRM) administration system integrated with the cTrader API. It allows traders to seamlessly manage their customer interactions, trading activities, and analytics in one unified platform.
 

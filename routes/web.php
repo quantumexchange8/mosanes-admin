@@ -24,4 +24,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+Route::get('/components/buttons', function () {
+    return Inertia::render('Components/Buttons');
+})->name('components.buttons');
+
 require __DIR__.'/auth.php';

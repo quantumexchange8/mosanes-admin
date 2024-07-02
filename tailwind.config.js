@@ -130,6 +130,9 @@ export default {
                 pink: '#FF2D58',
                 purple: '#7A5AF8',
             },
+            boxShadow: {
+                'input': '0 1px 2px 0px rgba(12, 17, 29, 0.05)',
+            },
             fontSize: {
                 xxs: ['10px', '16px'],
                 xs: ['12px', '18px'],

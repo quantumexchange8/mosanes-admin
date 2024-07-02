@@ -19,7 +19,7 @@ createInertiaApp({
             .use(ZiggyVue)
             .use(PrimeVue, {
                 unstyled: true,
-                preset: Aura
+                pt: Aura
             })
             .mount(el);
     },

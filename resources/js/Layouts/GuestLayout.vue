@@ -4,17 +4,13 @@ import { Link } from '@inertiajs/vue3';
 </script>
 
 <template>
-    <div class="min-h-screen flex flex-col sm:justify-center items-center pt-6 sm:pt-0 bg-gray-100">
-        <div>
-            <Link href="/">
-                <ApplicationLogo class="w-20 h-20 fill-current text-gray-500" />
-            </Link>
-        </div>
-
-        <div
-            class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white shadow-md overflow-hidden sm:rounded-lg"
-        >
+    <div 
+        class="min-h-screen flex flex-col justify-between md:justify-normal items-center py-12 md:px-8 md:gap-[60px]"
+        style="background-image: url('/img/background-login.svg'); background-repeat: repeat-x;"
+    >
+        <div class="max-w-xs md:max-w-md lg:max-w-lg xl:max-w-xl flex-1 flex flex-col xs:justify-center items-center">
             <slot />
         </div>
+        <div class="text-center text-gray-500 text-xs">© 2024 mosanes. All rights reserved.</div>
     </div>
 </template>

@@ -20,3 +20,36 @@ export const EmptyCircleIcon = defineComponent({
         )
     },
 })
+
+export const Menu01Icon = defineComponent({
+    setup() {
+        return () => (
+            <svg width="48" height="48" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M16.5 24H31.5M16.5 19H31.5M16.5 29H31.5" stroke="currentColor" stroke-width="1.25"
+                      stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+        )
+    },
+})
+
+export const XIcon = defineComponent({
+    setup() {
+        return () => (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M15 5L5 15M5 5L15 15" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+                      stroke-linejoin="round"/>
+            </svg>
+        )
+    },
+})
+
+export const ChevronDownIcon = defineComponent({
+    setup() {
+        return () => (
+            <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M5 7.5L10 12.5L15 7.5" stroke="currentColor" stroke-width="1.25" stroke-linecap="round"
+                      stroke-linejoin="round"/>
+            </svg>
+        )
+    },
+})

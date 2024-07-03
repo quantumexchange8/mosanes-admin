@@ -15,9 +15,7 @@ let buttonSizes = ["sm", "base", "lg"]
 </script>
 
 <template>
-    <Head title="Buttons"/>
-
-    <AuthenticatedLayout>
+    <AuthenticatedLayout title="Buttons">
         <div class="grid items-center gap-6 mt-4">
             <div v-for="variant in buttonVariants" :key="variant"
                  class="grid items-start grid-cols-3 gap-4 justify-items-center">

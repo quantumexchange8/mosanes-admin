@@ -14,14 +14,33 @@ Route::get('/', function () {
     ]);
 });
 
-Route::get('/dashboard', function () {
-    return Inertia::render('Dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
-
 Route::middleware('auth')->group(function () {
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/dashboard', function () {
+        return Inertia::render('Dashboard');
+    })->name('dashboard');
+
+    /**
+     * ==============================
+     *           Member
+     * ==============================
+     */
+    Route::prefix('member')->group(function () {
+//        Route::get('/listing', [ProfileController::class, 'edit'])->name('member.listing');
+//        Route::get('/network', [ProfileController::class, 'edit'])->name('member.network');
+//        Route::get('/forum', [ProfileController::class, 'edit'])->name('member.forum');
+    });
+
+    /**
+     * ==============================
+     *           Profile
+     * ==============================
+     */
+    Route::prefix('profile')->group(function () {
+        Route::get('/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+
+        Route::post('/update', [ProfileController::class, 'update'])->name('profile.update');
+        Route::delete('/delete_profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    });
 });
 
 Route::get('/components/buttons', function () {

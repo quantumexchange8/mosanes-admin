@@ -62,7 +62,7 @@ const { type, variant, size, squared, pill, href, iconOnly, srText, external } =
 const { disabled } = toRefs(props)
 
 const baseClasses = [
-    'inline-flex items-center justify-center transition-colors text-xs font-medium select-none disabled:cursor-not-allowed disabled:text-gray-400 focus:outline-none focus:ring',
+    'inline-flex items-center justify-center transition-colors text-sm font-medium select-none disabled:cursor-not-allowed disabled:text-gray-400 focus:outline-none focus:ring',
 ]
 
 const variantClasses = (variant) => ({

@@ -33,6 +33,7 @@ class HandleInertiaRequests extends Middleware
             ...parent::share($request),
             'auth' => [
                 'user' => $request->user(),
+                'profile_photo' => $request->user() ? $request->user()->getFirstMediaUrl('profile_photo') : null,
             ],
         ];
     }

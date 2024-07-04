@@ -15,7 +15,7 @@ import { IconWorld } from '@tabler/icons-vue';
                     <IconWorld size="25" stroke-width="1.25" />
                 </div>
             </div>
-            <div class="flex flex-1 flex-col justify-center items-center py-12 md:px-8 md:gap-[60px]">
+            <div class="flex flex-1 flex-col justify-center items-center pb-12 md:px-8 xs:gap-y-[60px]">
                 <div class="w-full flex sm:flex-1 justify-center">
                     <div class="w-full max-w-xs sm:max-w-none sm:w-[360px] flex flex-col justify-center items-center mx-5">
                         <slot />

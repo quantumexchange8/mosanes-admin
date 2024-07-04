@@ -58,7 +58,7 @@ onBeforeUnmount(() => {
     <GuestLayout>
         <Head title="Forgot Password" />
         
-        <div v-if="!submitted" class="w-full flex flex-col items-center justify-center gap-8">
+        <div v-if="!submitted" class="w-full flex flex-col items-center justify-center gap-8 pt-12">
             <div class="flex flex-col items-start gap-3 self-stretch">
                 <div class="self-stretch text-center text-gray-950 text-xl font-semibold">Forgot password?</div>
                 <div class="self-stretch text-center text-gray-500">No worries, we'll send you reset instructions.</div>
@@ -87,7 +87,7 @@ onBeforeUnmount(() => {
             </form>
         </div>
 
-        <div v-else class="w-full flex flex-col items-center justify-center gap-8">
+        <div v-else class="w-full flex flex-col items-center justify-center gap-8 pt-12">
             <div class="flex flex-col items-start gap-3 self-stretch">
                 <div class="self-stretch text-center text-gray-950 text-xl font-semibold">Check your email</div>
                 <div class="self-stretch text-center text-gray-500">We've sent a reset password link to <br/><span class="text-gray-900 font-medium">{{ submittedEmail }}</span> </div>

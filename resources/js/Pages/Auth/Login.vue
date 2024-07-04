@@ -85,10 +85,10 @@ const submit = () => {
                     </div>
                 </div>
                 <div class="flex justify-between items-center self-stretch">
-                    <div class="flex items-center gap-2">
+                    <label class="flex items-center cursor-pointer">
                         <Checkbox name="remember" v-model:checked="form.remember" />
-                        <span class="text-sm text-gray-600 font-medium">Remember me</span>
-                    </div>
+                        <span class="text-sm text-gray-600 font-medium ml-2">Remember me</span>
+                    </label>
 
                     <Link
                         v-if="canResetPassword"

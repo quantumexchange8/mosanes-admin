@@ -2,19 +2,17 @@ export default {
     root: ({ state }) => ({
         class: [
             // Shape
-            'rounded-lg',
-            'shadow-lg',
+            'rounded-3xl',
+            'shadow-dialog',
             'border-0',
 
             // Size
-            'max-h-[90vh]',
-            'w-[50vw]',
             'm-0',
 
             // Color
-            'bg-surface-0 dark:bg-surface-900',
+            'bg-white',
             '[&:last-child]:border-b',
-            'border-surface-200 dark:border-surface-700',
+            'border-gray-200',
 
             // Transitions
             'transform',
@@ -39,20 +37,19 @@ export default {
             'shrink-0',
 
             // Spacing
-            'p-6',
+            'py-5 px-4 sm:p-7',
 
             // Shape
-            'rounded-tl-lg',
-            'rounded-tr-lg',
+            'rounded-tl-3xl',
+            'rounded-tr-3xl',
 
             // Colors
-            'text-surface-700 dark:text-surface-0/80',
             'border border-b-0',
-            'border-surface-200 dark:border-surface-700'
+            'border-gray-200'
         ]
     },
     title: {
-        class: ['font-semibold text-xl leading-[normal]']
+        class: ['font-semibold text-lg text-gray-950']
     },
     icons: {
         class: ['flex items-center']
@@ -74,17 +71,16 @@ export default {
             'rounded-full',
 
             // Colors
-            'text-surface-500',
+            'text-gray-500',
             'bg-transparent',
 
             // Transitions
             'transition duration-200 ease-in-out',
 
             // States
-            'hover:text-surface-700 dark:hover:text-white/80',
-            'hover:bg-surface-100 dark:hover:bg-[rgba(255,255,255,0.03)]',
-            'focus:outline-none focus:outline-offset-0 focus:ring-1',
-            'focus:ring-primary-500 dark:focus:ring-primary-400',
+            'hover:text-gray-400',
+            'focus:outline-none focus:outline-offset-0 focus:ring-0',
+            'focus:ring-transparent',
 
             // Misc
             'overflow-hidden'
@@ -114,10 +110,9 @@ export default {
             'transition duration-200 ease-in-out',
 
             // States
-            'hover:text-surface-700 dark:hover:text-white/80',
-            'hover:bg-surface-100 dark:hover:bg-[rgba(255,255,255,0.03)]',
-            'focus:outline-none focus:outline-offset-0 focus:ring-1',
-            'focus:ring-primary-500 dark:focus:ring-primary-400',
+            'hover:text-gray-600',
+            'focus:outline-none focus:outline-offset-0 focus:ring-0',
+            'focus:ring-primary-25',
 
             // Misc
             'overflow-hidden'
@@ -146,21 +141,21 @@ export default {
     content: ({ state, instance }) => ({
         class: [
             // Spacing
-            'px-6',
-            'pb-6',
+            'px-4 sm:px-7',
+            'py-5 sm:pb-7',
             'pt-0',
 
             // Shape
             {
                 grow: state.maximized,
-                'rounded-bl-lg': !instance.$slots.footer,
-                'rounded-br-lg': !instance.$slots.footer
+                'rounded-bl-3xl': !instance.$slots.footer,
+                'rounded-br-3xl': !instance.$slots.footer
             },
 
             // Colors
             'text-surface-700 dark:text-surface-0/80',
             'border border-t-0 border-b-0',
-            'border-surface-200 dark:border-surface-700',
+            'border-gray-200',
 
             // Misc
             'overflow-y-auto'
@@ -180,13 +175,13 @@ export default {
 
             // Shape
             'border-t-0',
-            'rounded-b-lg',
+            'rounded-b-3xl',
 
             // Colors
             'bg-surface-0 dark:bg-surface-900',
             'text-surface-700 dark:text-surface-0/80',
             'border border-t-0 border-b-0',
-            'border-surface-200 dark:border-surface-700'
+            'border-gray-200'
         ]
     },
     mask: ({ props }) => ({
@@ -197,7 +192,7 @@ export default {
             { 'p-5': !props.position == 'full' },
 
             // Background and Effects
-            { 'has-[.mask-active]:bg-transparent bg-black/40': props.modal }
+            { 'has-[.mask-active]:bg-transparent bg-gray-500/40': props.modal }
         ]
     }),
     transition: ({ props }) => {

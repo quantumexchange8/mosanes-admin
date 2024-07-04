@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
@@ -25,7 +26,7 @@ Route::middleware('auth')->group(function () {
      * ==============================
      */
     Route::prefix('member')->group(function () {
-//        Route::get('/listing', [ProfileController::class, 'edit'])->name('member.listing');
+        Route::get('/listing', [MemberController::class, 'listing'])->name('member.listing');
 //        Route::get('/network', [ProfileController::class, 'edit'])->name('member.network');
 //        Route::get('/forum', [ProfileController::class, 'edit'])->name('member.forum');
     });

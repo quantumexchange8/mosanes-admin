@@ -132,6 +132,7 @@ export default {
             },
             boxShadow: {
                 'input': '0 1px 2px 0px rgba(12, 17, 29, 0.05)',
+                'dialog': '0 12px 24px -4 rgba(12, 17, 29, 0.10)',
             },
             fontSize: {
                 xxs: ['10px', '16px'],

@@ -1,10 +1,8 @@
 <script setup>
 import { Link } from '@inertiajs/vue3'
 import ApplicationLogo from '@/Components/ApplicationLogo.vue'
-import Button from '@/Components/Button.vue'
-import {Menu01Icon, XIcon} from '@/Components/Icons/outline'
-// import { XIcon } from '@heroicons/vue/outline'
 import { sidebarState } from '@/Composables'
+import { IconX } from '@tabler/icons-vue';
 </script>
 
 <template>
@@ -28,9 +26,7 @@ import { sidebarState } from '@/Composables'
             @click="sidebarState.isOpen = !sidebarState.isOpen"
             v-show="sidebarState.isOpen || sidebarState.isHovered"
         >
-            <XIcon
-                aria-hidden="true"
-            />
+            <IconX size="20" color="#182230" stroke-width="1.25" />
         </div>
     </div>
 </template>

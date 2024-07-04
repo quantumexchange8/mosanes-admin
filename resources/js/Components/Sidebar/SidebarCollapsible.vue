@@ -1,8 +1,9 @@
 <script setup>
 import { ref } from 'vue'
 import SidebarLink from '@/Components/Sidebar/SidebarLink.vue'
-import { EmptyCircleIcon, ChevronDownIcon } from '@/Components/Icons/outline'
+import { EmptyCircleIcon } from '@/Components/Icons/outline'
 import { sidebarState } from '@/Composables'
+import {IconChevronDown, IconLayoutDashboard} from '@tabler/icons-vue';
 
 const props = defineProps({
     title: {
@@ -55,12 +56,14 @@ const leave = (el) => {
                     aria-hidden="true"
                     class="relative block w-5 h-5 ml-auto"
                 >
-                    <ChevronDownIcon
+                    <IconChevronDown
                         :class="[
                             {
                                 'rotate-180': isOpen,
                             },
                         ]"
+                        :size="20"
+                        stroke-width="1.25"
                     />
                 </span>
             </template>

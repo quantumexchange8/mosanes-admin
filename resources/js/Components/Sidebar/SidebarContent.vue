@@ -28,6 +28,22 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle } from '@tabler/ico
 
         <!-- Member -->
         <SidebarCollapsible
+            title="Member"
+            :active="route().current('member.*')"
+        >
+            <template #icon>
+                <IconComponents :size="20" stroke-width="1.25" />
+            </template>
+
+            <SidebarCollapsibleItem
+                title="Member Listing"
+                :href="route('member.listing')"
+                :active="route().current('member.listing')"
+            />
+        </SidebarCollapsible>
+
+        <!-- Components -->
+        <SidebarCollapsible
             title="Components"
             :active="route().current('components.*')"
         >

@@ -85,9 +85,9 @@ const submit = () => {
                     </div>
                 </div>
                 <div class="flex justify-between items-center self-stretch">
-                    <label class="flex items-center cursor-pointer">
+                    <label class="flex items-center cursor-pointer gap-2">
                         <Checkbox name="remember" v-model:checked="form.remember" />
-                        <span class="text-sm text-gray-600 font-medium ml-2">Remember me</span>
+                        <span class="text-sm text-gray-600 font-medium">Remember me</span>
                     </label>
 
                     <Link

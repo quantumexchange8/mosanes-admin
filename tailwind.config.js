@@ -124,7 +124,7 @@ export default {
                 logo: '#2B398C',
                 indigo: '#424EF0',
                 turquoise: '#41EAD4',
-                mint: '#3DEFAC',
+                green: '#06D001',
                 jonquil: '#ECC30B',
                 orange: '#F26419',
                 pink: '#FF2D58',

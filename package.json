@@ -21,6 +21,7 @@
         "@tabler/icons-vue": "^3.7.0",
         "@vitejs/plugin-vue-jsx": "^4.0.0",
         "perfect-scrollbar": "^1.5.5",
-        "primevue": "^3.53.0"
+        "primevue": "^3.53.0",
+        "vue3-autocounter": "^1.0.6"
     }
 }

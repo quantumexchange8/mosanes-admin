@@ -6,6 +6,7 @@ import { IconRefresh, IconChevronRight, IconChevronDown } from '@tabler/icons-vu
 import { transactionFormat } from '@/Composables/index.js';
 import { DepositIcon, WithdrawalIcon, RebateIcon } from '@/Components/Icons/solid';
 import Badge from '@/Components/Badge.vue';
+import Vue3Autocounter from 'vue3-autocounter';
 
 const { formatAmount } = transactionFormat();
 
@@ -55,7 +56,7 @@ const { formatAmount } = transactionFormat();
                                 Balance ($)
                             </div>
                             <div class="text-gray-950 text-lg md:text-xl font-semibold">
-                                {{ formatAmount(100000) }}
+                                <vue3-autocounter ref="counter" :startAmount="0" :endAmount="100000" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
 
@@ -66,7 +67,7 @@ const { formatAmount } = transactionFormat();
                                 Equity ($)
                             </div>
                             <div class="text-gray-950 text-lg md:text-xl font-semibold">
-                                {{ formatAmount(30000) }}
+                                <vue3-autocounter ref="counter" :startAmount="0" :endAmount="30000" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
                     </div>
@@ -89,7 +90,7 @@ const { formatAmount } = transactionFormat();
                     </div>
 
                     <div class="self-stretch text-gray-950 text-xl md:text-xxl font-semibold">
-                        {{ formatAmount(16976.96) }}
+                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="16976.96" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -111,7 +112,7 @@ const { formatAmount } = transactionFormat();
                                 Net Asset ($)
                             </div>
                             <div class="text-gray-950 text-xl md:text-xxl font-semibold">
-                                {{ formatAmount(768709.42) }}
+                                <vue3-autocounter ref="counter" :startAmount="0" :endAmount="768709.42" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
                         <Button
@@ -134,7 +135,7 @@ const { formatAmount } = transactionFormat();
                                     Total Deposit ($)
                                 </div>
                                 <div class="self-stretch text-gray-950 text-base md:text-lg font-semibold">
-                                    {{ formatAmount(1802283.90) }}
+                                    <vue3-autocounter ref="counter" :startAmount="0" :endAmount="1802283.9" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                                 </div>
                             </div>
                             <Button
@@ -154,7 +155,7 @@ const { formatAmount } = transactionFormat();
                                     Total Withdrawal ($)
                                 </div>
                                 <div class="self-stretch text-gray-950 text-base md:text-lg font-semibold">
-                                    {{ formatAmount(937270.20) }}
+                                    <vue3-autocounter ref="counter" :startAmount="0" :endAmount="937270.2" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                                 </div>
                             </div>
                             <Button
@@ -174,7 +175,7 @@ const { formatAmount } = transactionFormat();
                                     Total Rebate Payout ($)
                                 </div>
                                 <div class="self-stretch text-gray-950 text-base md:text-lg font-semibold">
-                                    {{ formatAmount(96304.28) }}
+                                    <vue3-autocounter ref="counter" :startAmount="0" :endAmount="96304.28" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                                 </div>
                             </div>
                             <Button

@@ -7,9 +7,17 @@ import { transactionFormat } from '@/Composables/index.js';
 import { DepositIcon, WithdrawalIcon, RebateIcon } from '@/Components/Icons/solid';
 import Badge from '@/Components/Badge.vue';
 import Vue3Autocounter from 'vue3-autocounter';
+import { ref } from 'vue';
 
 const { formatAmount } = transactionFormat();
 
+const counterEquity = ref(null);
+const counterBalance = ref(null);
+
+const updateBalEquity = () => {
+    counterEquity.value.reset();
+    counterBalance.value.reset();
+}
 </script>
 
 <template>
@@ -45,6 +53,7 @@ const { formatAmount } = transactionFormat();
                             type="button"
                             iconOnly
                             v-slot="{ iconSizeClasses }"
+                            @click="updateBalEquity()"
                         >
                             <IconRefresh size="16" stroke-width="1.25" color="#667085" />
                         </Button>
@@ -56,7 +65,7 @@ const { formatAmount } = transactionFormat();
                                 Balance ($)
                             </div>
                             <div class="text-gray-950 text-lg md:text-xl font-semibold">
-                                <vue3-autocounter ref="counter" :startAmount="0" :endAmount="100000" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                                <vue3-autocounter ref="counterBalance" :startAmount="0" :endAmount="100000" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
 
@@ -67,7 +76,7 @@ const { formatAmount } = transactionFormat();
                                 Equity ($)
                             </div>
                             <div class="text-gray-950 text-lg md:text-xl font-semibold">
-                                <vue3-autocounter ref="counter" :startAmount="0" :endAmount="30000" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                                <vue3-autocounter ref="counterEquity" :startAmount="0" :endAmount="30000" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
                     </div>

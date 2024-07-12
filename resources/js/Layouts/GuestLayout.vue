@@ -7,7 +7,7 @@ import { IconWorld } from '@tabler/icons-vue';
 
 <template>
     <div 
-        style="background-image: linear-gradient(180deg, rgba(43, 57, 140, 0.2) 0%, rgba(255, 255, 255, 0.1) 20%), url('/img/background-login.svg'); background-repeat: repeat-x;"
+        style="background-image: url('/img/background-login.svg'); background-repeat: repeat-x;"
     >
         <div class="flex flex-col min-h-screen">
             <div class="flex py-3 px-5 xs:px-10 justify-end items-center">

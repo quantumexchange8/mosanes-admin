@@ -43,4 +43,8 @@ Route::get('/components/buttons', function () {
     return Inertia::render('Components/Buttons');
 })->name('components.buttons');
 
+Route::get('/test/component', function () {
+    return Inertia::render('Welcome');
+})->name('test.component');
+
 require __DIR__.'/auth.php';

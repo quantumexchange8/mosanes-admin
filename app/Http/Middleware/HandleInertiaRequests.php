@@ -35,6 +35,7 @@ class HandleInertiaRequests extends Middleware
                 'user' => $request->user(),
                 'profile_photo' => $request->user() ? $request->user()->getFirstMediaUrl('profile_photo') : null,
             ],
+            'toast' => session('toast'),
         ];
     }
 }

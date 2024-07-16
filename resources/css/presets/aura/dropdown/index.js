@@ -4,19 +4,20 @@ export default {
             // Display and Position
             'inline-flex',
             'relative',
+
             // Shape
-            { 'rounded-md': parent.instance.$name !== 'InputGroup' },
-            { 'first:rounded-l-md rounded-none last:rounded-r-md': parent.instance.$name == 'InputGroup' },
+            { 'rounded-lg': parent.instance.$name !== 'InputGroup' },
+            { 'first:rounded-l-lg rounded-none last:rounded-r-lg': parent.instance.$name == 'InputGroup' },
             { 'border-0 border-y border-l last:border-r': parent.instance.$name == 'InputGroup' },
             { 'first:ml-0 ml-[-1px]': parent.instance.$name == 'InputGroup' && !props.showButtons },
 
             // Color and Background
-            { 'bg-surface-0 dark:bg-surface-950': !props.disabled },
+            { 'bg-gray-25': !props.disabled },
 
             'border',
-            { 'dark:border-surface-700': parent.instance.$name != 'InputGroup' },
-            { 'dark:border-surface-600': parent.instance.$name == 'InputGroup' },
-            { 'border-surface-300 dark:border-surface-600': !props.invalid },
+            { 'border-gray-300': parent.instance.$name != 'InputGroup' },
+            { 'border-primary-500': parent.instance.$name == 'InputGroup' || state.focused },
+            { 'border-gray-300': !props.invalid },
 
             // Invalid State
             'invalid:focus:ring-red-200',
@@ -28,19 +29,19 @@ export default {
             'duration-200',
 
             // States
-            { 'hover:border-surface-400 dark:hover:border-surface-600': !props.invalid },
-            { 'outline-none outline-offset-0 ring-1 ring-primary-500 dark:ring-primary-400 z-10': state.focused },
+            { 'hover:border-gray-500': !props.invalid && !state.focused },
 
             // Misc
             'cursor-pointer',
             'select-none',
-            { 'bg-surface-200 dark:bg-surface-700 select-none pointer-events-none cursor-default': props.disabled }
+            'shadow-input',
+            { 'bg-gray-50 text-gray-300 select-none pointer-events-none cursor-default': props.disabled }
         ]
     }),
     input: ({ props, parent }) => ({
         class: [
             //Font
-            'leading-[normal]',
+            'text-sm',
 
             // Display
             'block',
@@ -49,12 +50,12 @@ export default {
             // Color and Background
             'bg-transparent',
             'border-0',
-            { 'text-surface-800 dark:text-white/80': props.modelValue != undefined, 'text-surface-400 dark:text-surface-500': props.modelValue == undefined },
-            'placeholder:text-surface-400 dark:placeholder:text-surface-500',
+            { 'text-gray-950': props.modelValue != undefined, 'text-gray-400': props.modelValue == undefined },
+            'placeholder:text-gray-400',
 
             // Sizing and Spacing
             'w-[1%]',
-            'py-2 px-3',
+            'py-3 px-4',
             { 'pr-7': props.showClear },
 
             //Shape
@@ -78,7 +79,7 @@ export default {
             'appearance-none'
         ]
     }),
-    trigger: {
+    trigger: ({ parent, state }) => ({
         class: [
             // Flexbox
             'flex items-center justify-center',
@@ -86,67 +87,67 @@ export default {
 
             // Color and Background
             'bg-transparent',
-            'text-surface-500',
+            'text-gray-500',
 
             // Size
-            'w-12',
+            'w-10',
 
             // Shape
-            'rounded-r-md'
+            'rounded-r-lg',
+            { 'rotate-180': parent.instance.$name === 'InputGroup' || state.focused },
+            { 'rotate-0':  !state.focused },
         ]
-    },
+    }),
     panel: {
         class: [
             // Colors
-            'bg-surface-0 dark:bg-surface-900',
-            'text-surface-700 dark:text-white/80',
+            'bg-gray-25',
+            'text-gray-950',
 
             // Shape
-            'border border-surface-300 dark:border-surface-700',
-            'rounded-md',
-            'shadow-md'
+            'border border-gray-300',
+            'rounded-lg',
+            'shadow-[0_8px_16px_-4px_rgba(12,17,29,0.08)]',
         ]
     },
     wrapper: {
         class: [
             // Sizing
-            'max-h-[200px]',
+            'max-h-[228px]',
 
             // Misc
             'overflow-auto'
         ]
     },
     list: {
-        class: 'p-1 list-none m-0'
+        class: 'list-none py-2'
     },
     item: ({ context }) => ({
         class: [
             'relative',
 
             // Font
-            'leading-none',
+            'text-sm',
 
             // Spacing
-            'm-0 px-3 py-2',
-            'first:mt-0 mt-[2px]',
+            'm-0 p-3',
 
             // Shape
-            'border-0 rounded',
+            'border-0',
 
             // Colors
             {
-                'text-surface-700 dark:text-white/80': !context.focused && !context.selected,
-                'bg-surface-200 dark:bg-surface-600/60': context.focused && !context.selected,
-                'text-surface-700 dark:text-white/80': context.focused && !context.selected,
+                'text-gray-950': !context.focused && !context.selected,
+                'bg-primary-50': context.focused && !context.selected,
+                'text-primary-950': context.focused && !context.selected,
 
                 'text-primary-highlight-inverse': context.selected,
                 'bg-primary-highlight': context.selected
             },
 
             //States
-            { 'hover:bg-surface-100 dark:hover:bg-[rgba(255,255,255,0.03)]': !context.focused && !context.selected },
-            { 'hover:bg-primary-highlight-hover': context.selected },
-            { 'hover:text-surface-700 hover:bg-surface-100 dark:hover:text-white dark:hover:bg-[rgba(255,255,255,0.03)]': context.focused && !context.selected },
+            { 'hover:bg-primary-50': !context.focused && !context.selected },
+            { 'hover:text-primary-500 hover:bg-primary-50': context.focused && !context.selected },
 
             // Transition
             'transition-shadow duration-200',
@@ -190,8 +191,8 @@ export default {
 
             //Shape
             'border-b-0',
-            'rounded-tl-md',
-            'rounded-tr-md',
+            'rounded-tl-lg',
+            'rounded-tr-lg',
 
             // Color
             'text-surface-700 dark:text-white/80',

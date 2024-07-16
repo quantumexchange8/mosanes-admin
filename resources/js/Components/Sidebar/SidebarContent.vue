@@ -5,7 +5,7 @@ import SidebarCollapsible from '@/Components/Sidebar/SidebarCollapsible.vue'
 import SidebarCollapsibleItem from '@/Components/Sidebar/SidebarCollapsibleItem.vue'
 import {ref} from "vue";
 import {usePage} from "@inertiajs/vue3";
-import { IconLayoutDashboard, IconComponents, IconUserCircle } from '@tabler/icons-vue';
+import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup } from '@tabler/icons-vue';
 
 </script>
 
@@ -41,6 +41,17 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle } from '@tabler/ico
                 :active="route().current('member.listing')"
             />
         </SidebarCollapsible>
+
+        <!-- Group -->
+        <SidebarLink
+            title="Group"
+            :href="route('group')"
+            :active="route().current('group')"
+        >
+            <template #icon>
+                <IconUsersGroup :size="20" stroke-width="1.25" />
+            </template>
+        </SidebarLink>
 
         <!-- Components -->
         <SidebarCollapsible

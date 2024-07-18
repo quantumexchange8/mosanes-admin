@@ -34,6 +34,8 @@ Route::middleware('auth')->group(function () {
      */
     Route::prefix('group')->group(function () {
         Route::get('/', [GroupController::class, 'show'])->name('group');
+
+        Route::post('/create_group', [GroupController::class, 'createGroup'])->name('group.create');
     });
 
     /**

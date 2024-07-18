@@ -2,10 +2,11 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import { ref } from 'vue';
 import { transactionFormat } from '@/Composables/index.js';
-import { IconWallet, IconCreditCardPay, IconReceiptTax, IconPlus, IconUserFilled, IconRefresh, IconDotsVertical } from '@tabler/icons-vue';
+import { IconWallet, IconCreditCardPay, IconReceiptTax, IconUserFilled, IconRefresh, IconDotsVertical } from '@tabler/icons-vue';
 import Button from '@/Components/Button.vue';
 import Calendar from 'primevue/calendar';
 import ProfilePhoto from "@/Components/ProfilePhoto.vue";
+import NewGroup from '@/Pages/Group/Partials/NewGroup.vue';
 
 
 const { formatAmount } = transactionFormat();
@@ -90,21 +91,7 @@ const groupAccountEquity = ref(17000)
                         dateFormat="dd/mm/yy"
                         class="w-full md:w-auto"
                     />
-<!-- move btn into partials -->
-                    <Button
-                        variant="primary-flat"
-                        type="button"
-                        size="base"
-                        class="w-full md:w-auto"
-                        v-slot="{ iconSizeClasses }"
-                    >
-                        <div class="flex justify-center items-center gap-3 self-stretch">
-                            <IconPlus size="20" stroke-width="1.25" color="white" />
-                            <div class="text-white text-center text-sm font-medium">
-                                New Group
-                            </div>
-                        </div>
-                    </Button>
+                    <NewGroup />
                 </div>
 
                 <div class="flex flex-col items-center self-stretch">

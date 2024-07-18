@@ -11,4 +11,14 @@ class GroupController extends Controller
     {
         return Inertia::render('Group/Group');
     }
+
+    public function createGroup(Request $request)
+    {
+        // dd($request->all());
+
+        return back()->with('toast', [
+            'title' => "You've successfully created a new group!",
+            'type' => 'success',
+        ]);
+    }
 }

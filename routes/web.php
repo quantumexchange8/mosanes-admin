@@ -47,4 +47,11 @@ Route::get('/test/component', function () {
     return Inertia::render('Welcome');
 })->name('test.component');
 
+Route::get('/test/getData', function () {
+    $users = \App\Models\User::all();
+    return response()->json([
+        'users' => $users
+    ]);
+});
+
 require __DIR__.'/auth.php';

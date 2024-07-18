@@ -7,7 +7,8 @@ export default {
             { 'flex flex-col': props.scrollable && props.scrollHeight === 'flex' },
 
             // Size
-            { 'h-full': props.scrollable && props.scrollHeight === 'flex' }
+            { 'h-full': props.scrollable && props.scrollHeight === 'flex' },
+            'w-full'
         ]
     }),
     loadingoverlay: {
@@ -49,12 +50,12 @@ export default {
             props.showGridlines ? 'border-x border-t border-b-0' : 'border-y border-x-0',
 
             // Spacing
-            'p-4',
+            'pb-6',
 
             // Color
-            'bg-surface-0 dark:bg-surface-900',
-            'border-surface-200 dark:border-surface-700',
-            'text-surface-700 dark:text-white/80'
+            'bg-white',
+            'border-transparent',
+            'text-gray-900'
         ]
     }),
     table: {
@@ -63,7 +64,7 @@ export default {
     thead: ({ context }) => ({
         class: [
             {
-                'bg-surface-0 dark:bg-surface-900 top-0 z-40 sticky': context.scrollable
+                'bg-white top-0 z-40 sticky': context.scrollable
             }
         ]
     }),
@@ -72,13 +73,13 @@ export default {
             {
                 'sticky z-20': instance.frozenRow && context.scrollable
             },
-            'bg-surface-0 dark:bg-surface-900'
+            'bg-white'
         ]
     }),
     tfoot: ({ context }) => ({
         class: [
             {
-                'bg-surface-0 bottom-0 z-0': context.scrollable
+                'bg-white bottom-0 z-0': context.scrollable
             }
         ]
     }),
@@ -93,7 +94,7 @@ export default {
             'p-4',
 
             // Color
-            'bg-surface-0 dark:bg-surface-900',
+            'bg-white',
             'border-surface-200 dark:border-surface-700',
             'text-surface-700 dark:text-white/80'
         ]
@@ -102,7 +103,8 @@ export default {
         headercell: ({ context, props }) => ({
             class: [
                 'font-semibold',
-                'leading-[normal]',
+                'text-xs',
+                'uppercase',
 
                 // Position
                 { 'sticky z-20 border-b': props.frozen || props.frozen === '' },
@@ -117,14 +119,14 @@ export default {
                 'border-0 border-b border-solid',
 
                 // Spacing
-                context?.size === 'small' ? 'py-[0.375rem] px-2' : context?.size === 'large' ? 'py-[0.9375rem] px-5' : 'py-3 px-4',
+                context?.size === 'small' ? 'py-[0.375rem] px-2' : context?.size === 'large' ? 'py-[0.9375rem] px-5' : 'p-3',
 
                 // Color
-                (props.sortable === '' || props.sortable) && context.sorted ? 'bg-primary-highlight text-primary-highlight-inverse' : 'bg-surface-0 text-surface-700 dark:text-white/80 dark:bg-surface-900',
-                'border-surface-200 dark:border-surface-700 ',
+                (props.sortable === '' || props.sortable) && context.sorted ? 'bg-primary-50 text-primary-500' : 'bg-white text-gray-950',
+                'border-gray-200 ',
 
                 // States
-                { 'hover:bg-surface-100 dark:hover:bg-surface-800/50': (props.sortable === '' || props.sortable) && !context?.sorted },
+                { 'hover:bg-gray-100': (props.sortable === '' || props.sortable) && !context?.sorted },
                 'focus-visible:outline-none focus-visible:outline-offset-0 focus-visible:ring-1 focus-visible:ring-inset focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400',
 
                 // Transition
@@ -141,12 +143,12 @@ export default {
             class: 'flex items-center'
         },
         sort: ({ context }) => ({
-            class: [context.sorted ? 'text-primary-500' : 'text-surface-700', context.sorted ? 'dark:text-primary-400' : 'dark:text-white/80']
+            class: [context.sorted ? 'text-primary-500' : 'text-gray-400']
         }),
         bodycell: ({ props, context, state, parent }) => ({
             class: [
                 // Font
-                'leading-[normal]',
+                'text-sm',
 
                 //Position
                 { 'sticky box-border border-b': parent.instance.frozenRow },
@@ -158,16 +160,16 @@ export default {
                 // Shape
                 'border-0 border-b border-solid',
                 { 'first:border-l border-r border-b': context?.showGridlines },
-                { 'bg-surface-0 dark:bg-surface-900': parent.instance.frozenRow || props.frozen || props.frozen === '' },
+                { 'bg-white': parent.instance.frozenRow || props.frozen || props.frozen === '' },
 
                 // Spacing
                 { 'py-[0.375rem] px-2': context?.size === 'small' && !state['d_editing'] },
                 { 'py-[0.9375rem] px-5': context?.size === 'large' && !state['d_editing'] },
-                { 'py-3 px-4': context?.size !== 'large' && context?.size !== 'small' && !state['d_editing'] },
+                { 'py-2 px-3': context?.size !== 'large' && context?.size !== 'small' && !state['d_editing'] },
                 { 'py-[0.6rem] px-2': state['d_editing'] },
 
                 // Color
-                'border-surface-200 dark:border-surface-700'
+                'border-gray-200'
             ]
         }),
         footercell: ({ context }) => ({
@@ -192,7 +194,7 @@ export default {
             ]
         }),
         sorticon: ({ context }) => ({
-            class: ['ml-2', context.sorted ? 'text-primary-highlight-inverse' : 'text-surface-700 dark:text-white/70']
+            class: ['ml-2', context.sorted ? 'text-primary-highlight-inverse' : 'text-gray-400']
         }),
         sortbadge: {
             class: [
@@ -1089,9 +1091,9 @@ export default {
     bodyrow: ({ context, props }) => ({
         class: [
             // Color
-            'dark:text-white/80',
+            'text-gray-950',
             { 'bg-primary-highlight text-primary-highlight-inverse': context.selected },
-            { 'bg-surface-0 text-surface-600 dark:bg-surface-900': !context.selected },
+            { 'bg-white': !context.selected },
             { 'font-bold bg-surface-0 dark:bg-surface-900 z-20': props.frozenRow },
             { 'odd:bg-surface-0 odd:text-surface-600 dark:odd:bg-surface-900 even:bg-surface-50 even:text-surface-600 dark:even:bg-surface-800/50': context.stripedRows },
 

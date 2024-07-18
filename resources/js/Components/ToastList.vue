@@ -5,14 +5,14 @@ import {Inertia} from "@inertiajs/inertia";
 import {usePage} from "@inertiajs/vue3";
 import toast from "@/Composables/toast.js"
 
-const pageToast = usePage().props.toast;
+const page = usePage();
 
 let removeFinishEventListener = Inertia.on("finish", () => {
-    if (pageToast) {
+    if (page) {
         toast.add({
-            title: pageToast.title,
-            message: pageToast.message,
-            type: pageToast.type,
+            title: page.props.toast.title,
+            message: page.props.toast.message,
+            type: page.props.toast.type,
         });
     }
 });
@@ -30,7 +30,7 @@ function remove(index) {
         enter-active-class="duration-300"
         leave-active-class="duration-300"
         leave-to-class="-translate-y-full opacity-0"
-        class="fixed top-4 middle z-50 min-w-[320px] w-full max-w-[640px] space-y-4">
+        class="fixed top-4 left-1/2 z-50 min-w-[320px] w-full max-w-[640px] -translate-x-2/4 space-y-4">
         <ToastListItem
             v-for="(item, index) in toast.items"
             :key="item.key"

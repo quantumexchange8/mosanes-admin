@@ -5,14 +5,17 @@ export default {
             'flex items-center justify-center flex-wrap',
 
             // Spacing
-            'px-4 py-2',
+            'px-4 py-3 mt-6',
 
             // Shape
             'border-0 rounded-md',
 
             // Color
-            'bg-surface-0 dark:bg-surface-900',
-            'text-surface-500 dark:text-white/60'
+            'bg-white',
+            'text-gray-700',
+
+            // Font
+            'text-sm'
         ]
     },
     firstpagebutton: ({ context }) => ({
@@ -26,16 +29,15 @@ export default {
             'border-0 rounded-full',
 
             // Size
-            'min-w-[2.5rem] h-10 m-[0.143rem]',
-            'leading-none',
+            'w-9 h-9',
 
             // Color
-            'text-surface-500 dark:text-white/60',
+            'text-gray-700',
 
             // State
             {
-                'hover:bg-surface-50 dark:hover:bg-[rgba(255,255,255,0.03)]': !context.disabled,
-                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400': !context.disabled
+                'hover:bg-gray-100': !context.disabled,
+                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500': !context.disabled
             },
 
             // Transition
@@ -43,7 +45,7 @@ export default {
 
             // Misc
             'user-none overflow-hidden',
-            { 'cursor-default pointer-events-none opacity-60': context.disabled }
+            { 'cursor-default pointer-events-none disabled:text-gray-400': context.disabled }
         ]
     }),
     previouspagebutton: ({ context }) => ({
@@ -57,16 +59,15 @@ export default {
             'border-0 rounded-full',
 
             // Size
-            'min-w-[2.5rem] h-10 m-[0.143rem]',
-            'leading-none',
+            'w-9 h-9',
 
             // Color
-            'text-surface-500 dark:text-white/60',
+            'text-gray-700',
 
             // State
             {
-                'hover:bg-surface-50 dark:hover:bg-[rgba(255,255,255,0.03)]': !context.disabled,
-                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400': !context.disabled
+                'hover:bg-gray-100': !context.disabled,
+                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500': !context.disabled
             },
 
             // Transition
@@ -74,7 +75,7 @@ export default {
 
             // Misc
             'user-none overflow-hidden',
-            { 'cursor-default pointer-events-none opacity-60': context.disabled }
+            { 'cursor-default pointer-events-none disabled:text-gray-400': context.disabled }
         ]
     }),
     nextpagebutton: ({ context }) => ({
@@ -88,16 +89,16 @@ export default {
             'border-0 rounded-full',
 
             // Size
-            'min-w-[2.5rem] h-10 m-[0.143rem]',
+            'w-9 h-9',
             'leading-none',
 
             // Color
-            'text-surface-500 dark:text-white/60',
+            'text-gray-700',
 
             // State
             {
-                'hover:bg-surface-50 dark:hover:bg-[rgba(255,255,255,0.03)]': !context.disabled,
-                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400': !context.disabled
+                'hover:bg-gray-100': !context.disabled,
+                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500': !context.disabled
             },
 
             // Transition
@@ -105,7 +106,7 @@ export default {
 
             // Misc
             'user-none overflow-hidden',
-            { 'cursor-default pointer-events-none opacity-60': context.disabled }
+            { 'cursor-default pointer-events-none disabled:text-gray-400': context.disabled }
         ]
     }),
     lastpagebutton: ({ context }) => ({
@@ -119,16 +120,16 @@ export default {
             'border-0 rounded-full',
 
             // Size
-            'min-w-[2.5rem] h-10 m-[0.143rem]',
+            'w-9 h-9',
             'leading-none',
 
             // Color
-            'text-surface-500 dark:text-white/60',
+            'text-gray-700',
 
             // State
             {
-                'hover:bg-surface-50 dark:hover:bg-[rgba(255,255,255,0.03)]': !context.disabled,
-                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400': !context.disabled
+                'hover:bg-gray-100': !context.disabled,
+                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500': !context.disabled
             },
 
             // Transition
@@ -136,7 +137,7 @@ export default {
 
             // Misc
             'user-none overflow-hidden',
-            { 'cursor-default pointer-events-none opacity-60': context.disabled }
+            { 'cursor-default pointer-events-none disabled:text-gray-400': context.disabled }
         ]
     }),
     pagebutton: ({ context }) => ({
@@ -150,16 +151,17 @@ export default {
             'border-0 rounded-full',
 
             // Size
-            'min-w-[2.5rem] h-10 m-[0.143rem]',
+            'w-9 h-9',
             'leading-none',
 
             // Color
-            'text-surface-500 dark:text-white/60',
+            'text-gray-700',
 
             // State
             {
-                'hover:bg-surface-50 dark:hover:bg-[rgba(255,255,255,0.03)]': !context.disabled,
-                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400': !context.disabled
+                'hover:bg-gray-100': !context.disabled,
+                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500': !context.disabled,
+                'bg-primary-50 text-primary-500': context.active
             },
 
             // Transition
@@ -167,7 +169,7 @@ export default {
 
             // Misc
             'user-none overflow-hidden',
-            { 'cursor-default pointer-events-none opacity-60': context.disabled }
+            { 'cursor-default pointer-events-none disabled:text-gray-400': context.disabled }
         ]
     }),
     rowperpagedropdown: {
@@ -178,35 +180,32 @@ export default {
                 'relative',
 
                 // Shape
-                'h-10',
-                'rounded-md',
+                'rounded-lg',
 
                 // Spacing
                 'mx-2',
 
                 // Color and Background
-                'bg-surface-0 dark:bg-surface-950',
-                'border border-surface-300 dark:border-surface-700',
+                'bg-white',
+                'border border-gray-300',
 
                 // Transitions
                 'transition-all',
                 'duration-200',
 
                 // States
-                'hover:border-surface-400 dark:hover:border-surface-600',
-                { 'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400': !state.focused },
+                'hover:border-gray-500',
+                { 'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500': !state.focused },
 
                 // Misc
                 'cursor-pointer',
+                'shadow-input',
                 'select-none',
-                { 'bg-surface-200 dark:bg-surface-700 select-none pointer-events-none cursor-default': props.disabled }
+                { 'bg-gray-50 select-none pointer-events-none cursor-default': props.disabled }
             ]
         }),
         input: {
             class: [
-                //Font
-                'leading-[normal]',
-
                 // Display
                 'block',
                 'flex-auto',
@@ -214,11 +213,11 @@ export default {
                 // Color and Background
                 'bg-transparent',
                 'border-0',
-                'text-surface-800 dark:text-white/80',
+                'text-gray-400',
 
                 // Sizing and Spacing
                 'w-[1%]',
-                'py-2 pl-3 pr-0',
+                'py-3 pl-4 pr-0',
 
                 //Shape
                 'rounded-none',
@@ -259,13 +258,13 @@ export default {
         panel: {
             class: [
                 // Colors
-                'bg-surface-0 dark:bg-surface-900',
-                'text-surface-700 dark:text-white/80',
+                'bg-gray-25',
+                'text-gray-950',
 
                 // Shape
-                'border border-surface-300 dark:border-surface-700',
-                'rounded-md',
-                'shadow-md'
+                'border border-gray-200',
+                'rounded-lg',
+                'shadow-[0_8px_16px_-4px_rgba(12,17,29,0.08)]'
             ]
         },
         wrapper: {
@@ -278,36 +277,35 @@ export default {
             ]
         },
         list: {
-            class: 'p-1 list-none m-0'
+            class: 'list-none py-2'
         },
         item: ({ context }) => ({
             class: [
                 'relative',
 
                 // Font
-                'leading-none',
+                'text-sm',
+                'text-center',
 
                 // Spacing
-                'm-0 px-3 py-2',
-                'first:mt-0 mt-[2px]',
+                'm-0 p-3',
 
                 // Shape
-                'border-0 rounded',
+                'border-0',
 
                 // Colors
                 {
-                    'text-surface-700 dark:text-white/80': !context.focused && !context.selected,
-                    'bg-surface-200 dark:bg-surface-600/60': context.focused && !context.selected,
-                    'text-surface-700 dark:text-white/80': context.focused && !context.selected,
+                    'text-gray-950': !context.focused && !context.selected,
+                    'bg-primary-50': context.focused && !context.selected,
+                    'text-primary-950': context.focused && !context.selected,
 
                     'text-primary-highlight-inverse': context.selected,
                     'bg-primary-highlight': context.selected
                 },
 
                 //States
-                { 'hover:bg-surface-100 dark:hover:bg-[rgba(255,255,255,0.03)]': !context.focused && !context.selected },
-                { 'hover:bg-primary-highlight-hover': context.selected },
-                { 'hover:text-surface-700 hover:bg-surface-100 dark:hover:text-white dark:hover:bg-[rgba(255,255,255,0.03)]': context.focused && !context.selected },
+                { 'hover:bg-primary-50': !context.focused && !context.selected },
+                { 'hover:text-primary-500 hover:bg-primary-50': context.focused && !context.selected },
 
                 // Transitions
                 'transition-shadow',
@@ -356,7 +354,7 @@ export default {
                     // States
                     'hover:border-surface-400 dark:hover:border-surface-600',
                     'focus:outline-none focus:shadow-none',
-                    'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400',
+                    'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500',
 
                     // Misc
                     'cursor-pointer',
@@ -391,7 +389,7 @@ export default {
 
                 // States
                 'hover:border-surface-400 dark:hover:border-surface-600',
-                { 'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400': !state.focused },
+                { 'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500': !state.focused },
 
                 // Misc
                 'cursor-pointer',
@@ -522,5 +520,11 @@ export default {
     },
     end: {
         class: 'ml-auto'
-    }
+    },
+    current: {
+        class: 'text-xs'
+    },
+    pages: {
+        class: 'flex gap-1'
+    },
 };

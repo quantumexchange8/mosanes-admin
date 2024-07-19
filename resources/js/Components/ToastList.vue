@@ -8,7 +8,7 @@ import toast from "@/Composables/toast.js"
 const page = usePage();
 
 let removeFinishEventListener = Inertia.on("finish", () => {
-    if (page) {
+    if (page.props.toast) {
         toast.add({
             title: page.props.toast.title,
             message: page.props.toast.message,

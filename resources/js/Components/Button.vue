@@ -21,7 +21,7 @@ const props = defineProps({
     },
     size: {
         type: String,
-        default: 'sm',
+        default: 'base',
         validator(value) {
             return ['sm', 'base', 'lg'].includes(value)
         },
@@ -62,7 +62,7 @@ const { type, variant, size, squared, pill, href, iconOnly, srText, external } =
 const { disabled } = toRefs(props)
 
 const baseClasses = [
-    'inline-flex items-center justify-center transition-colors text-sm font-medium select-none disabled:cursor-not-allowed disabled:text-gray-400 focus:outline-none focus:ring',
+    'inline-flex items-center justify-center gap-3 transition-colors text-sm font-medium select-none disabled:cursor-not-allowed disabled:text-gray-400 focus:outline-none focus:ring',
 ]
 
 const variantClasses = (variant) => ({

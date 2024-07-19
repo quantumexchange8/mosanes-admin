@@ -14,7 +14,7 @@ export default {
             'overflow-y-hidden overscroll-contain',
             'overscroll-auto',
             'scroll-smooth',
-            '[&::-webkit-scrollbar]:hidden'
+            '[&::-webkit-scrollbar]:hidden',
         ]
     }),
     previousButton: {
@@ -67,8 +67,8 @@ export default {
             'p-0 m-0',
 
             // Colors
-            'bg-surface-0 dark:bg-surface-900',
-            'border-b border-surface-200 dark:border-surface-700',
+            // 'bg-surface-0 dark:bg-surface-900',
+            // 'border-b border-surface-200 dark:border-surface-700',
             'text-surface-900 dark:text-surface-0/80'
         ]
     },
@@ -89,36 +89,40 @@ export default {
             class: [
                 'relative',
 
+                // Font size
+                'text-sm',
+
                 // Font
-                'font-semibold',
+                'font-medium',
 
                 // Flexbox and Alignment
-                'flex items-center',
+                'flex items-center justify-center',
 
                 // Spacing
-                'py-4 px-[1.125rem]',
-                '-mb-px',
+                // 'py-4 px-[1.125rem]',
+                // '-mb-px',
+                'p-3',
 
                 // Shape
-                'border-b-2',
-                'rounded-t-md',
+                // 'border-b-2',
+                // 'rounded-t-md',
 
                 // Colors and Conditions
                 {
-                    'border-surface-200 dark:border-surface-700': parent.state.d_activeIndex !== context.index,
-                    'bg-surface-0 dark:bg-surface-900': parent.state.d_activeIndex !== context.index,
-                    'text-surface-700 dark:text-surface-0/80': parent.state.d_activeIndex !== context.index,
+                    // 'border-surface-200': parent.state.d_activeIndex !== context.index,
+                    // 'bg-surface-0': parent.state.d_activeIndex !== context.index,
+                    'text-gray-950': parent.state.d_activeIndex !== context.index,
 
-                    'bg-surface-0 dark:bg-surface-900': parent.state.d_activeIndex === context.index,
-                    'border-primary': parent.state.d_activeIndex === context.index,
-                    'text-primary': parent.state.d_activeIndex === context.index
+                    // 'bg-surface-0': parent.state.d_activeIndex === context.index,
+                    'border-b-2 border-primary-500': parent.state.d_activeIndex === context.index,
+                    'text-primary-500': parent.state.d_activeIndex === context.index
                 },
 
                 // States
-                'focus:outline-none focus:outline-offset-0 focus-visible:ring-1 ring-inset focus-visible:ring-primary-400 dark:focus-visible:ring-primary-300',
+                // 'focus:outline-none focus:outline-offset-0 focus-visible:ring-1 ring-inset focus-visible:ring-primary-400 dark:focus-visible:ring-primary-300',
                 {
-                    'hover:bg-surface-0 dark:hover:bg-surface-800/80': parent.state.d_activeIndex !== context.index,
-                    'hover:text-surface-900 dark:hover:text-surface-0': parent.state.d_activeIndex !== context.index
+                    'hover:bg-gray-100': parent.state.d_activeIndex !== context.index,
+                    'hover:bg-primary-50': parent.state.d_activeIndex == context.index
                 },
 
                 // Transitions
@@ -134,22 +138,23 @@ export default {
             class: [
                 // Text
                 'leading-none',
-                'whitespace-nowrap'
+                'whitespace-nowrap',
             ]
         }
     },
     panelcontainer: {
         class: [
             // Spacing
-            'p-[1.125rem] pt-[0.875rem]',
+            // 'p-[1.125rem] pt-[0.875rem]',
 
             // Shape
             'border-0 rounded-none',
             'border-br-md border-bl-md',
 
             // Colors
-            'bg-surface-0 dark:bg-surface-900',
-            'text-surface-900 dark:text-surface-0/80'
+            // 'bg-surface-0 dark:bg-surface-900',
+            // 'text-surface-900 dark:text-surface-0/80'
+            'text-gray-950'
         ]
     }
 };

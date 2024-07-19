@@ -2,21 +2,26 @@ export default {
     root: {
         class: [
             // Flexbox
-            'inline-flex items-center',
+            'inline-flex justify-center items-center',
 
             // Spacing
-            'px-3 py-1',
+            'px-3 py-1.5',
 
             // Shape
-            'rounded-[1.14rem]',
+            'rounded-lg',
 
-            // Colors
-            'text-surface-700 dark:text-white',
-            'bg-surface-100 dark:bg-surface-700'
+            // Border
+            'border border-gray-300',
+
+            // Box shadow
+            'shadow-input',
+
+            // Conditional classes based on state
+            'hover:bg-gray-50',
         ]
     },
     label: {
-        class: 'leading-6 m-0'
+        class: 'text-gray-950 text-center text-xs'
     },
     icon: {
         class: 'leading-6 mr-2'

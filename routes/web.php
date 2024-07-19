@@ -22,9 +22,21 @@ Route::middleware('auth')->group(function () {
      * ==============================
      */
     Route::prefix('member')->group(function () {
+        // listing
         Route::get('/listing', [MemberController::class, 'listing'])->name('member.listing');
-//        Route::get('/network', [ProfileController::class, 'edit'])->name('member.network');
-//        Route::get('/forum', [ProfileController::class, 'edit'])->name('member.forum');
+        Route::post('/addNewMember', [MemberController::class, 'addNewMember'])->name('member.addNewMember');
+
+        // details
+        Route::get('/detail', [MemberController::class, 'detail'])->name('member.detail');
+        Route::get('/loadCountries', [MemberController::class, 'loadCountries'])->name('member.loadCountries');
+        Route::post('/updateContactInfo', [MemberController::class, 'updateContactInfo'])->name('member.updateContactInfo');
+        Route::post('/updateCryptoWalletInfo', [MemberController::class, 'updateCryptoWalletInfo'])->name('member.updateCryptoWalletInfo');
+        Route::post('/updateKYCStatus', [MemberController::class, 'updateKYCStatus'])->name('member.updateKYCStatus');
+        Route::post('/cashWalletAdjustment', [MemberController::class, 'cashWalletAdjustment'])->name('member.cashWalletAdjustment');
+        Route::post('/rebateWalletAdjustment', [MemberController::class, 'rebateWalletAdjustment'])->name('member.rebateWalletAdjustment');
+        Route::post('/accountBalanceAdjustment', [MemberController::class, 'accountBalanceAdjustment'])->name('member.accountBalanceAdjustment');
+        Route::post('/accountCreditAdjustment', [MemberController::class, 'accountCreditAdjustment'])->name('member.accountCreditAdjustment');
+        Route::post('/accountDelete', [MemberController::class, 'accountDelete'])->name('member.accountDelete');
     });
 
     /**
@@ -62,5 +74,22 @@ Route::get('/components/buttons', function () {
 Route::get('/test/component', function () {
     return Inertia::render('Welcome');
 })->name('test.component');
+
+Route::get('/getData', function () {
+//    $countries = \Illuminate\Support\Facades\DB::table('countries')->get()->map(function ($country) {
+//        return [
+//            'id' => $country->id,
+//            'name' => $country->name,
+//            'code' => $country->iso3,
+//        ];
+//    });
+
+    $users = \App\Models\User::latest()->get();
+
+    return response()->json([
+        'users' => $users,
+//        'countries' => $countries,
+    ]);
+});
 
 require __DIR__.'/auth.php';

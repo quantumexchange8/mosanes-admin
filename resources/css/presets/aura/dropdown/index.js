@@ -59,7 +59,7 @@ export default {
             { 'pr-7': props.showClear },
 
             //Shape
-            'rounded-none',
+            'rounded-l-lg',
 
             // Transitions
             'transition',
@@ -94,8 +94,8 @@ export default {
 
             // Shape
             'rounded-r-lg',
-            { 'rotate-180': parent.instance.$name === 'InputGroup' || state.focused },
-            { 'rotate-0':  !state.focused },
+            // { 'rotate-180': parent.instance.$name === 'InputGroup' || state.focused },
+            // { 'rotate-0':  !state.focused },
         ]
     }),
     panel: {
@@ -229,7 +229,7 @@ export default {
 
             // States
             'hover:border-surface-400 dark:hover:border-surface-600',
-            'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 focus:z-10',
+            'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 focus:z-10',
 
             // Misc
             'appearance-none'

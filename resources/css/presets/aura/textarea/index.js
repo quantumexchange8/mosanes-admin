@@ -2,32 +2,32 @@ export default {
     root: ({ context, props, parent }) => ({
         class: [
             // Font
-            'leading-none',
+            'leading-none caret-primary-500 text-sm',
 
             // Spacing
             'm-0',
-            'py-2 px-3',
+            'py-3 px-4',
 
             // Shape
             'rounded-md',
 
             // Colors
-            'text-surface-800 dark:text-white/80',
-            'placeholder:text-surface-400 dark:placeholder:text-surface-500',
-            { 'bg-surface-0 dark:bg-surface-950': !context.disabled },
+            'text-gray-950',
+            'placeholder:text-gray-400',
+            { 'bg-surface-0': !context.disabled },
             'border',
-            { 'border-surface-300 dark:border-surface-600': !props.invalid },
+            { 'border-surface-300': !props.invalid },
 
             // Invalid State
             'invalid:focus:ring-red-200',
             'invalid:hover:border-red-500',
-            { 'border-red-500 dark:border-red-400': props.invalid },
+            { 'border-red-500': props.invalid },
 
             // States
             {
-                'hover:border-surface-400 dark:hover:border-surface-600': !context.disabled && !props.invalid,
-                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 focus:z-10': !context.disabled,
-                'bg-surface-200 dark:bg-surface-700 select-none pointer-events-none cursor-default': context.disabled
+                'hover:border-surface-400': !context.disabled && !props.invalid,
+                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 focus:z-10': !context.disabled,
+                'bg-surface-200 select-none pointer-events-none cursor-default': context.disabled
             },
 
             // Filled State *for FloatLabel

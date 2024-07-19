@@ -71,7 +71,7 @@ Route::get('/test/component', function () {
     return Inertia::render('Welcome');
 })->name('test.component');
 
-Route::get('/test/getData', function () {
+Route::get('/getData', function () {
 //    $countries = \Illuminate\Support\Facades\DB::table('countries')->get()->map(function ($country) {
 //        return [
 //            'id' => $country->id,

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Foundation\Application;
@@ -36,6 +37,17 @@ Route::middleware('auth')->group(function () {
         Route::post('/accountBalanceAdjustment', [MemberController::class, 'accountBalanceAdjustment'])->name('member.accountBalanceAdjustment');
         Route::post('/accountCreditAdjustment', [MemberController::class, 'accountCreditAdjustment'])->name('member.accountCreditAdjustment');
         Route::post('/accountDelete', [MemberController::class, 'accountDelete'])->name('member.accountDelete');
+    });
+
+    /**
+     * ==============================
+     *            Group
+     * ==============================
+     */
+    Route::prefix('group')->group(function () {
+        Route::get('/', [GroupController::class, 'show'])->name('group');
+
+        Route::post('/create_group', [GroupController::class, 'createGroup'])->name('group.create');
     });
 
     /**

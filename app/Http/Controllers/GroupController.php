@@ -21,4 +21,22 @@ class GroupController extends Controller
             'type' => 'success',
         ]);
     }
+
+    public function editGroup(Request $request)
+    {
+        // dd($request->all());
+
+        return back()->with('toast', [
+            'title' => "You've successfully updated the group details!",
+            'type' => 'success',
+        ]);
+    }
+
+    public function deleteGroup(Request $request)
+    {
+        return back()->with('toast', [
+            'title' => "Group has been deleted!",
+            'type' => 'success',
+        ]);
+    }
 }

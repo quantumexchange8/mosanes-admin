@@ -147,6 +147,7 @@ const cities = ref([
                 <Button
                     variant="primary-flat"
                     size="base"
+                    :disabled="form.processing"
                 >
                     Create
                 </Button>

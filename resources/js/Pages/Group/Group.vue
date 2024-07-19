@@ -7,7 +7,38 @@ import Button from '@/Components/Button.vue';
 import Calendar from 'primevue/calendar';
 import ProfilePhoto from "@/Components/ProfilePhoto.vue";
 import NewGroup from '@/Pages/Group/Partials/NewGroup.vue';
+import GroupMenu from '@/Pages/Group/Partials/GroupMenu.vue';
 
+const groups = [
+    {
+        groupName: 'XYZ Group',
+        groupColour: '000000',
+        groupMemberCount: '64',
+        groupLeaderName: 'Liam Anderson',
+        groupLeaderEmail: 'liamanderson@gmail.com',
+        groupDeposit: '231000',
+        groupWithdrawal: '172000',
+        groupChargesPercent: '6',
+        groupFeeCharges: '13860',
+        groupNetBalance: '45140',
+        groupAccountBalance: '88600',
+        groupAccountEquity: '59000',
+    },
+    {
+        groupName: 'ABC Group',
+        groupColour: '7a5af8',
+        groupMemberCount: '1658',
+        groupLeaderName: 'Alice Johnson',
+        groupLeaderEmail: 'alicealicejs@gmail.com',
+        groupDeposit: '88000',
+        groupWithdrawal: '64000',
+        groupChargesPercent: '10',
+        groupFeeCharges: '8800',
+        groupNetBalance: '15200',
+        groupAccountBalance: '24000',
+        groupAccountEquity: '17000',
+    },
+];
 
 const { formatAmount } = transactionFormat();
 
@@ -17,17 +48,17 @@ const totalWithdrawal = ref(236000);
 const totalFeeCharges = ref(22660);
 
 const date = ref('');
-const groupName = ref('ABC Group');
-const groupMemberCount = ref(1658);
-const groupLeaderName = ref('Alice Johnson');
-const groupLeaderEmail = ref('alicealicejs@gmail.com');
-const groupDeposit = ref(88000);
-const groupWithdrawal = ref(64000)
-const groupChargesPercent = ref(10)
-const groupFeeCharges = ref(8800)
-const groupNetBalance = ref(15200)
-const groupAccountBalance = ref(24000)
-const groupAccountEquity = ref(17000)
+// const groupName = ref('ABC Group');
+// const groupMemberCount = ref(1658);
+// const groupLeaderName = ref('Alice Johnson');
+// const groupLeaderEmail = ref('alicealicejs@gmail.com');
+// const groupDeposit = ref(88000);
+// const groupWithdrawal = ref(64000)
+// const groupChargesPercent = ref(10)
+// const groupFeeCharges = ref(8800)
+// const groupNetBalance = ref(15200)
+// const groupAccountBalance = ref(24000)
+// const groupAccountEquity = ref(17000)
 </script>
 
 <template>
@@ -94,15 +125,22 @@ const groupAccountEquity = ref(17000)
                     <NewGroup />
                 </div>
 
-                <div class="flex flex-col items-center self-stretch">
-                    <div class="py-2 px-4 flex items-center gap-3 self-stretch bg-purple">
+                <div
+                    v-for="(group, index) in groups"
+                    :key="index"
+                    class="flex flex-col items-center self-stretch"
+                >
+                    <div
+                        class="py-2 px-4 flex items-center gap-3 self-stretch"
+                        :style="{'backgroundColor': '#'+group.groupColour}"
+                    >
                         <div class="flex-1 text-white font-semibold">
-                            {{ groupName }}
+                            {{ group.groupName }}
                         </div>
                         <div class="flex items-center gap-2">
                             <IconUserFilled size="16" stroke-width="1.25" color="white" />
                             <div class="text-white text-right text-sm font-medium">
-                                {{ formatAmount(groupMemberCount, 0) }}
+                                {{ formatAmount(group.groupMemberCount, 0) }}
                             </div>
                         </div>
                     </div>
@@ -115,10 +153,10 @@ const groupAccountEquity = ref(17000)
                                 </div>
                                 <div class="flex flex-col items-start flex-1">
                                     <div class="max-w-40 self-stretch overflow-hidden whitespace-nowrap text-gray-950 text-ellipsis text-sm font-medium md:max-w-[500px] xl:max-w-3xl">
-                                        {{ groupLeaderName }} Lorem ipsum, dolor sit amet consectetur adipisicing elit. Impedit perferendis ipsa tempora assumenda maiores excepturi quod iste rerum consectetur, deleniti ex labore veritatis alias? Inventore architecto nihil explicabo soluta dicta!
+                                        {{ group.groupLeaderName }}
                                     </div>
                                     <div class="max-w-40 self-stretch overflow-hidden whitespace-nowrap text-gray-500 text-ellipsis text-xs md:max-w-[500px] xl:max-w-3xl">
-                                        {{ groupLeaderEmail }} Lorem ipsum dolor, sit amet consectetur adipisicing elit. Earum tenetur non doloribus expedita maxime inventore neque, placeat veritatis pariatur minima, praesentium quo aliquid deserunt similique ad ducimus dolorem accusamus nulla.
+                                        {{ group.groupLeaderEmail }}
                                     </div>
                                 </div>
                                 <Button
@@ -130,15 +168,8 @@ const groupAccountEquity = ref(17000)
                                 >
                                     <IconRefresh size="16" stroke-width="1.25" color="#667085" />
                                 </Button>
-                                <Button
-                                    variant="gray-text"
-                                    size="sm"
-                                    type="button"
-                                    iconOnly
-                                    v-slot="{ iconSizeClasses }"
-                                >
-                                    <IconDotsVertical size="16" stroke-width="1.25" color="#667085" />
-                                </Button>
+
+                                <GroupMenu :group="group" :indexNum="index" />
                             </div>
                         </div>
 
@@ -148,7 +179,7 @@ const groupAccountEquity = ref(17000)
                                     Deposit ($)
                                 </div>
                                 <div class="text-gray-950 font-semibold">
-                                    {{ formatAmount(groupDeposit) }}
+                                    {{ formatAmount(group.groupDeposit) }}
                                 </div>
                             </div>
 
@@ -157,16 +188,16 @@ const groupAccountEquity = ref(17000)
                                     Withdrawal ($)
                                 </div>
                                 <div class="text-gray-950 font-semibold">
-                                    {{ formatAmount(groupWithdrawal) }}
+                                    {{ formatAmount(group.groupWithdrawal) }}
                                 </div>
                             </div>
 
                             <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                 <div class="text-gray-500 text-xs">
-                                    {{ groupChargesPercent }}% Fee Charges ($)
+                                    {{ group.groupChargesPercent }}% Fee Charges ($)
                                 </div>
                                 <div class="text-gray-950 font-semibold">
-                                    {{ formatAmount(groupFeeCharges) }}
+                                    {{ formatAmount(group.groupFeeCharges) }}
                                 </div>
                             </div>
 
@@ -175,7 +206,7 @@ const groupAccountEquity = ref(17000)
                                     Net Balance ($)
                                 </div>
                                 <div class="text-gray-950 font-semibold">
-                                    {{ formatAmount(groupNetBalance) }}
+                                    {{ formatAmount(group.groupNetBalance) }}
                                 </div>
                             </div>
 
@@ -184,7 +215,7 @@ const groupAccountEquity = ref(17000)
                                     Account Balance ($)
                                 </div>
                                 <div class="text-gray-950 font-semibold">
-                                    {{ formatAmount(groupAccountBalance) }}
+                                    {{ formatAmount(group.groupAccountBalance) }}
                                 </div>
                             </div>
 
@@ -193,7 +224,7 @@ const groupAccountEquity = ref(17000)
                                     Account Equity ($)
                                 </div>
                                 <div class="text-gray-950 font-semibold">
-                                    {{ formatAmount(groupAccountEquity) }}
+                                    {{ formatAmount(group.groupAccountEquity) }}
                                 </div>
                             </div>
                         </div>

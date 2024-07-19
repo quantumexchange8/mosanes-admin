@@ -2,13 +2,18 @@ export default {
     root: ({ props }) => ({
         class: [
             // Font
-            'font-bold',
+            'font-semibold',
 
             {
-                'text-xs leading-[1.5rem]': props.size == null,
+                'text-xs': props.size == null,
                 'text-lg leading-[2.25rem]': props.size == 'large',
                 'text-2xl leading-[3rem]': props.size == 'xlarge'
             },
+
+            // Spacing
+            'flex',
+            'px-2 py-1',
+            'items-center',
 
             // Alignment
             'text-center inline-block',
@@ -24,19 +29,16 @@ export default {
             // Shape
             {
                 'rounded-full': props.value.length == 1,
-                'rounded-[0.71rem]': props.value.length !== 1
+                'rounded-[20px]': props.value.length !== 1
             },
 
-            // Color
-            'text-primary-inverse',
             {
-                'bg-primary': props.severity == null || props.severity == 'primary',
-                'bg-surface-500 dark:bg-surface-400': props.severity == 'secondary',
-                'bg-green-500 dark:bg-green-400': props.severity == 'success',
-                'bg-blue-500 dark:bg-blue-400': props.severity == 'info',
-                'bg-orange-500 dark:bg-orange-400': props.severity == 'warning',
-                'bg-purple-500 dark:bg-purple-400': props.severity == 'help',
-                'bg-red-500 dark:bg-red-400': props.severity == 'danger'
+                'bg-primary-50 text-primary-500': props.severity == null || props.severity == 'primary',
+                'bg-gray-50 text-gray-500': props.severity == 'gray',
+                'bg-success-50 text-success-500': props.severity == 'success',
+                'bg-info-50 text-info-500': props.severity == 'info',
+                'bg-warning-50 text-warning-500': props.severity == 'warning',
+                'bg-error-50 text-error-500': props.severity == 'error'
             }
         ]
     })

@@ -132,8 +132,9 @@ export default {
             },
             boxShadow: {
                 'input': '0 1px 2px 0px rgba(12, 17, 29, 0.05)',
-                'dialog': '0 12px 24px -4 rgba(12, 17, 29, 0.10)',
+                'dialog': '0 12px 24px -4px rgba(12, 17, 29, 0.10)',
                 'toast': '0 4px 20px 0 rgba(12, 17, 29, 0.08)',
+                'box': '0 8px 16px -4px rgba(12, 17, 29, 0.08)',
                 'table': '0 2px 8px 0 rgba(12, 17, 29, 0.05)',
             },
             fontSize: {
@@ -151,7 +152,8 @@ export default {
                 'md': '768px',
                 'lg': '1024px',
                 'xl': '1280px',
-            }
+            },
+            chip: 'inline-flex items-center justify-center px-3 py-1.5 rounded-lg border border-gray-300 bg-white shadow-input hover:bg-gray-50 focus:border-primary-300 focus:bg-primary-50 opacity-50 cursor-not-allowed',
         },
     },
 

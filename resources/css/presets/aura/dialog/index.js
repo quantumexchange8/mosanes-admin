@@ -37,7 +37,7 @@ export default {
             'shrink-0',
 
             // Spacing
-            'py-5 px-4 sm:p-7',
+            'py-5 px-4 md:p-7',
 
             // Shape
             'rounded-tl-3xl',
@@ -49,7 +49,7 @@ export default {
         ]
     },
     title: {
-        class: ['font-semibold text-lg text-gray-950']
+        class: ['font-semibold md:text-lg text-gray-950']
     },
     icons: {
         class: ['flex items-center']
@@ -141,8 +141,8 @@ export default {
     content: ({ state, instance }) => ({
         class: [
             // Spacing
-            'px-4 sm:px-7',
-            'py-5 sm:pb-7',
+            'px-4 md:px-7',
+            'py-5 md:pb-7',
             'pt-0',
 
             // Shape
@@ -158,7 +158,7 @@ export default {
             'border-gray-200',
 
             // Misc
-            'overflow-y-auto'
+            'overflow-y-auto',
         ]
     }),
     footer: {

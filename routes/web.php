@@ -60,9 +60,19 @@ Route::get('/test/component', function () {
 })->name('test.component');
 
 Route::get('/test/getData', function () {
-    $users = \App\Models\User::all();
+//    $countries = \Illuminate\Support\Facades\DB::table('countries')->get()->map(function ($country) {
+//        return [
+//            'id' => $country->id,
+//            'name' => $country->name,
+//            'code' => $country->iso3,
+//        ];
+//    });
+
+    $users = \App\Models\User::latest()->get();
+
     return response()->json([
-        'users' => $users
+        'users' => $users,
+//        'countries' => $countries,
     ]);
 });
 

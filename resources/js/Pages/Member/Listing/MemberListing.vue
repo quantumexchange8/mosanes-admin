@@ -1,5 +1,5 @@
 <script setup>
-import { ref,watchEffect } from "vue";
+import {onMounted, ref, watchEffect} from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import AddMember from "@/Pages/Member/Listing/Partials/AddMember.vue";
 import { SearchIcon, Sliders02Icon, DownloadCloud01Icon } from '@/Components/Icons/outline';
@@ -13,6 +13,10 @@ import { useForm } from '@inertiajs/vue3';
 // import MemberListingTable from "./Partials/MemberListingTable.vue";
 import OverlayPanel from 'primevue/overlaypanel';
 import Dialog from 'primevue/dialog';
+import DataTable from "primevue/datatable";
+import Column from "primevue/column";
+import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
+import {FilterMatchMode} from "primevue/api";
 
 const form = useForm({
     search: '',
@@ -80,6 +84,33 @@ watchEffect(() => {
     }, 0);
 });
 
+onMounted(() => {
+    getResults();
+})
+const getResults = async (langVal) => {
+    try {
+        const response = await axios.get('http://mosanes-admin.test/test/getData');
+        customers.value = response.data.users;
+    } catch (error) {
+        console.error('Error changing locale:', error);
+    }
+};
+
+const dt = ref();
+const exportCSV = () => {
+    dt.value.exportCSV();
+};
+
+const customers = ref();
+
+const filters = ref({
+    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    'country.name': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    representative: { value: null, matchMode: FilterMatchMode.IN },
+    status: { value: null, matchMode: FilterMatchMode.EQUALS },
+    verified: { value: null, matchMode: FilterMatchMode.EQUALS }
+});
 </script>
 
 <template>
@@ -142,59 +173,114 @@ watchEffect(() => {
                     </div>
                 </div>
             </div>
-            <div class="flex flex-col justify-center md:justify-normal items-center px-4 md:px-6 py-6 gap-5 md:gap-6 self-stretch max-w-[1440px] rounded-2xl border border-gray-200 bg-white shadow-table">
-                <!-- below md table -->
-                <div class="flex md:hidden flex-col items-center gap-3 self-stretch">
-                    <IconField iconPosition="left" class="w-full">
-                        <SearchIcon class="w-5 h-5 text-gray-400" />
-                        <InputText
-                            id="searchSM"
-                            type="text"
-                            class="block w-full"
-                            v-model="form.search"
-                            placeholder="Search"
-                            :invalid="form.errors.search"
-                        />
-                    </IconField>
-                    <div class="flex justify-center items-center gap-3 self-stretch">
-                        <Button variant="gray-text" class="flex flex-1 ring-1 ring-gray-300 hover:bg-gray-50 focus:bg-gray-50 focus:ring-gray-300 focus:ring-1" @click="toggleDialog">
-                            <Sliders02Icon />
-                            Filter
-                            <Badge variant="numberbadge" class="text-xs text-white">{{filterCount}}</Badge>
-                        </Button>
-                        <Button variant="primary-outlined" class="flex flex-1 focus:ring-0">
-                            Export
-                            <DownloadCloud01Icon />
-                        </Button>
-                    </div>
-                </div>
-                <!-- above md table -->
-                <div class="hidden md:flex justify-between items-center self-stretch">
-                    <div class="flex items-center gap-3">
-                        <IconField iconPosition="left" class="w-[240px]">
-                            <SearchIcon class="w-5 h-5 text-gray-400" />
-                            <InputText
-                                id="searchMD"
-                                type="text"
-                                class="block w-full"
-                                v-model="form.search"
-                                placeholder="Search"
-                                :invalid="form.errors.search"
-                            />
-                        </IconField>
-                        <Button variant="gray-text" class="flex flex-1 ring-1 ring-gray-300 hover:bg-gray-50 focus:bg-gray-50 focus:ring-gray-300 focus:ring-1" @click="toggleOverlay">
-                            <Sliders02Icon />
-                            Filter
-                            <Badge variant="numberbadge" class="text-xs text-white">{{filterCount}}</Badge>
-                        </Button>
-                    </div>
-                    <Button variant="primary-outlined" class="flex items-center w-[124px] focus:ring-0">
-                        Export
-                        <DownloadCloud01Icon />
-                    </Button>
-                </div>
-<!--                <MemberListingTable />-->
+            <div class="p-6 flex flex-col items-center justify-center self-stretch gap-6 border border-gray-200 bg-white shadow-table rounded-2xl">
+                <DataTable
+                    v-model:filters="filters"
+                    :value="customers"
+                    paginator
+                    removableSort
+                    :rows="10"
+                    :rowsPerPageOptions="[10, 20, 50, 100]"
+                    tableStyle="min-width: 50rem"
+                    paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
+                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    :globalFilterFields="['first_name']"
+                    ref="dt"
+                >
+                    <template #header>
+                        <div class="flex justify-between items-center self-stretch">
+                            <div>
+                                <InputText v-model="filters['global'].value" placeholder="Keyword Search" class="font-normal" />
+                            </div>
+                            <div >
+                                <Button variant="primary-outlined" @click="exportCSV($event)">
+                                    Export
+                                </Button>
+                            </div>
+                        </div>
+                    </template>
+                    <template #empty> No customers found. </template>
+                    <template #loading> Loading customers data. Please wait. </template>
+                    <Column field="id" sortable header="Id" style="width: 25%">
+                        <template #body="slotProps">
+                            MID00000{{ slotProps.data.id }}
+                        </template>
+                    </Column>
+                    <Column field="first_name" sortable header="Name" style="width: 25%">
+                        <template #body="slotProps">
+                            <div class="flex items-center gap-3">
+                                <div class="w-7 h-7 rounded-full overflow-hidden">
+                                    <DefaultProfilePhoto />
+                                </div>
+                                <div class="flex flex-col items-start">
+                                    <div class="font-medium">
+                                        {{ slotProps.data.first_name }}
+                                    </div>
+                                    <div class="text-gray-500 text-xs">
+                                        {{ slotProps.data.email }}
+                                    </div>
+                                </div>
+                            </div>
+                        </template>
+                    </Column>
+                    <Column field="company" header="Company" style="width: 25%"></Column>
+                    <Column field="representative.name" header="Representative" style="width: 25%"></Column>
+                </DataTable>
+
             </div>
+<!--            <div class="flex flex-col justify-center md:justify-normal items-center px-4 md:px-6 py-6 gap-5 md:gap-6 self-stretch max-w-[1440px] rounded-2xl border border-gray-200 bg-white shadow-table">-->
+<!--                &lt;!&ndash; below md table &ndash;&gt;-->
+<!--                <div class="flex md:hidden flex-col items-center gap-3 self-stretch">-->
+<!--                    <IconField iconPosition="left" class="w-full">-->
+<!--                        <SearchIcon class="w-5 h-5 text-gray-400" />-->
+<!--                        <InputText-->
+<!--                            id="searchSM"-->
+<!--                            type="text"-->
+<!--                            class="block w-full"-->
+<!--                            v-model="form.search"-->
+<!--                            placeholder="Search"-->
+<!--                            :invalid="form.errors.search"-->
+<!--                        />-->
+<!--                    </IconField>-->
+<!--                    <div class="flex justify-center items-center gap-3 self-stretch">-->
+<!--                        <Button variant="gray-text" class="flex flex-1 ring-1 ring-gray-300 hover:bg-gray-50 focus:bg-gray-50 focus:ring-gray-300 focus:ring-1" @click="toggleDialog">-->
+<!--                            <Sliders02Icon />-->
+<!--                            Filter-->
+<!--                            <Badge variant="numberbadge" class="text-xs text-white">{{filterCount}}</Badge>-->
+<!--                        </Button>-->
+<!--                        <Button variant="primary-outlined" class="flex flex-1 focus:ring-0">-->
+<!--                            Export-->
+<!--                            <DownloadCloud01Icon />-->
+<!--                        </Button>-->
+<!--                    </div>-->
+<!--                </div>-->
+<!--                &lt;!&ndash; above md table &ndash;&gt;-->
+<!--                <div class="hidden md:flex justify-between items-center self-stretch">-->
+<!--                    <div class="flex items-center gap-3">-->
+<!--                        <IconField iconPosition="left" class="w-[240px]">-->
+<!--                            <SearchIcon class="w-5 h-5 text-gray-400" />-->
+<!--                            <InputText-->
+<!--                                id="searchMD"-->
+<!--                                type="text"-->
+<!--                                class="block w-full"-->
+<!--                                v-model="form.search"-->
+<!--                                placeholder="Search"-->
+<!--                                :invalid="form.errors.search"-->
+<!--                            />-->
+<!--                        </IconField>-->
+<!--                        <Button variant="gray-text" class="flex flex-1 ring-1 ring-gray-300 hover:bg-gray-50 focus:bg-gray-50 focus:ring-gray-300 focus:ring-1" @click="toggleOverlay">-->
+<!--                            <Sliders02Icon />-->
+<!--                            Filter-->
+<!--                            <Badge variant="numberbadge" class="text-xs text-white">{{filterCount}}</Badge>-->
+<!--                        </Button>-->
+<!--                    </div>-->
+<!--                    <Button variant="primary-outlined" class="flex items-center w-[124px] focus:ring-0">-->
+<!--                        Export-->
+<!--                        <DownloadCloud01Icon />-->
+<!--                    </Button>-->
+<!--                </div>-->
+<!--&lt;!&ndash;                <MemberListingTable />&ndash;&gt;-->
+<!--            </div>-->
         </div>
     </AuthenticatedLayout>
 

@@ -10,7 +10,7 @@ import RadioButton from 'primevue/radiobutton';
 import Button from '@/Components/Button.vue';
 import Badge from "@/Components/Badge.vue";
 import { useForm } from '@inertiajs/vue3';
-import MemberListingTable from "./Partials/MemberListingTable.vue";
+// import MemberListingTable from "./Partials/MemberListingTable.vue";
 import OverlayPanel from 'primevue/overlaypanel';
 import Dialog from 'primevue/dialog';
 
@@ -193,7 +193,7 @@ watchEffect(() => {
                         <DownloadCloud01Icon />
                     </Button>
                 </div>
-                <MemberListingTable />
+<!--                <MemberListingTable />-->
             </div>
         </div>
     </AuthenticatedLayout>

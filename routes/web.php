@@ -24,12 +24,13 @@ Route::middleware('auth')->group(function () {
     Route::prefix('member')->group(function () {
         // listing
         Route::get('/listing', [MemberController::class, 'listing'])->name('member.listing');
+        Route::get('/getMemberListingData', [MemberController::class, 'getMemberListingData'])->name('member.getMemberListingData');
+        Route::get('/loadCountries', [MemberController::class, 'loadCountries'])->name('member.loadCountries');
+        Route::get('/loadUplines', [MemberController::class, 'loadUplines'])->name('member.loadUplines');
         Route::post('/addNewMember', [MemberController::class, 'addNewMember'])->name('member.addNewMember');
 
         // details
         Route::get('/detail', [MemberController::class, 'detail'])->name('member.detail');
-        Route::get('/loadCountries', [MemberController::class, 'loadCountries'])->name('member.loadCountries');
-        Route::get('/loadUplines', [MemberController::class, 'loadUplines'])->name('member.loadUplines');
         Route::post('/updateContactInfo', [MemberController::class, 'updateContactInfo'])->name('member.updateContactInfo');
         Route::post('/updateCryptoWalletInfo', [MemberController::class, 'updateCryptoWalletInfo'])->name('member.updateCryptoWalletInfo');
         Route::post('/updateKYCStatus', [MemberController::class, 'updateKYCStatus'])->name('member.updateKYCStatus');

@@ -2,7 +2,7 @@ export default {
     root: {
         class: [
             // Flex & Alignment
-            'flex items-center justify-center flex-wrap',
+            'flex items-center justify-center flex-wrap gap-1',
 
             // Spacing
             'px-4 py-3 mt-6',
@@ -217,7 +217,7 @@ export default {
 
                 // Sizing and Spacing
                 'w-[1%]',
-                'py-3 pl-4 pr-0',
+                'py-2 pl-4 pr-2',
 
                 //Shape
                 'rounded-none',
@@ -523,8 +523,5 @@ export default {
     },
     current: {
         class: 'text-xs'
-    },
-    pages: {
-        class: 'flex gap-1'
     },
 };

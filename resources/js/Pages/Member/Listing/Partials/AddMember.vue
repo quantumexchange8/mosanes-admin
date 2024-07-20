@@ -14,19 +14,21 @@ const visible = ref(false)
 const form = useForm({
     name: '',
     email: '',
+    dial_code: '',
     phone: '',
     upline: '',
     password: '',
     password_confirmation: '',
 });
 
-const create = () => {
+const submitForm = () => {
+    form.dial_code = selectedCountry.value
     form.post(route('member.addNewMember'), {
         onSuccess: () => {
-            visible.value = false;
+            visible.value = false
+            form.reset();
         },
     })
-    // visible.value = false;
 };
 
 const countries = ref()
@@ -39,7 +41,6 @@ const getResults = async () => {
 
         const uplineResponse = await axios.get('/member/loadUplines');
         uplines.value = uplineResponse.data;
-
     } catch (error) {
         console.error('Error changing locale:', error);
     }
@@ -59,14 +60,13 @@ getResults()
         Add member
     </Button>
 
-
     <Dialog
         v-model:visible="visible"
         modal
         header="New Member"
         class="dialog-xs md:dialog-md"
     >
-        <form>
+        <form @submit.prevent="submitForm()">
             <div class="flex flex-col items-center gap-8 self-stretch">
 
                 <!-- Basic Information -->
@@ -199,7 +199,6 @@ getResults()
                             type="button"
                             variant="primary-tonal"
                             size="base"
-                            @click="create"
                         >
                             Browse
                         </Button>
@@ -243,7 +242,7 @@ getResults()
                 <Button
                     variant="primary-flat"
                     size="base"
-                    @click="create"
+                    @click="submitForm"
                 >
                     Create
                 </Button>

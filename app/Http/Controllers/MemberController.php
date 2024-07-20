@@ -14,12 +14,23 @@ class MemberController extends Controller
         return Inertia::render('Member/Listing/MemberListing');
     }
 
+    public function getMemberListingData()
+    {
+        $users = User::latest()
+            ->get();
+
+        return response()->json([
+            'users' => $users
+        ]);
+    }
+
     public function addNewMember(Request $request)
     {
-        // dd($request->all());
-        return redirect()->back()->with('toast', [
-            'title' => 'You’ve successfully created a new member!',
-            'type' => 'success'
+//        dd($request->all());
+
+        return back()->with('toast', [
+            'title' => "You’ve successfully created a new member!",
+            'type' => 'success',
         ]);
     }
 

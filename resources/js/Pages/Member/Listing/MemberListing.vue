@@ -89,7 +89,7 @@ onMounted(() => {
 })
 const getResults = async (langVal) => {
     try {
-        const response = await axios.get('/getData');
+        const response = await axios.get('/member/loadUplines');
         customers.value = response.data.users;
     } catch (error) {
         console.error('Error changing locale:', error);
@@ -201,9 +201,9 @@ const filters = ref({
                     </template>
                     <template #empty> No customers found. </template>
                     <template #loading> Loading customers data. Please wait. </template>
-                    <Column field="id" sortable header="Id" style="width: 25%">
+                    <Column field="id_number" sortable header="Id" style="width: 25%">
                         <template #body="slotProps">
-                            MID00000{{ slotProps.data.id }}
+                            {{ slotProps.data.id_number }}
                         </template>
                     </Column>
                     <Column field="first_name" sortable header="Name" style="width: 25%">

@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Country;
+use App\Models\User;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -16,7 +18,7 @@ class MemberController extends Controller
     {
         // dd($request->all());
         return redirect()->back()->with('toast', [
-            'title' => 'test',
+            'title' => 'You’ve successfully created a new member!',
             'type' => 'success'
         ]);
     }
@@ -27,17 +29,33 @@ class MemberController extends Controller
         return Inertia::render('Member/Listing/Partials/MemberListingDetail');
     }
 
-    public function loadCountries(Request $request)
+    public function loadCountries()
     {
-        $countries = collect([
-            ['country' => 'United States', 'dial_code' => '+1'],
-            ['country' => 'Italy', 'dial_code' => '+39'],
-            ['country' => 'United Kingdom', 'dial_code' => '+44' ],
-            ['country' => 'Turkey', 'dial_code' => '+90' ],
-            ['country' => 'France', 'dial_code' => '+33' ]
-        ]);
+        $countries = Country::get()->map(function ($country) {
+            return [
+                'id' => $country->id,
+                'name' => $country->name,
+                'phone_code' => $country->phone_code,
+            ];
+        });
 
         return response()->json($countries);
+    }
+
+    public function loadUplines()
+    {
+        $users = User::where('role', 'super-admin')
+            ->select('id', 'name')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'value' => $user->id,
+                    'name' => $user->name,
+                    'profile_photo' => $user->getFirstMediaUrl('profile_photo')
+                ];
+            });
+
+        return response()->json($users);
     }
 
     public function updateContactInfo(Request $request)

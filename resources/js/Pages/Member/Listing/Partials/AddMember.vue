@@ -8,6 +8,7 @@ import InputText from 'primevue/inputtext';
 import { useForm } from '@inertiajs/vue3';
 import Dropdown from "primevue/dropdown";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
+import Password from 'primevue/password';
 
 const visible = ref(false)
 
@@ -16,19 +17,25 @@ const form = useForm({
     email: '',
     dial_code: '',
     phone: '',
+    phone_number: '',
     upline: '',
     password: '',
     password_confirmation: '',
 });
 
 const submitForm = () => {
-    form.dial_code = selectedCountry.value
+    form.dial_code = selectedCountry.value;
+
+    if (selectedCountry.value) {
+        form.phone_number = selectedCountry.value.phone_code + form.phone;
+    }
+
     form.post(route('member.addNewMember'), {
         onSuccess: () => {
-            visible.value = false
+            visible.value = false;
             form.reset();
         },
-    })
+    });
 };
 
 const countries = ref()
@@ -112,6 +119,7 @@ getResults()
                                     placeholder="Code"
                                     class="w-[100px]"
                                     scroll-height="236px"
+                                    :invalid="!!form.errors.phone"
                                 >
                                     <template #value="slotProps">
                                         <div v-if="slotProps.value" class="flex items-center">
@@ -150,6 +158,7 @@ getResults()
                                 placeholder="Select Upline"
                                 class="w-full"
                                 scroll-height="236px"
+                                :invalid="!!form.errors.upline"
                             >
                                 <template #value="slotProps">
                                     <div v-if="slotProps.value" class="flex items-center gap-3">
@@ -183,7 +192,7 @@ getResults()
                                     </div>
                                 </template>
                             </Dropdown>
-                            <InputError :message="form.errors.email" />
+                            <InputError :message="form.errors.upline" />
                         </div>
                     </div>
                 </div>
@@ -213,24 +222,18 @@ getResults()
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 w-full">
                         <div class="space-y-1 h-[66px]">
                             <InputLabel for="password" value="Password" />
-                            <InputText
-                                id="password"
-                                type="password"
-                                class="block w-full"
+                            <Password
                                 v-model="form.password"
+                                toggleMask
                                 :invalid="!!form.errors.password"
-                                placeholder="••••••••"
                             />
-                            <InputError :message="form.errors.name" />
+                            <InputError :message="form.errors.password" />
                         </div>
                         <div class="space-y-1 h-[66px]">
                             <InputLabel for="password_confirmation" value="Confirm Password" />
-                            <InputText
-                                id="password_confirmation"
-                                type="password"
-                                class="block w-full"
+                            <Password
                                 v-model="form.password_confirmation"
-                                placeholder="••••••••"
+                                toggleMask
                                 :invalid="!!form.errors.password"
                             />
                         </div>
@@ -243,6 +246,7 @@ getResults()
                     variant="primary-flat"
                     size="base"
                     @click="submitForm"
+                    :disabled="form.processing"
                 >
                     Create
                 </Button>

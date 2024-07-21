@@ -2,8 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\AddMemberRequest;
 use App\Models\Country;
 use App\Models\User;
+use App\Models\Wallet;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Illuminate\Http\Request;
 
@@ -24,9 +28,41 @@ class MemberController extends Controller
         ]);
     }
 
-    public function addNewMember(Request $request)
+    public function addNewMember(AddMemberRequest $request)
     {
-//        dd($request->all());
+        $upline_id = $request->upline['value'];
+        $upline = User::find($upline_id);
+
+        if(empty($upline->hierarchyList)) {
+            $hierarchyList = "-" . $upline_id . "-";
+        } else {
+            $hierarchyList = $upline->hierarchyList . $upline_id . "-";
+        }
+
+        $dial_code = $request->dial_code;
+        $country = Country::find($dial_code['id']);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'country' => $request->country,
+            'dial_code' => $dial_code['phone_code'],
+            'phone' => $request->phone,
+            'phone_number' => $request->phone_number,
+            'upline_id' => $upline_id,
+            'country_id' => $country->id,
+            'nationality' => $country->nationality,
+            'hierarchyList' => $hierarchyList,
+            'password' => Hash::make($request->password),
+            'role' => 'user',
+            'kyc_approval' => 'verified',
+        ]);
+
+        $user->setReferralId();
+
+        $id_no = 'MID' . Str::padLeft($user->id, 5, "0");
+        $user->id_number = $id_no;
+        $user->save();
 
         return back()->with('toast', [
             'title' => "You’ve successfully created a new member!",

@@ -6,7 +6,7 @@ import { MemberIcon, AgentIcon, UserIcon, } from '@/Components/Icons/solid';
 import InputText from 'primevue/inputtext';
 import RadioButton from 'primevue/radiobutton';
 import Button from '@/Components/Button.vue';
-import { useForm } from '@inertiajs/vue3';
+import {useForm, usePage} from '@inertiajs/vue3';
 import OverlayPanel from 'primevue/overlaypanel';
 import Dialog from 'primevue/dialog';
 import DataTable from "primevue/datatable";
@@ -106,6 +106,12 @@ const filters = ref({
     representative: { value: null, matchMode: FilterMatchMode.IN },
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
     verified: { value: null, matchMode: FilterMatchMode.EQUALS }
+});
+
+watchEffect(() => {
+    if (usePage().props.toast !== null) {
+        getResults();
+    }
 });
 </script>
 

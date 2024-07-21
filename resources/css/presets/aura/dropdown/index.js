@@ -20,9 +20,9 @@ export default {
             { 'border-gray-300': !props.invalid },
 
             // Invalid State
-            'invalid:focus:ring-red-200',
-            'invalid:hover:border-red-500',
-            { 'border-red-500 dark:border-red-400': props.invalid },
+            'invalid:focus:ring-error-500',
+            'invalid:hover:border-error-500',
+            { 'border-error-500 dark:border-error-500': props.invalid },
 
             // Transitions
             'transition-all',

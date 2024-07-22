@@ -12,7 +12,7 @@ export default {
             { 'first:ml-0 ml-[-1px]': parent.instance.$name == 'InputGroup' && !props.showButtons },
 
             // Color and Background
-            { 'bg-gray-25': !props.disabled },
+            { 'bg-white': !props.disabled },
 
             'border',
             { 'border-gray-300': parent.instance.$name != 'InputGroup' },
@@ -20,9 +20,9 @@ export default {
             { 'border-gray-300': !props.invalid },
 
             // Invalid State
-            'invalid:focus:ring-red-200',
-            'invalid:hover:border-red-500',
-            { 'border-red-500 dark:border-red-400': props.invalid },
+            'invalid:focus:ring-error-500',
+            'invalid:hover:border-error-500',
+            { 'border-error-500 dark:border-error-500': props.invalid },
 
             // Transitions
             'transition-all',
@@ -101,7 +101,7 @@ export default {
     panel: {
         class: [
             // Colors
-            'bg-gray-25',
+            'bg-white',
             'text-gray-950',
 
             // Shape
@@ -195,9 +195,9 @@ export default {
             'rounded-tr-lg',
 
             // Color
-            'text-surface-700 dark:text-white/80',
-            'bg-surface-0 dark:bg-surface-900',
-            'border-surface-300 dark:border-surface-700'
+            'text-dark-950',
+            'bg-white',
+            'border-gray-300'
         ]
     },
     filtercontainer: {
@@ -206,7 +206,7 @@ export default {
     filterinput: {
         class: [
             // Font
-            'leading-[normal]',
+            'text-sm',
 
             // Sizing
             'py-2 pl-3 pr-7',
@@ -214,9 +214,9 @@ export default {
             'w-full',
 
             //Color
-            'text-surface-700 dark:text-white/80',
-            'bg-surface-0 dark:bg-surface-950',
-            'border-surface-200 dark:border-surface-700',
+            'text-gray-950',
+            'bg-white',
+            'border-gray-400',
 
             // Shape
             'border',
@@ -228,8 +228,8 @@ export default {
             'duration-200',
 
             // States
-            'hover:border-surface-400 dark:hover:border-surface-600',
-            'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 focus:z-10',
+            'hover:border-primary-500',
+            'focus:outline-none focus:border-primary-500',
 
             // Misc
             'appearance-none'

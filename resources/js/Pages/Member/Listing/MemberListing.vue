@@ -2,15 +2,11 @@
 import {onMounted, ref, watchEffect} from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import AddMember from "@/Pages/Member/Listing/Partials/AddMember.vue";
-import { SearchIcon, Sliders02Icon, DownloadCloud01Icon } from '@/Components/Icons/outline';
 import { MemberIcon, AgentIcon, UserIcon, } from '@/Components/Icons/solid';
 import InputText from 'primevue/inputtext';
-import IconField from 'primevue/iconfield';
 import RadioButton from 'primevue/radiobutton';
 import Button from '@/Components/Button.vue';
-import Badge from "@/Components/Badge.vue";
-import { useForm } from '@inertiajs/vue3';
-// import MemberListingTable from "./Partials/MemberListingTable.vue";
+import {useForm, usePage} from '@inertiajs/vue3';
 import OverlayPanel from 'primevue/overlaypanel';
 import Dialog from 'primevue/dialog';
 import DataTable from "primevue/datatable";
@@ -87,10 +83,10 @@ watchEffect(() => {
 onMounted(() => {
     getResults();
 })
-const getResults = async (langVal) => {
+const getResults = async () => {
     try {
-        const response = await axios.get('/getData');
-        customers.value = response.data.users;
+        const response = await axios.get('/member/getMemberListingData');
+        users.value = response.data.users;
     } catch (error) {
         console.error('Error changing locale:', error);
     }
@@ -101,7 +97,7 @@ const exportCSV = () => {
     dt.value.exportCSV();
 };
 
-const customers = ref();
+const users = ref();
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -110,6 +106,12 @@ const filters = ref({
     representative: { value: null, matchMode: FilterMatchMode.IN },
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
     verified: { value: null, matchMode: FilterMatchMode.EQUALS }
+});
+
+watchEffect(() => {
+    if (usePage().props.toast !== null) {
+        getResults();
+    }
 });
 </script>
 
@@ -140,13 +142,9 @@ const filters = ref({
                     </div>
                 </div>
              </div>
-            <!-- below md add member button -->
-            <div class="md:hidden">
-                <AddMember />
-            </div>
 
             <!-- above md add member button -->
-            <div class="hidden md:flex flex-col items-end gap-2.5 max-w-[1440px] self-stretch">
+            <div class="w-full md:w-auto md:flex flex-col items-end gap-2.5 max-w-[1440px] self-stretch">
                 <AddMember />
             </div>
             <!-- above md data overview -->
@@ -176,7 +174,7 @@ const filters = ref({
             <div class="p-6 flex flex-col items-center justify-center self-stretch gap-6 border border-gray-200 bg-white shadow-table rounded-2xl">
                 <DataTable
                     v-model:filters="filters"
-                    :value="customers"
+                    :value="users"
                     paginator
                     removableSort
                     :rows="10"
@@ -199,11 +197,11 @@ const filters = ref({
                             </div>
                         </div>
                     </template>
-                    <template #empty> No customers found. </template>
-                    <template #loading> Loading customers data. Please wait. </template>
-                    <Column field="id" sortable header="Id" style="width: 25%">
+                    <template #empty> No users found. </template>
+                    <template #loading> Loading users data. Please wait. </template>
+                    <Column field="id_number" sortable header="Id" style="width: 25%">
                         <template #body="slotProps">
-                            MID00000{{ slotProps.data.id }}
+                            {{ slotProps.data.id_number }}
                         </template>
                     </Column>
                     <Column field="first_name" sortable header="Name" style="width: 25%">
@@ -214,7 +212,7 @@ const filters = ref({
                                 </div>
                                 <div class="flex flex-col items-start">
                                     <div class="font-medium">
-                                        {{ slotProps.data.first_name }}
+                                        {{ slotProps.data.name }}
                                     </div>
                                     <div class="text-gray-500 text-xs">
                                         {{ slotProps.data.email }}

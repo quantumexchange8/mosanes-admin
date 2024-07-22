@@ -2,7 +2,7 @@ export default {
     root: ({ props, context, parent }) => ({
         class: [
             // Font
-            'leading-none caret-primary-500 text-sm',
+            'caret-primary-500 text-sm',
 
             // Flex
             { 'flex-1 w-[1%]': parent.instance.$name == 'InputGroup' },

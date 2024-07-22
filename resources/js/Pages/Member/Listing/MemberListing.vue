@@ -142,13 +142,9 @@ watchEffect(() => {
                     </div>
                 </div>
              </div>
-            <!-- below md add member button -->
-<!--            <div class="md:hidden">-->
-<!--                <AddMember />-->
-<!--            </div>-->
 
             <!-- above md add member button -->
-            <div class="hidden md:flex flex-col items-end gap-2.5 max-w-[1440px] self-stretch">
+            <div class="w-full md:w-auto md:flex flex-col items-end gap-2.5 max-w-[1440px] self-stretch">
                 <AddMember />
             </div>
             <!-- above md data overview -->

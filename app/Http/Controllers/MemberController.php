@@ -20,15 +20,21 @@ class MemberController extends Controller
 
     public function getMemberListingData()
     {
-        $users = User::latest()
-            ->get();
+        $query = User::whereNot('role', 'super-admin')
+            ->latest();
+
+        $total_members = clone $query;
+        $total_agents = clone $query;
 
         return response()->json([
-            'users' => $users
+            'users' => $query->get(),
+            'total_members' => $total_members->where('role', 'member')->count(),
+            'total_agents' => $total_agents->where('role', 'agent')->count(),
+            'total_users' => $query->count(),
         ]);
     }
 
-    public function addNewMember(AddMemberRequest $request)
+    public function addNewMember(Request $request)
     {
         $upline_id = $request->upline['value'];
         $upline = User::find($upline_id);
@@ -54,13 +60,13 @@ class MemberController extends Controller
             'nationality' => $country->nationality,
             'hierarchyList' => $hierarchyList,
             'password' => Hash::make($request->password),
-            'role' => 'user',
+            'role' => $upline_id == 1 ? 'agent' : 'member',
             'kyc_approval' => 'verified',
         ]);
 
         $user->setReferralId();
 
-        $id_no = 'MID' . Str::padLeft($user->id, 5, "0");
+        $id_no = ($user->role == 'agent' ? 'AID' : 'MID') . Str::padLeft($user->id, 5, "0");
         $user->id_number = $id_no;
         $user->save();
 
@@ -91,18 +97,25 @@ class MemberController extends Controller
 
     public function loadUplines()
     {
-        $users = User::where('role', 'super-admin')
+        $users = User::whereIn('role', ['member', 'agent'])
             ->select('id', 'name')
-            ->get()
-            ->map(function ($user) {
-                return [
-                    'value' => $user->id,
-                    'name' => $user->name,
-                    'profile_photo' => $user->getFirstMediaUrl('profile_photo')
-                ];
-            });
+            ->get();
 
-        return response()->json($users);
+        if ($users->isEmpty()) {
+            $users = User::where('id', 1)
+                ->select('id', 'name')
+                ->get();
+        }
+
+        $formattedUsers = $users->map(function ($user) {
+            return [
+                'value' => $user->id,
+                'name' => $user->name,
+                'profile_photo' => $user->getFirstMediaUrl('profile_photo')
+            ];
+        });
+
+        return response()->json($formattedUsers);
     }
 
     public function updateContactInfo(Request $request)
@@ -154,5 +167,8 @@ class MemberController extends Controller
 
     }
 
-
+    public function uploadKyc(Request $request)
+    {
+        dd($request->all());
+    }
 }

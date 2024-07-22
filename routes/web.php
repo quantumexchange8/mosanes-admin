@@ -29,6 +29,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/loadUplines', [MemberController::class, 'loadUplines'])->name('member.loadUplines');
         Route::post('/addNewMember', [MemberController::class, 'addNewMember'])->name('member.addNewMember');
 
+        Route::post('/uploadKyc', [MemberController::class, 'uploadKyc'])->name('member.uploadKyc');
+
         // details
         Route::get('/detail', [MemberController::class, 'detail'])->name('member.detail');
         Route::post('/updateContactInfo', [MemberController::class, 'updateContactInfo'])->name('member.updateContactInfo');

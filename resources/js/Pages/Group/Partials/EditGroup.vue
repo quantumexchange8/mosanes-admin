@@ -1,12 +1,13 @@
 <script setup>
 import Button from "@/Components/Button.vue";
-import {ref} from "vue";
+import {onMounted, ref} from "vue";
 import InputText from 'primevue/inputtext';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import { useForm } from "@inertiajs/vue3";
 import ColorPicker from 'primevue/colorpicker';
 import Dropdown from 'primevue/dropdown';
+import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 
 const props = defineProps({
     group: Object,
@@ -14,17 +15,29 @@ const props = defineProps({
 
 const emit = defineEmits(['closeDialog']);
 
-const name = ref(props.group.groupName);
-const chargesPercent = ref(props.group.groupChargesPercent);
-const colour = ref(props.group.groupColour);
-const agentId = ref('LDN');
-const memberCount = ref(props.group.groupMemberCount);
+const name = ref(props.group.name);
+const chargesPercent = ref(props.group.fee_charges);
+const colour = ref(props.group.color);
+const memberCount = ref(props.group.member_count);
+const agents = ref();
+const getAgents = async () => {
+    try {
+        const agentResponse = await axios.get('/group/loadAgents');
+        agents.value = agentResponse.data;
+    } catch (error) {
+        console.error('Error fetching agents:', error);
+    }
+};
+
+onMounted(() => {
+    getAgents();
+})
 
 const form = useForm({
     group_name: '',
     fee_charges: '',
     colour: '',
-    agent_id: '',
+    agent: '',
     group_members: null,
 })
 
@@ -32,7 +45,7 @@ const submitForm = () => {
     form.group_name = name.value;
     form.fee_charges = chargesPercent.value;
     form.colour = colour.value;
-    form.agent_id = agentId.value;
+    form.agent = agentId.value;
     form.group_members = memberCount.value;
 
     form.put(route('group.edit'), {
@@ -47,13 +60,6 @@ const submitForm = () => {
     })
 }
 
-const cities = ref([
-    { name: 'New York', code: 'NY' },
-    { name: 'Rome', code: 'RM' },
-    { name: 'London', code: 'LDN' },
-    { name: 'Istanbul', code: 'IST' },
-    { name: 'Paris', code: 'PRS' },
-]);
 </script>
 
 <template>
@@ -103,17 +109,52 @@ const cities = ref([
                 </div>
                 <div class="flex flex-col items-start gap-3 self-stretch md:flex-row md:justify-center md:content-start md:gap-5 md:flex-wrap">
                     <div class="flex flex-col items-start gap-1 self-stretch md:flex-1">
-                        <InputLabel for="agent_id" value="Agent" :invalid="!!form.errors.agent_id" />
+                        <InputLabel for="agent" value="Agent" :invalid="!!form.errors.agent" />
                         <Dropdown
-                            id="agent_id"
-                            v-model="agentId"
-                            :options="cities"
-                            optionLabel="name"
-                            optionValue="code"
-                            placeholder="Select agent"
-                            class="w-full"
-                        />
-                        <InputError :message="form.errors.agent_id" />
+                                id="agent"
+                                v-model="form.agent"
+                                :options="agents"
+                                filter
+                                :filterFields="['name', 'phone_code']"
+                                optionLabel="name"
+                                placeholder="Select agent"
+                                class="w-full"
+                                scroll-height="236px"
+                                :invalid="!!form.errors.agent"
+                            >
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value" class="flex items-center gap-3">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-5 h-5 rounded-full overflow-hidden">
+                                                <template v-if="slotProps.value.profile_photo">
+                                                    <img :src="slotProps.value.profile_photo" alt="profile_picture" />
+                                                </template>
+                                                <template v-else>
+                                                    <DefaultProfilePhoto />
+                                                </template>
+                                            </div>
+                                            <div>{{ slotProps.value.name }}</div>
+                                        </div>
+                                    </div>
+                                    <span v-else class="text-gray-400">
+                                            {{ slotProps.placeholder }}
+                                    </span>
+                                </template>
+                                <template #option="slotProps">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-5 h-5 rounded-full overflow-hidden">
+                                            <template v-if="slotProps.option.profile_photo">
+                                                <img :src="slotProps.option.profile_photo" alt="profile_picture" />
+                                            </template>
+                                            <template v-else>
+                                                <DefaultProfilePhoto />
+                                            </template>
+                                        </div>
+                                        <div>{{ slotProps.option.name }}</div>
+                                    </div>
+                                </template>
+                            </Dropdown>
+                        <InputError :message="form.errors.agent" />
                     </div>
                     <div class="flex flex-col items-start gap-1 self-stretch md:flex-1">
                         <InputLabel for="groupMembers" value="Total Group Members" :invalid="!!form.errors.group_members" />

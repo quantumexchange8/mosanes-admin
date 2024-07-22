@@ -7,7 +7,8 @@ import EditGroup from '@/Pages/Group/Partials/EditGroup.vue';
 import DropdownOverlay from '@/Components/Dropdown.vue';
 import { useConfirm } from "primevue/useconfirm";
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
-import { router } from '@inertiajs/vue3'
+import { router } from '@inertiajs/vue3';
+import GroupTransactions from '@/Pages/Group/Partials/GroupTransactions.vue';
 
 const props = defineProps({
     group: Object,
@@ -105,7 +106,7 @@ const requireConfirmation = (name) => {
         </template>
 
         <template v-if="dialogTitle === 'view_group_transactions'">
-            test
+            <GroupTransactions />
         </template>
     </Dialog>
 

@@ -57,4 +57,19 @@ class User extends Authenticatable implements HasMedia
         $this->referral_code = $randomString;
         $this->save();
     }
+
+    public function getChildrenIds(): array
+    {
+        return User::query()->where('hierarchyList', 'like', '%-' . $this->id . '-%')
+            ->pluck('id')
+            ->toArray();
+    }
+
+    public function assignedGroup($group_id): void
+    {
+        GroupHasUser::updateOrCreate(
+            ['user_id' => $this->id],
+            ['group_id' => $group_id]
+        );
+    }
 }

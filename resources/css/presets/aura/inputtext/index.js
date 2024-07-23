@@ -34,7 +34,7 @@ export default {
             // States
             {
                 'hover:border-gray-500': !context.disabled && !props.invalid,
-                'focus:outline-none focus:border-primary-500': !context.disabled,
+                'focus:outline-none focus:ring-0 focus:border-primary-500': !context.disabled,
                 'bg-gray-50 text-gray-300 placeholder:text-gray-300 select-none pointer-events-none cursor-default': context.disabled
             },
 

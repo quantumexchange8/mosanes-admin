@@ -37,7 +37,7 @@ return new class extends Migration
             $table->text('kyc_approval_description')->nullable();
             $table->string('gender')->nullable();
             $table->integer('ct_user_id')->nullable();
-            $table->string('role')->default('user');
+            $table->string('role')->default('member');
             $table->string('status')->default('active');
             $table->string('remarks')->nullable();
             $table->rememberToken();

@@ -9,6 +9,8 @@ import { useForm } from '@inertiajs/vue3';
 import Dropdown from "primevue/dropdown";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import Password from 'primevue/password';
+import FileUpload from 'primevue/fileupload';
+import ProgressBar from 'primevue/progressbar';
 
 const visible = ref(false)
 
@@ -19,6 +21,7 @@ const form = useForm({
     phone: '',
     phone_number: '',
     upline: '',
+    kyc_verification: '',
     password: '',
     password_confirmation: '',
 });
@@ -53,7 +56,7 @@ const getResults = async () => {
     }
 };
 
-getResults()
+getResults();
 </script>
 
 <template>
@@ -86,7 +89,7 @@ getResults()
                             <InputLabel for="name" value="Full Name" />
                             <InputText
                                 id="name"
-                                type="name"
+                                type="text"
                                 class="block w-full"
                                 v-model="form.name"
                                 placeholder="Name as per NRIC or passport"
@@ -204,13 +207,28 @@ getResults()
                     </div>
                     <div class="flex flex-col gap-3 items-start self-stretch">
                         <span class="text-xs text-gray-500">Maximum file size is 10 MB. Supported file types are .jpg and .png.</span>
-                        <Button
-                            type="button"
-                            variant="primary-tonal"
-                            size="base"
+                        <FileUpload
+                            class="w-full"
+                            name="kyc_verification"
+                            url="/member/uploadKyc"
+                            accept="image/*"
+                            :maxFileSize="10485760"
+                            auto
                         >
-                            Browse
-                        </Button>
+                            <template #header="{ chooseCallback }">
+                                <div class="flex flex-wrap justify-between items-center flex-1 gap-2">
+                                    <div class="flex gap-2">
+                                        <Button
+                                            type="button"
+                                            variant="primary-tonal"
+                                            @click="chooseCallback()"
+                                        >
+                                            Browse
+                                        </Button>
+                                    </div>
+                                </div>
+                            </template>
+                        </FileUpload>
                     </div>
                 </div>
 

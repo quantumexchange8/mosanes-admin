@@ -1,4 +1,7 @@
 export default {
+    root: {
+      class: 'w-full'
+    },
     input: {
         class: 'hidden'
     },
@@ -9,21 +12,8 @@ export default {
             'flex-wrap',
 
             // Colors
-            'bg-surface-0',
-            'dark:bg-surface-900',
-            'text-surface-700',
-            'dark:text-white/80',
-
-            // Spacing
-            'p-[1.125rem]',
-            'gap-2',
-
-            // Borders
-            'border',
-            'border-solid',
-            'border-surface-200',
-            'dark:border-surface-700',
-            'border-b-0',
+            'bg-white',
+            'text-gray-500',
 
             // Shape
             'rounded-tr-lg',
@@ -80,25 +70,19 @@ export default {
     },
     content: {
         class: [
+            // Font
+            'text-sm',
+
             // Position
             'relative',
 
             // Colors
-            'bg-surface-0',
-            'dark:bg-surface-900',
-            'text-surface-700',
-            'dark:text-white/80',
-
-            // Spacing
-            'p-[1.125rem]',
-
-            // Borders
-            'border border-t-0',
-            'border-surface-200',
-            'dark:border-surface-700',
+            'bg-white',
+            'text-gray-950',
 
             // Shape
-            'rounded-b-lg'
+            'rounded-b-lg',
+            'w-full'
         ]
     },
     file: {
@@ -106,34 +90,43 @@ export default {
             // Flexbox
             'flex',
             'items-center',
-            'flex-wrap',
+            'gap-3',
 
             // Spacing
-            'p-4',
-            'mb-2',
+            'px-4 py-3',
+            'my-2',
             'last:mb-0',
 
-            // Borders
-            'border',
-            'border-surface-200',
-            'dark:border-surface-700',
-            'gap-2',
+            // Color
+            'bg-gray-50',
 
             // Shape
-            'rounded'
-        ]
+            'rounded-xl',
+            'w-full'
+        ],
     },
     thumbnail: {
         class: 'shrink-0'
     },
     fileName: {
-        class: 'mb-2 break-all'
+        class: 'break-all'
     },
     fileSize: {
-        class: 'mr-2'
+        class: 'text-xs text-gray-400 mr-2'
     },
     uploadicon: {
         class: 'mr-2'
+    },
+    details: {
+        class: 'w-full'
+    },
+    badge: {
+        root: {
+            class: 'hidden'
+        }
+    },
+    actions: {
+        class: 'flex justify-end w-full'
     },
     progressbar: {
         root: {
@@ -149,7 +142,7 @@ export default {
                 'w-full',
 
                 // Colors
-                'bg-surface-100 dark:bg-surface-700'
+                'bg-gray-100'
             ]
         },
         value: {
@@ -158,7 +151,7 @@ export default {
                 'absolute flex items-center justify-center overflow-hidden',
 
                 // Colors
-                'bg-primary',
+                'bg-primary-500',
 
                 // Spacing & Sizing
                 'm-0',
@@ -169,6 +162,37 @@ export default {
 
                 // Transitions
                 'transition-width duration-1000 ease-in-out'
+            ]
+        }
+    },
+    removebutton: {
+        root: {
+            class: 'flex items-center text-gray-500 hover:text-error-500 w-5 h-5 grow-0 shrink-0 rounded-full'
+        }
+    },
+    message: {
+        root: {
+            class: [
+                // Color
+                'bg-white',
+
+                //Size
+            ]
+        },
+        wrapper: {
+            class: 'mt-2 px-0'
+        },
+        icon: {
+            class: 'hidden'
+        },
+        closebutton: {
+            class: 'hidden'
+        },
+        text: {
+            class: [
+                // Font
+                'text-xs',
+                'text-error-500'
             ]
         }
     }

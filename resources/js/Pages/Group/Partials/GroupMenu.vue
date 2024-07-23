@@ -24,17 +24,17 @@ const openDialog = (title) => {
 }
 
 const confirm = useConfirm();
-const requireConfirmation = (name) => {
+const requireConfirmation = (id) => {
     console.log(confirm)
     confirm.require({
         group: 'headless',
-        header: 'Are you sure?'+name,
+        header: 'Are you sure?',
         message: 'Are you sure you want to delete this member? \n' +
             'This action cannot be undone.',
         acceptButton: 'Yes, delete it',
         accept: () => {
             // route or function
-            router.visit(route('group.delete', 1), {method: 'delete'})
+            router.visit(route('group.delete', id), {method: 'delete'})
         },
     });
 };
@@ -80,7 +80,7 @@ const requireConfirmation = (name) => {
 
                 <div 
                     class="p-3 flex items-center gap-3 self-stretch hover:bg-gray-100 hover:cursor-pointer"
-                    @click="requireConfirmation(group.groupName)"
+                    @click="requireConfirmation(group.id)"
                 >
                     <IconTrash size="20" stroke-width="1.25" color="#F04438" />
                     <div class="text-error-500 text-sm font-medium">

@@ -47,7 +47,7 @@ class GroupController extends Controller
     {
         $has_group = GroupHasUser::pluck('user_id');
 
-        $users = User::where('role', 'member')
+        $users = User::where('role', 'agent')
             ->whereNotIn('id', $has_group)
             ->select('id', 'name')
             ->get()
@@ -74,13 +74,16 @@ class GroupController extends Controller
             'edited_by' => Auth::id(),
         ]);
 
+        $group_id = $group->id;
         GroupHasUser::create([
-            'group_id' => $group->id,
+            'group_id' => $group_id,
             'user_id' => $agent_id
         ]);
 
         $children_ids = User::find($agent_id)->getChildrenIds();
-        //loop ids to assign group
+        User::whereIn('id', $children_ids)->chunk(500, function($users) use ($group_id) {
+            $users->each->assignedGroup($group_id);
+        });
 
         return back()->with('toast', [
             'title' => "You've successfully created a new group!",
@@ -98,8 +101,12 @@ class GroupController extends Controller
         ]);
     }
 
-    public function deleteGroup(Request $request)
+    public function deleteGroup($id)
     {
+        Group::destroy($id);
+
+        GroupHasUser::where('group_id', $id)->delete();
+
         return back()->with('toast', [
             'title' => "Group has been deleted!",
             'type' => 'success',

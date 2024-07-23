@@ -15,16 +15,17 @@ import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import {FilterMatchMode} from "primevue/api";
 import Loader from "@/Components/Loader.vue";
 import Dropdown from "primevue/dropdown";
-import IconField from 'primevue/iconfield';
 import {IconSearch, IconCircleXFilled, IconAdjustments} from '@tabler/icons-vue';
 import Badge from '@/Components/Badge.vue';
+import Vue3Autocounter from 'vue3-autocounter';
 
-const total_members = ref();
-const total_agents = ref();
-const total_users = ref();
+const total_members = ref(999);
+const total_agents = ref(999);
+const total_users = ref(999);
 const loading = ref(false);
 const dt = ref();
 const users = ref();
+const counterDuration = ref(10);
 
 onMounted(() => {
     getResults();
@@ -58,6 +59,8 @@ const getResults = async () => {
         total_members.value = users.value.filter(user => user.role === 'member').length;
         total_agents.value = users.value.filter(user => user.role === 'agent').length;
         total_users.value = users.value.length;
+
+        counterDuration.value = 1;
     } catch (error) {
         console.error('Error changing locale:', error);
     } finally {
@@ -185,7 +188,9 @@ const rgbaColor = (hex, opacity) => {
                 >
                     <component :is="item.icon" class="w-12 h-12 grow-0 shrink-0" />
                     <div class="flex flex-col items-start gap-1 w-full">
-                        <span class="text-gray-950 text-lg md:text-2xl font-semibold">{{ item.total }}</span>
+                        <div class="text-gray-950 text-lg md:text-2xl font-semibold">
+                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="item.total" :duration="counterDuration" separator="," decimalSeparator="." :autoinit="true" />
+                        </div>
                         <span class="text-gray-500 text-xs md:text-sm">{{ item.label }}</span>
                     </div>
                 </div>
@@ -208,25 +213,26 @@ const rgbaColor = (hex, opacity) => {
                     :loading="loading"
                 >
                     <template #header>
-                        <div class="flex justify-between items-center self-stretch">
-                            <div class="flex gap-3 items-center self-stretch">
-                                <div class="relative">
-                                    <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
-                                        <IconSearch size="20" stroke-width="1.25" />
-                                    </div>
-                                    <InputText v-model="filters['global'].value" placeholder="Keyword Search" class="font-normal w-60 pl-12" />
-                                    <div
-                                        v-if="filters['global'].value !== null"
-                                        class="absolute top-2/4 -mt-2 right-4 text-gray-300 hover:text-gray-400 select-none cursor-pointer"
-                                        @click="clearFilterGlobal"
-                                    >
-                                        <IconCircleXFilled size="16" />
-                                    </div>
+                        <div class="flex flex-col md:flex-row gap-3 items-center self-stretch">
+                            <div class="relative w-full md:w-60">
+                                <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
+                                    <IconSearch size="20" stroke-width="1.25" />
                                 </div>
+                                <InputText v-model="filters['global'].value" placeholder="Keyword Search" class="font-normal pl-12 w-full md:w-60" />
+                                <div
+                                    v-if="filters['global'].value !== null"
+                                    class="absolute top-2/4 -mt-2 right-4 text-gray-300 hover:text-gray-400 select-none cursor-pointer"
+                                    @click="clearFilterGlobal"
+                                >
+                                    <IconCircleXFilled size="16" />
+                                </div>
+                            </div>
+                            <div class="grid grid-cols-2 w-full gap-3">
                                 <Button
                                     variant="gray-outlined"
                                     @click="toggle"
-                                    class="flex gap-3 items-center justify-center py-3 px-4"
+                                    size="sm"
+                                    class="flex gap-3 items-center justify-center py-3 w-full md:w-[130px]"
                                 >
                                     <IconAdjustments size="20" color="#0C111D" stroke-width="1.25" />
                                     <div class="text-sm text-gray-950 font-medium">
@@ -236,12 +242,17 @@ const rgbaColor = (hex, opacity) => {
                                         {{ filterCount }}
                                     </Badge>
                                 </Button>
+                                <div class="w-full flex justify-end">
+                                    <Button
+                                        variant="primary-outlined"
+                                        @click="exportCSV($event)"
+                                        class="w-full md:w-auto"
+                                    >
+                                        Export
+                                    </Button>
+                                </div>
                             </div>
-                            <div>
-                                <Button variant="primary-outlined" @click="exportCSV($event)">
-                                    Export
-                                </Button>
-                            </div>
+
                         </div>
                     </template>
                     <template #empty> No users found. </template>

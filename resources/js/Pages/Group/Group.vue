@@ -109,7 +109,7 @@ const date = ref('');
                         selectionMode="range"
                         :manualInput="false"
                         dateFormat="dd/mm/yy"
-                        class="w-full md:w-auto"
+                        class="w-full md:w-[272px]"
                     />
                     <NewGroup />
                 </div>

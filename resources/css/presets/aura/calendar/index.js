@@ -13,28 +13,27 @@ export default {
             'flex flex-auto',
 
             // Font
-            'leading-none',
+            'text-sm',
 
             // Colors
-            'text-surface-600 dark:text-surface-200',
-            'placeholder:text-surface-400 dark:placeholder:text-surface-500',
-            { 'bg-surface-0 dark:bg-surface-950': !props.disabled },
+            'text-gray-950',
+            'placeholder:text-gray-400',
+            { 'bg-white': !props.disabled },
             'border',
-            { 'border-surface-300 dark:border-surface-600': !props.invalid },
+            { 'border-gray-300': !props.invalid },
 
             // Invalid State
-            'invalid:focus:ring-red-200',
-            'invalid:hover:border-red-500',
-            { 'border-red-500 dark:border-red-400': props.invalid },
+            { 'border-error-500': props.invalid },
 
             // Spacing
-            'm-0 py-2 px-3',
+            'm-0 py-3 px-4',
 
             // Shape
             'appearance-none',
-            { 'rounded-md': !props.showIcon || props.iconDisplay == 'input' },
-            { 'rounded-l-md  flex-1 pr-9': props.showIcon && props.iconDisplay !== 'input' },
-            { 'rounded-md flex-1 pr-9': props.showIcon && props.iconDisplay === 'input' },
+            { 'rounded-lg': !props.showIcon || props.iconDisplay == 'input' },
+            { 'rounded-l-lg  flex-1 pr-9': props.showIcon && props.iconDisplay !== 'input' },
+            { 'rounded-lg flex-1 pr-9': props.showIcon && props.iconDisplay === 'input' },
+            'shadow-input',
 
             // Transitions
             'transition-colors',
@@ -42,9 +41,9 @@ export default {
 
             // States
             {
-                'hover:border-surface-400 dark:hover:border-surface-600': !props.disabled && !props.invalid,
-                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400 focus:z-10': !props.disabled,
-                'bg-surface-200 dark:bg-surface-700 select-none pointer-events-none cursor-default': props.disabled
+                'hover:border-gray-500': !props.disabled && !props.invalid,
+                'focus:outline-none focus:ring-0 focus:border-primary-500 focus:z-10': !props.disabled,
+                'bg-gray-50 text-gray-300 placeholder:text-gray-300 select-none pointer-events-none cursor-default': props.disabled
             },
 
             // Filled State *for FloatLabel
@@ -91,19 +90,19 @@ export default {
             },
 
             // Size
-            { 'w-auto p-3 ': !props.inline },
+            { 'w-auto p-5 ': !props.inline },
             { 'min-w-[80vw] w-auto p-3 ': props.touchUI },
             { 'p-3 min-w-full': props.inline },
 
             // Shape
             'border rounded-lg',
             {
-                'shadow-md': !props.inline
+                'shadow-dialog': !props.inline
             },
 
             // Colors
-            'bg-surface-0 dark:bg-surface-900',
-            'border-surface-200 dark:border-surface-700',
+            'bg-white',
+            'border-gray-200',
 
             //misc
             { 'overflow-x-auto': props.inline }
@@ -126,12 +125,12 @@ export default {
 
             // Shape
             'border-b',
-            'rounded-t-md',
+            'rounded-t-lg',
 
             // Colors
-            'text-surface-700 dark:text-white/80',
-            'bg-surface-0 dark:bg-surface-900',
-            'border-surface-200 dark:border-surface-700'
+            'text-gray-500',
+            'bg-white',
+            'border-gray-200'
         ]
     },
     previousbutton: {
@@ -149,7 +148,7 @@ export default {
             'rounded-full',
 
             // Colors
-            'text-surface-600 dark:text-white/70',
+            'text-gray-500',
             'border-0',
             'bg-transparent',
 
@@ -182,7 +181,7 @@ export default {
             'rounded-md',
 
             // Colors
-            'text-surface-700 dark:text-white/80',
+            'text-gray-950',
 
             // Transitions
             'transition duration-200',
@@ -209,7 +208,7 @@ export default {
             'rounded-md',
 
             // Colors
-            'text-surface-700 dark:text-white/80',
+            'text-gray-950',
 
             // Transitions
             'transition duration-200',
@@ -241,7 +240,7 @@ export default {
             'rounded-full',
 
             // Colors
-            'text-surface-600 dark:text-white/70',
+            'text-gray-500',
             'border-0',
             'bg-transparent',
 
@@ -260,7 +259,7 @@ export default {
     table: {
         class: [
             // Font
-            'text-base leading-[normal]',
+            'text-sm',
             // Size & Shape
             'border-collapse',
             'w-full',
@@ -277,7 +276,7 @@ export default {
         ]
     },
     weekheader: {
-        class: ['leading-5', 'text-surface-600 dark:text-white/70', 'opacity-60 cursor-default']
+        class: ['leading-5', 'text-gray-500', 'opacity-60 cursor-default']
     },
     weeknumber: {
         class: ['text-surface-600 dark:text-white/70', 'opacity-60 cursor-default']
@@ -285,7 +284,7 @@ export default {
     weekday: {
         class: [
             // Colors
-            'text-surface-500 dark:text-white/60',
+            'text-gray-500',
             'p-1'
         ]
     },
@@ -339,9 +338,9 @@ export default {
 
             // Colors
             {
-                'bg-surface-100 dark:bg-surface-800 text-surface-600 dark:text-white/70': context.date.today && !context.selected && !context.disabled,
-                'bg-transparent text-surface-600 dark:text-white/70': !context.selected && !context.disabled && !context.date.today,
-                'text-primary-highlight-inverse bg-primary-highlight': context.selected && !context.disabled
+                'bg-gray-200 text-gray-950': context.date.today && !context.selected && !context.disabled,
+                'bg-transparent text-gray-950': !context.selected && !context.disabled && !context.date.today,
+                'text-primary-500 bg-primary-50': context.selected && !context.disabled
             },
 
             // States
@@ -350,7 +349,7 @@ export default {
                 'hover:bg-surface-50 dark:hover:bg-surface-500/10': !context.selected && !context.disabled
             },
             {
-                'opacity-60 cursor-default': context.disabled,
+                'text-gray-400 cursor-default': context.disabled,
                 'cursor-pointer': !context.disabled
             }
         ]

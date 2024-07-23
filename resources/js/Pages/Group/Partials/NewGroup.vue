@@ -1,7 +1,7 @@
 <script setup>
 import Button from "@/Components/Button.vue";
 import Dialog from 'primevue/dialog';
-import {onMounted, ref} from "vue";
+import {onUpdated, ref} from "vue";
 import { IconPlus } from '@tabler/icons-vue';
 import InputText from 'primevue/inputtext';
 import InputError from '@/Components/InputError.vue';
@@ -23,7 +23,7 @@ const getAgents = async () => {
     }
 };
 
-onMounted(() => {
+onUpdated(() => {
     getAgents();
 })
 

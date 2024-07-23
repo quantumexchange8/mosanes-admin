@@ -8,9 +8,22 @@ import { DepositIcon, WithdrawalIcon, RebateIcon } from '@/Components/Icons/soli
 import Badge from '@/Components/Badge.vue';
 import Vue3Autocounter from 'vue3-autocounter';
 import { ref } from 'vue';
+import { usePage } from '@inertiajs/vue3';
+
+const page = usePage();
 
 const { formatAmount } = transactionFormat();
 
+const counterDuration = ref(10);
+const balance = ref(9879879.61)
+const equity = ref(945789.39)
+const pendingWithdrawal = ref(16976.96)
+const netAsset = ref(768709.42)
+const totalDeposit = ref(1802283.9)
+const totalWithdrawal = ref(937270.2)
+const totalRebate = ref(96304.28);
+
+const pendingWithdrawalCount = ref(6)
 const counterEquity = ref(null);
 const counterBalance = ref(null);
 
@@ -29,7 +42,7 @@ const updateBalEquity = () => {
             >
                 <div class="w-3/4 md:w-full flex flex-col items-start gap-1">
                     <div class="self-stretch text-primary-900 text-base md:text-xxl font-bold">
-                        Welcome Back, Mosanes Admin!
+                        Welcome Back, {{ page.props.auth.user.name }}!
                     </div>
                     <div class="self-stretch text-primary-900 text-xs md:text-base">
                         Ready to grow your trading community? Let's get started!
@@ -65,7 +78,7 @@ const updateBalEquity = () => {
                                 Balance ($)
                             </div>
                             <div class="text-gray-950 text-lg md:text-xl font-semibold">
-                                <vue3-autocounter ref="counterBalance" :startAmount="0" :endAmount="100000" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                                <vue3-autocounter ref="counterBalance" :startAmount="0" :endAmount="balance" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
 
@@ -76,7 +89,7 @@ const updateBalEquity = () => {
                                 Equity ($)
                             </div>
                             <div class="text-gray-950 text-lg md:text-xl font-semibold">
-                                <vue3-autocounter ref="counterEquity" :startAmount="0" :endAmount="30000" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                                <vue3-autocounter ref="counterEquity" :startAmount="0" :endAmount="equity" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
                     </div>
@@ -99,12 +112,12 @@ const updateBalEquity = () => {
                     </div>
 
                     <div class="self-stretch text-gray-950 text-xl md:text-xxl font-semibold">
-                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="16976.96" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="pendingWithdrawal" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                     </div>
 
                     <div class="flex items-center gap-2">
                         <Badge class="text-white text-sm">
-                            6
+                            {{ pendingWithdrawalCount }}
                         </Badge>
                         <div class="text-gray-500 text-xs md:text-sm">
                             accounts request to withdraw
@@ -121,7 +134,7 @@ const updateBalEquity = () => {
                                 Net Asset ($)
                             </div>
                             <div class="text-gray-950 text-xl md:text-xxl font-semibold">
-                                <vue3-autocounter ref="counter" :startAmount="0" :endAmount="768709.42" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                                <vue3-autocounter ref="counter" :startAmount="0" :endAmount="netAsset" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
                         <Button
@@ -144,7 +157,7 @@ const updateBalEquity = () => {
                                     Total Deposit ($)
                                 </div>
                                 <div class="self-stretch text-gray-950 text-base md:text-lg font-semibold">
-                                    <vue3-autocounter ref="counter" :startAmount="0" :endAmount="1802283.9" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                                    <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalDeposit" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                                 </div>
                             </div>
                             <Button
@@ -164,7 +177,7 @@ const updateBalEquity = () => {
                                     Total Withdrawal ($)
                                 </div>
                                 <div class="self-stretch text-gray-950 text-base md:text-lg font-semibold">
-                                    <vue3-autocounter ref="counter" :startAmount="0" :endAmount="937270.2" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                                    <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalWithdrawal" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                                 </div>
                             </div>
                             <Button
@@ -184,7 +197,7 @@ const updateBalEquity = () => {
                                     Total Rebate Payout ($)
                                 </div>
                                 <div class="self-stretch text-gray-950 text-base md:text-lg font-semibold">
-                                    <vue3-autocounter ref="counter" :startAmount="0" :endAmount="96304.28" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                                    <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalRebate" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                                 </div>
                             </div>
                             <Button

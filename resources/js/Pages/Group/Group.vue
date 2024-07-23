@@ -11,13 +11,29 @@ import GroupMenu from '@/Pages/Group/Partials/GroupMenu.vue';
 import IllustrationEmpty from '@/Pages/Group/Partials/IllustrationEmpty.vue';
 import Vue3Autocounter from 'vue3-autocounter';
 
+const { formatAmount } = transactionFormat();
+
+const counterDuration = ref(10);
+const totalNetBalance = ref(9879879.61);
+const totalDeposit = ref(97697699.61);
+const totalWithdrawal = ref(987989.61);
+const totalFeeCharges = ref(945789.39);
 const groups = ref();
 const groupsLength = ref();
+const total = ref();
+
 const getGroups = async () => {
     try {
         const response = await axios.get('/group/getGroups');
         groups.value = response.data.groups;
         groupsLength.value = response.data.groups.length;
+
+        total.value = response.data.total;
+        totalNetBalance.value = total.value.total_net_balance;
+        totalDeposit.value = total.value.total_deposit;
+        totalWithdrawal.value = total.value.total_withdrawal;
+        totalFeeCharges.value = total.value.total_charges;
+        counterDuration.value = 1;
     } catch (error) {
         console.error('Error fetching group:', error);
     }
@@ -31,13 +47,6 @@ onUpdated(() => {
     getGroups();
 })
 
-const { formatAmount } = transactionFormat();
-
-const totalNetBalance = ref(60340);
-const totalDeposit = ref(319000);
-const totalWithdrawal = ref(236000);
-const totalFeeCharges = ref(22660);
-
 const date = ref('');
 </script>
 
@@ -50,14 +59,14 @@ const date = ref('');
                         Total Net Balance ($)
                     </div>
                     <div class="self-stretch text-gray-950 text-xxl font-semibold md:flex-1 md:text-right">
-                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalNetBalance" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalNetBalance" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                     </div>
                 </div>
 
                 <div class="w-full flex flex-col items-center gap-3 self-stretch md:flex-row md:gap-5">
                     <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch bg-green md:gap-3 md:flex-1">
                         <div class="self-stretch text-white text-lg font-semibold md:text-xl">
-                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalDeposit" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalDeposit" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                         </div>
                         <div class="flex items-center gap-2 self-stretch">
                             <IconWallet size="20" stroke-width="1.25" color="white" class="md:size-4 xl:size-5" />
@@ -69,7 +78,7 @@ const date = ref('');
 
                     <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch bg-pink md:gap-3 md:flex-1">
                         <div class="self-stretch text-white text-lg font-semibold md:text-xl">
-                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalWithdrawal" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalWithdrawal" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                         </div>
                         <div class="flex items-center gap-2 self-stretch">
                             <IconCreditCardPay size="20" stroke-width="1.25" color="white" class="md:size-4 xl:size-5" />
@@ -81,7 +90,7 @@ const date = ref('');
 
                     <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch bg-gray-500 md:gap-3 md:flex-1">
                         <div class="self-stretch text-white text-lg font-semibold md:text-xl">
-                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalFeeCharges" :duration="1" prefix="" suffix="" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalFeeCharges" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                         </div>
                         <div class="flex items-center gap-2 self-stretch">
                             <IconReceiptTax size="20" stroke-width="1.25" color="white" class="md:size-4 xl:size-5" />
@@ -127,7 +136,7 @@ const date = ref('');
                     >
                         <div
                             class="py-2 px-4 flex items-center gap-3 self-stretch"
-                            :style="{'backgroundColor': '#'+group.color}"
+                            :style="{'backgroundColor': `#${group.color}`}"
                         >
                             <div class="flex-1 text-white font-semibold">
                                 {{ group.name }}
@@ -176,7 +185,7 @@ const date = ref('');
                                         Deposit ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.groupDeposit) }}
+                                        {{ formatAmount(group.deposit) }}
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
@@ -184,7 +193,7 @@ const date = ref('');
                                         Withdrawal ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.groupWithdrawal) }}
+                                        {{ formatAmount(group.withdrawal) }}
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
@@ -192,7 +201,7 @@ const date = ref('');
                                         {{ group.fee_charges }}% Fee Charges ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.groupFeeCharges) }}
+                                        {{ formatAmount(group.charges) }}
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
@@ -200,7 +209,7 @@ const date = ref('');
                                         Net Balance ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.groupNetBalance) }}
+                                        {{ formatAmount(group.net_balance) }}
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
@@ -208,7 +217,7 @@ const date = ref('');
                                         Account Balance ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.groupAccountBalance) }}
+                                        {{ formatAmount(group.account_balance) }}
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
@@ -216,7 +225,7 @@ const date = ref('');
                                         Account Equity ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.groupAccountEquity) }}
+                                        {{ formatAmount(group.account_equity) }}
                                     </div>
                                 </div>
                             </div>

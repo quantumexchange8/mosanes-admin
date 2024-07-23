@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\EditGroupRequest;
 use App\Http\Requests\GroupRequest;
 use App\Models\Group;
 use App\Models\GroupHasUser;
@@ -35,11 +36,24 @@ class GroupController extends Controller
                     'leader_email' => $group->leader_email,
                     'profile_photo' => User::find($group->user_id)->getFirstMediaUrl('profile_photo'),
                     'member_count' => GroupHasUser::where('group_id', $group->id)->count(),
+                    'deposit' => 0,
+                    'withdrawal' => 0,
+                    'charges' => 0,
+                    'net_balance' => 0,
+                    'account_balance' => 0,
+                    'account_equity' => 0,
                 ];
             });
 
+        $total = [];
+        $total['total_net_balance'] = 60340;
+        $total['total_deposit'] = 36521;
+        $total['total_withdrawal'] = 12054;
+        $total['total_charges'] = 24467;
+
         return response()->json([
-            'groups' => $groups
+            'groups' => $groups,
+            'total' => $total,
         ]);
     }
 
@@ -64,7 +78,6 @@ class GroupController extends Controller
 
     public function createGroup(GroupRequest $request)
     {
-        // dd($request->all());
         $agent_id = $request->agent['value'];
         $group = Group::create([
             'name' => $request->group_name,
@@ -91,9 +104,15 @@ class GroupController extends Controller
         ]);
     }
 
-    public function editGroup(Request $request)
+    public function editGroup(EditGroupRequest $request, $id)
     {
-        // dd($request->all());
+        $group = Group::find($id);
+        $group->name = $request->group_name;
+        $group->fee_charges = $request->fee_charges;
+        $group->color = $request->color;
+        $group->agent = $request->agent['value'];
+        $group->edited_by = Auth::id();
+        $group->save();
 
         return back()->with('toast', [
             'title' => "You've successfully updated the group details!",

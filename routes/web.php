@@ -55,7 +55,7 @@ Route::middleware('auth')->group(function () {
 
         Route::post('/create_group', [GroupController::class, 'createGroup'])->name('group.create');
 
-        Route::put('/edit_group', [GroupController::class, 'editGroup'])->name('group.edit');
+        Route::patch('/edit_group/{id}', [GroupController::class, 'editGroup'])->name('group.edit');
 
         Route::delete('/delete_group/{id}', [GroupController::class, 'deleteGroup'])->name('group.delete');
     });

@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\belongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class GroupHasUser extends Model
@@ -13,4 +14,10 @@ class GroupHasUser extends Model
         'group_id',
         'user_id',
     ];
+
+    // Relations
+    public function group(): belongsTo
+    {
+        return $this->belongsTo(Group::class, 'group_id', 'id');
+    }
 }

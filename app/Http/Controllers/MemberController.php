@@ -6,6 +6,7 @@ use App\Http\Requests\AddMemberRequest;
 use App\Models\Country;
 use App\Models\User;
 use App\Models\Wallet;
+use App\Services\DropdownOptionService;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -20,17 +21,34 @@ class MemberController extends Controller
 
     public function getMemberListingData()
     {
-        $query = User::whereNot('role', 'super-admin')
+        $query = User::with(['groupHasUser'])
+            ->whereNot('role', 'super-admin')
             ->latest();
 
-        $total_members = clone $query;
-        $total_agents = clone $query;
-
         return response()->json([
-            'users' => $query->get(),
-            'total_members' => $total_members->where('role', 'member')->count(),
-            'total_agents' => $total_agents->where('role', 'agent')->count(),
-            'total_users' => $query->count(),
+            'users' => $query->get()->map(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'upline_id' => $user->upline_id,
+                    'role' => $user->role,
+                    'id_number' => $user->id_number,
+                    'group_id' => $user->groupHasUser->group_id ?? null,
+                    'group_name' => $user->groupHasUser->group->name ?? null,
+                    'group_color' => $user->groupHasUser->group->color ?? null,
+                    'status' => $user->status,
+                ];
+            }),
+        ]);
+    }
+
+    public function getFilterData()
+    {
+        return response()->json([
+            'countries' => (new DropdownOptionService())->getCountries(),
+            'uplines' => (new DropdownOptionService())->getUplines(),
+            'groups' => (new DropdownOptionService())->getGroups(),
         ]);
     }
 
@@ -47,6 +65,7 @@ class MemberController extends Controller
 
         $dial_code = $request->dial_code;
         $country = Country::find($dial_code['id']);
+        $default_agent_id = User::where('id_number', 'AID00000')->first()->id;
 
         $user = User::create([
             'name' => $request->name,
@@ -60,13 +79,13 @@ class MemberController extends Controller
             'nationality' => $country->nationality,
             'hierarchyList' => $hierarchyList,
             'password' => Hash::make($request->password),
-            'role' => $upline_id == 1 ? 'agent' : 'member',
+            'role' => $upline_id == $default_agent_id ? 'agent' : 'member',
             'kyc_approval' => 'verified',
         ]);
 
         $user->setReferralId();
 
-        $id_no = ($user->role == 'agent' ? 'AID' : 'MID') . Str::padLeft($user->id, 5, "0");
+        $id_no = ($user->role == 'agent' ? 'AID' : 'MID') . Str::padLeft($user->id - 2, 5, "0");
         $user->id_number = $id_no;
         $user->save();
 
@@ -80,42 +99,6 @@ class MemberController extends Controller
     public function detail()
     {
         return Inertia::render('Member/Listing/Partials/MemberListingDetail');
-    }
-
-    public function loadCountries()
-    {
-        $countries = Country::get()->map(function ($country) {
-            return [
-                'id' => $country->id,
-                'name' => $country->name,
-                'phone_code' => $country->phone_code,
-            ];
-        });
-
-        return response()->json($countries);
-    }
-
-    public function loadUplines()
-    {
-        $users = User::whereIn('role', ['member', 'agent'])
-            ->select('id', 'name')
-            ->get();
-
-        if ($users->isEmpty()) {
-            $users = User::where('id', 1)
-                ->select('id', 'name')
-                ->get();
-        }
-
-        $formattedUsers = $users->map(function ($user) {
-            return [
-                'value' => $user->id,
-                'name' => $user->name,
-                'profile_photo' => $user->getFirstMediaUrl('profile_photo')
-            ];
-        });
-
-        return response()->json($formattedUsers);
     }
 
     public function updateContactInfo(Request $request)

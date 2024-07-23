@@ -1,12 +1,12 @@
 <script setup>
-import {computed, onMounted, ref, watchEffect} from "vue";
+import {computed, onMounted, ref, watch, watchEffect} from "vue";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import AddMember from "@/Pages/Member/Listing/Partials/AddMember.vue";
 import { MemberIcon, AgentIcon, UserIcon, } from '@/Components/Icons/solid';
 import InputText from 'primevue/inputtext';
 import RadioButton from 'primevue/radiobutton';
 import Button from '@/Components/Button.vue';
-import {useForm, usePage} from '@inertiajs/vue3';
+import {usePage} from '@inertiajs/vue3';
 import OverlayPanel from 'primevue/overlaypanel';
 import Dialog from 'primevue/dialog';
 import DataTable from "primevue/datatable";
@@ -14,6 +14,10 @@ import Column from "primevue/column";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import {FilterMatchMode} from "primevue/api";
 import Loader from "@/Components/Loader.vue";
+import Dropdown from "primevue/dropdown";
+import IconField from 'primevue/iconfield';
+import {IconSearch, IconCircleXFilled, IconAdjustments} from '@tabler/icons-vue';
+import Badge from '@/Components/Badge.vue';
 
 const total_members = ref();
 const total_agents = ref();
@@ -23,7 +27,6 @@ const dt = ref();
 const users = ref();
 
 onMounted(() => {
-    loading.value = true;
     getResults();
 })
 
@@ -47,18 +50,34 @@ const dataOverviews = computed(() => [
 ]);
 
 const getResults = async () => {
+    loading.value = true;
+
     try {
         const response = await axios.get('/member/getMemberListingData');
         users.value = response.data.users;
-        total_members.value = response.data.total_members;
-        total_agents.value = response.data.total_agents;
-        total_users.value = response.data.total_users;
+        total_members.value = users.value.filter(user => user.role === 'member').length;
+        total_agents.value = users.value.filter(user => user.role === 'agent').length;
+        total_users.value = users.value.length;
     } catch (error) {
         console.error('Error changing locale:', error);
     } finally {
         loading.value = false;
     }
 };
+
+const getFilterData = async () => {
+    try {
+        const uplineResponse = await axios.get('/member/getFilterData');
+        uplines.value = uplineResponse.data.uplines;
+        groups.value = uplineResponse.data.groups;
+    } catch (error) {
+        console.error('Error changing locale:', error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+getFilterData();
 
 const exportCSV = () => {
     dt.value.exportCSV();
@@ -67,39 +86,87 @@ const exportCSV = () => {
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    'country.name': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+    upline_id: { value: null, matchMode: FilterMatchMode.EQUALS },
+    group_id: { value: null, matchMode: FilterMatchMode.EQUALS },
     role: { value: null, matchMode: FilterMatchMode.EQUALS },
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
-    verified: { value: null, matchMode: FilterMatchMode.EQUALS }
 });
 
 // overlay panel
 const op = ref();
+const uplines = ref()
+const groups = ref()
+const upline_id = ref(null)
+const group_id = ref(null)
+const filterCount = ref(0);
 
 const toggle = (event) => {
     op.value.toggle(event);
 }
 
-const initFilters = () => {
+watch([upline_id, group_id], ([newUplineId, newGroupId]) => {
+    if (upline_id.value !== null) {
+        filters.value['upline_id'].value = newUplineId.value
+    }
+
+    if (group_id.value !== null) {
+        filters.value['group_id'].value = newGroupId.value
+    }
+})
+
+const recalculateTotals = () => {
+    const filteredUsers = users.value.filter(user => {
+        return (
+            (!filters.value.name.value || user.name.startsWith(filters.value.name.value)) &&
+            (!filters.value.upline_id.value || user.upline_id === filters.value.upline_id.value) &&
+            (!filters.value.group_id.value || user.group_id === filters.value.group_id.value) &&
+            (!filters.value.role.value || user.role === filters.value.role.value) &&
+            (!filters.value.status.value || user.status === filters.value.status.value)
+        );
+    });
+
+    total_members.value = filteredUsers.filter(user => user.role === 'member').length;
+    total_agents.value = filteredUsers.filter(user => user.role === 'agent').length;
+    total_users.value = filteredUsers.length;
+};
+
+watch(filters, () => {
+    recalculateTotals();
+
+    // Count active filters
+    filterCount.value = Object.values(filters.value).filter(filter => filter.value !== null).length;
+}, { deep: true });
+
+const clearFilter = () => {
     filters.value = {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-        'country.name': { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+        upline_id: { value: null, matchMode: FilterMatchMode.EQUALS },
+        group_id: { value: null, matchMode: FilterMatchMode.EQUALS },
         role: { value: null, matchMode: FilterMatchMode.EQUALS },
         status: { value: null, matchMode: FilterMatchMode.EQUALS },
-        verified: { value: null, matchMode: FilterMatchMode.EQUALS }
     };
+
+    upline_id.value = null;
+    group_id.value = null;
 };
 
-const clearFilter = () => {
-    initFilters();
-};
+const clearFilterGlobal = () => {
+    filters.value['global'].value = null;
+}
 
 watchEffect(() => {
     if (usePage().props.toast !== null) {
         getResults();
     }
 });
+
+const rgbaColor = (hex, opacity) => {
+    const r = parseInt(hex.slice(0, 2), 16);
+    const g = parseInt(hex.slice(2, 4), 16);
+    const b = parseInt(hex.slice(4, 6), 16);
+    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+}
 </script>
 
 <template>
@@ -136,19 +203,41 @@ watchEffect(() => {
                     tableStyle="min-width: 50rem"
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
                     currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-                    :globalFilterFields="['first_name']"
+                    :globalFilterFields="['name']"
                     ref="dt"
                     :loading="loading"
                 >
                     <template #header>
                         <div class="flex justify-between items-center self-stretch">
-                            <div class="flex gap-3 items-center">
-                                <InputText v-model="filters['global'].value" placeholder="Keyword Search" class="font-normal w-60" />
-                                <Button variant="gray-outlined" @click="toggle">
-                                    Filter
+                            <div class="flex gap-3 items-center self-stretch">
+                                <div class="relative">
+                                    <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
+                                        <IconSearch size="20" stroke-width="1.25" />
+                                    </div>
+                                    <InputText v-model="filters['global'].value" placeholder="Keyword Search" class="font-normal w-60 pl-12" />
+                                    <div
+                                        v-if="filters['global'].value !== null"
+                                        class="absolute top-2/4 -mt-2 right-4 text-gray-300 hover:text-gray-400 select-none cursor-pointer"
+                                        @click="clearFilterGlobal"
+                                    >
+                                        <IconCircleXFilled size="16" />
+                                    </div>
+                                </div>
+                                <Button
+                                    variant="gray-outlined"
+                                    @click="toggle"
+                                    class="flex gap-3 items-center justify-center py-3 px-4"
+                                >
+                                    <IconAdjustments size="20" color="#0C111D" stroke-width="1.25" />
+                                    <div class="text-sm text-gray-950 font-medium">
+                                        Filter
+                                    </div>
+                                    <Badge class="w-5 h-5 text-xs text-white" variant="numberbadge">
+                                        {{ filterCount }}
+                                    </Badge>
                                 </Button>
                             </div>
-                            <div >
+                            <div>
                                 <Button variant="primary-outlined" @click="exportCSV($event)">
                                     Export
                                 </Button>
@@ -170,7 +259,7 @@ watchEffect(() => {
                             {{ slotProps.data.id_number }}
                         </template>
                     </Column>
-                    <Column field="name" sortable header="Name" style="width: 25%">
+                    <Column field="name" sortable header="Name" style="width: 35%">
                         <template #body="slotProps">
                             <div class="flex items-center gap-3">
                                 <div class="w-7 h-7 rounded-full overflow-hidden">
@@ -187,8 +276,35 @@ watchEffect(() => {
                             </div>
                         </template>
                     </Column>
-                    <Column field="company" header="Company" style="width: 25%"></Column>
-                    <Column field="representative.name" header="Representative" style="width: 25%"></Column>
+                    <Column field="group" style="width: 15%">
+                        <template #header>
+                            <span class="hidden md:block items-center justify-center w-full text-center">group</span>
+                        </template>
+                        <template #body="slotProps">
+                            <div class="flex items-center justify-center">
+                                <div
+                                    v-if="slotProps.data.group_id"
+                                    class="flex items-center gap-2 rounded justify-center py-1 px-2"
+                                    :style="{ backgroundColor: rgbaColor(slotProps.data.group_color, 0.1) }"
+                                >
+                                    <div
+                                        class="w-1.5 h-1.5 grow-0 shrink-0 rounded-full"
+                                        :style="{ backgroundColor: `#${slotProps.data.group_color}` }"
+                                    ></div>
+                                    <div
+                                        class="text-xs font-semibold"
+                                        :style="{ color: `#${slotProps.data.group_color}` }"
+                                    >
+                                        {{ slotProps.data.group_name }}
+                                    </div>
+                                </div>
+                                <div v-else>
+                                    -
+                                </div>
+                            </div>
+                        </template>
+                    </Column>
+                    <Column field="representative.name" header="" style="width: 25%"></Column>
                 </DataTable>
             </div>
 <!--            <div class="flex flex-col justify-center md:justify-normal items-center px-4 md:px-6 py-6 gap-5 md:gap-6 self-stretch max-w-[1440px] rounded-2xl border border-gray-200 bg-white shadow-table">-->
@@ -266,39 +382,85 @@ watchEffect(() => {
                 </div>
             </div>
 
-<!--            &lt;!&ndash; Filter Group&ndash;&gt;-->
-<!--            <div class="flex flex-col gap-2 items-center self-stretch">-->
-<!--                <div class="flex self-stretch text-xs text-gray-950 font-semibold">-->
-<!--                    Filter by group-->
-<!--                </div>-->
-<!--                <div class="flex flex-col gap-1 self-stretch">-->
-<!--                    <div class="flex items-center gap-2 text-sm text-gray-950">-->
-<!--                        <RadioButton v-model="filterByRole" inputId="role_member" value="member" />-->
-<!--                        <label for="role_member">Member</label>-->
-<!--                    </div>-->
-<!--                    <div class="flex items-center gap-2 text-sm text-gray-950">-->
-<!--                        <RadioButton v-model="filterByRole" inputId="role_agent" value="agent" />-->
-<!--                        <label for="role_agent">Agent</label>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
+            <!-- Filter Group-->
+            <div class="flex flex-col gap-2 items-center self-stretch">
+                <div class="flex self-stretch text-xs text-gray-950 font-semibold">
+                    Filter by group
+                </div>
+                <Dropdown
+                    v-model="group_id"
+                    :options="groups"
+                    filter
+                    :filterFields="['name']"
+                    optionLabel="name"
+                    placeholder="Select group"
+                    class="w-full"
+                    scroll-height="236px"
+                >
+                    <template #value="slotProps">
+                        <div v-if="slotProps.value" class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-4 h-4 rounded-full overflow-hidden grow-0 shrink-0" :style="{ backgroundColor: `#${slotProps.value.color}` }"></div>
+                                <div>{{ slotProps.value.name }}</div>
+                            </div>
+                        </div>
+                        <span v-else class="text-gray-400">{{ slotProps.placeholder }}</span>
+                    </template>
+                    <template #option="slotProps">
+                        <div class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded-full overflow-hidden grow-0 shrink-0" :style="{ backgroundColor: `#${slotProps.option.color}` }"></div>
+                            <div>{{ slotProps.option.name }}</div>
+                        </div>
+                    </template>
+                </Dropdown>
+            </div>
 
-<!--            &lt;!&ndash; Filter Upline&ndash;&gt;-->
-<!--            <div class="flex flex-col gap-2 items-center self-stretch">-->
-<!--                <div class="flex self-stretch text-xs text-gray-950 font-semibold">-->
-<!--                    Filter by upline-->
-<!--                </div>-->
-<!--                <div class="flex flex-col gap-1 self-stretch">-->
-<!--                    <div class="flex items-center gap-2 text-sm text-gray-950">-->
-<!--                        <RadioButton v-model="filterByRole" inputId="role_member" value="member" />-->
-<!--                        <label for="role_member">Member</label>-->
-<!--                    </div>-->
-<!--                    <div class="flex items-center gap-2 text-sm text-gray-950">-->
-<!--                        <RadioButton v-model="filterByRole" inputId="role_agent" value="agent" />-->
-<!--                        <label for="role_agent">Agent</label>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--            </div>-->
+            <!-- Filter Upline-->
+            <div class="flex flex-col gap-2 items-center self-stretch">
+                <div class="flex self-stretch text-xs text-gray-950 font-semibold">
+                    Filter by upline
+                </div>
+                <Dropdown
+                    v-model="upline_id"
+                    :options="uplines"
+                    filter
+                    :filterFields="['name']"
+                    optionLabel="name"
+                    placeholder="Select upline"
+                    class="w-full"
+                    scroll-height="236px"
+                >
+                    <template #value="slotProps">
+                        <div v-if="slotProps.value" class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <div class="w-5 h-5 rounded-full overflow-hidden">
+                                    <template v-if="slotProps.value.profile_photo">
+                                        <img :src="slotProps.value.profile_photo" alt="profile_picture" />
+                                    </template>
+                                    <template v-else>
+                                        <DefaultProfilePhoto />
+                                    </template>
+                                </div>
+                                <div>{{ slotProps.value.name }}</div>
+                            </div>
+                        </div>
+                        <span v-else class="text-gray-400">{{ slotProps.placeholder }}</span>
+                    </template>
+                    <template #option="slotProps">
+                        <div class="flex items-center gap-2">
+                            <div class="w-5 h-5 rounded-full overflow-hidden">
+                                <template v-if="slotProps.option.profile_photo">
+                                    <img :src="slotProps.option.profile_photo" alt="profile_picture" />
+                                </template>
+                                <template v-else>
+                                    <DefaultProfilePhoto />
+                                </template>
+                            </div>
+                            <div>{{ slotProps.option.name }}</div>
+                        </div>
+                    </template>
+                </Dropdown>
+            </div>
 
             <!-- Filter Statys-->
             <div class="flex flex-col gap-2 items-center self-stretch">

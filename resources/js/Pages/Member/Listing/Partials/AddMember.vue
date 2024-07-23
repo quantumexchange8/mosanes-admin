@@ -1,11 +1,11 @@
 <script setup>
 import Button from "@/Components/Button.vue";
 import Dialog from 'primevue/dialog';
-import {ref} from "vue";
+import {ref, watchEffect} from "vue";
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputText from 'primevue/inputtext';
-import { useForm } from '@inertiajs/vue3';
+import {useForm, usePage} from '@inertiajs/vue3';
 import Dropdown from "primevue/dropdown";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import Password from 'primevue/password';
@@ -46,17 +46,21 @@ const uplines = ref()
 const selectedCountry = ref();
 const getResults = async () => {
     try {
-        const countriesResponse = await axios.get('/member/loadCountries');
-        countries.value = countriesResponse.data;
-
-        const uplineResponse = await axios.get('/member/loadUplines');
-        uplines.value = uplineResponse.data;
+        const response = await axios.get('/member/getFilterData');
+        countries.value = response.data.countries;
+        uplines.value = response.data.uplines;
     } catch (error) {
         console.error('Error changing locale:', error);
     }
 };
 
 getResults();
+
+watchEffect(() => {
+    if (usePage().props.toast !== null) {
+        getResults();
+    }
+});
 </script>
 
 <template>

@@ -25,8 +25,7 @@ Route::middleware('auth')->group(function () {
         // listing
         Route::get('/listing', [MemberController::class, 'listing'])->name('member.listing');
         Route::get('/getMemberListingData', [MemberController::class, 'getMemberListingData'])->name('member.getMemberListingData');
-        Route::get('/loadCountries', [MemberController::class, 'loadCountries'])->name('member.loadCountries');
-        Route::get('/loadUplines', [MemberController::class, 'loadUplines'])->name('member.loadUplines');
+        Route::get('/getFilterData', [MemberController::class, 'getFilterData'])->name('member.getFilterData');
         Route::post('/addNewMember', [MemberController::class, 'addNewMember'])->name('member.addNewMember');
 
         Route::post('/uploadKyc', [MemberController::class, 'uploadKyc'])->name('member.uploadKyc');

@@ -4,6 +4,7 @@ namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Spatie\MediaLibrary\HasMedia;
@@ -56,5 +57,11 @@ class User extends Authenticatable implements HasMedia
 
         $this->referral_code = $randomString;
         $this->save();
+    }
+
+    // Relations
+    public function groupHasUser(): HasOne
+    {
+        return $this->hasOne(GroupHasUser::class, 'user_id');
     }
 }

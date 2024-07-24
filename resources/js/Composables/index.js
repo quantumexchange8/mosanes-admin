@@ -58,7 +58,7 @@ export function transactionFormat() {
         const seconds = formattedDate.getSeconds().toString().padStart(2, '0');
 
         if (includeTime) {
-            return `${day}/${month}/${year} ${hours}:${minutes}:${seconds}`;
+            return `${year}/${month}/${day} ${hours}:${minutes}:${seconds}`;
         } else {
             return `${day} ${month} ${year}`;
         }

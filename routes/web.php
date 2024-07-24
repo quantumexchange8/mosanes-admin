@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountTypeController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Foundation\Application;
@@ -67,6 +68,15 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [TransactionController::class, 'listing'])->name('transaction');
         Route::get('/getTransactionListingData', [TransactionController::class, 'getTransactionListingData'])->name('transaction.getTransactionListingData');
 
+    });
+
+    /**
+     * ==============================
+     *         Account Type
+     * ==============================
+     */
+    Route::prefix('account_type')->group(function () {
+        Route::get('/', [AccountTypeController::class, 'show'])->name('accountType');
     });
 
     /**

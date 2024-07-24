@@ -28,8 +28,8 @@ const requireConfirmation = (id) => {
     console.log(confirm)
     confirm.require({
         group: 'headless',
-        header: 'Are you sure?',
-        message: 'Are you sure you want to delete this member? \n' +
+        header: 'Delete Group',
+        message: 'Are you sure you want to delete this group? \n' +
             'This action cannot be undone.',
         acceptButton: 'Yes, delete it',
         accept: () => {

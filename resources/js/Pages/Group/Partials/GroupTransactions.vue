@@ -3,8 +3,14 @@ import { ref } from 'vue';
 import { IconCloudDownload } from '@tabler/icons-vue';
 import Button from '@/Components/Button.vue';
 import Calendar from 'primevue/calendar';
+import Empty from '@/Components/Empty.vue';
 
 const date = ref('');
+const length = ref();
+
+//get data by axios
+length.value = 0;
+
 </script>
 
 <template>
@@ -29,6 +35,12 @@ const date = ref('');
             </Button>
         </div>
 
-        <!-- this is a table -->
+        <template v-if="length === 0">
+            <Empty message="No Transactions Yet" />
+        </template>
+
+        <template v-else>
+            <!-- this is a table -->
+        </template>
     </div>
 </template>

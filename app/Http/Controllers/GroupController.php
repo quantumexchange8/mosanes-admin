@@ -110,7 +110,7 @@ class GroupController extends Controller
         $group->name = $request->group_name;
         $group->fee_charges = $request->fee_charges;
         $group->color = $request->color;
-        $group->agent = $request->agent['value'];
+        $group->group_leader = $request->agent['value'];
         $group->edited_by = Auth::id();
         $group->save();
 

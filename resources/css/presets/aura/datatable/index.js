@@ -136,7 +136,8 @@ export default {
                 { 'cursor-pointer': props.sortable === '' || props.sortable },
                 {
                     'overflow-hidden space-nowrap border-y bg-clip-padding': context.resizable // Resizable
-                }
+                },
+                'hidden md:table-cell',
             ]
         }),
         headercontent: {

@@ -20,17 +20,17 @@ const baseClasses = [
 ];
 
 const variantClasses = computed(() => {
-    if (props.value.toLowerCase() === 'primary' || props.value.toLowerCase() === 'member') {
+    if (props.value === 'primary' || props.value === 'member') {
         return 'bg-primary-50 text-primary-500'
-    } else if (props.value.toLowerCase() === 'success' || props.value.toLowerCase() === 'active' || props.value.toLowerCase() === 'live') {
+    } else if (props.value === 'success' || props.value === 'active' || props.value === 'live') {
         return 'bg-success-50 text-success-500'
-    } else if (props.value.toLowerCase() === 'error') {
+    } else if (props.value === 'error' || props.value === 'failed') {
         return 'bg-error-50 text-error-500'
-    } else if (props.value.toLowerCase() === 'warning') {
+    } else if (props.value === 'warning') {
         return 'bg-warning-50 text-warning-500'
-    } else if (props.value.toLowerCase() === 'info' || props.value.toLowerCase() === 'demo') {
+    } else if (props.value === 'info' || props.value === 'demo' || props.value === 'processing') {
         return 'bg-info-50 text-info-500'
-    } else if (props.value.toLowerCase() === 'gray') {
+    } else if (props.value === 'gray') {
         return 'bg-gray-50 text-gray-500'
     }
     return 'bg-primary-600 text-gray-950'
@@ -52,6 +52,6 @@ const classes = computed(() => [
 
 <template>
   <div :class="[borderClass, classes]">
-    {{ value }}
+    <slot>{{ value }}</slot>
   </div>
 </template>

@@ -136,6 +136,7 @@ export default {
                 'toast': '0 4px 20px 0 rgba(12, 17, 29, 0.08)',
                 'box': '0 8px 16px -4px rgba(12, 17, 29, 0.08)',
                 'table': '0 2px 8px 0 rgba(12, 17, 29, 0.05)',
+                'dropdown': '0px 8px 16px -4px rgba(12, 17, 29, 0.08)',
             },
             fontSize: {
                 xxs: ['10px', '16px'],

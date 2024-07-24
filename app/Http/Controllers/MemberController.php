@@ -120,22 +120,12 @@ class MemberController extends Controller
         dd($request->all());
     }
 
-    public function cashWalletAdjustment(Request $request)
+    public function WalletAdjustment(Request $request)
     {
         dd($request->all());
     }
 
-    public function rebateWalletAdjustment(Request $request)
-    {
-        dd($request->all());
-    }
-
-    public function accountBalanceAdjustment(Request $request)
-    {
-        dd($request->all());
-    }
-
-    public function accountCreditAdjustment(Request $request)
+    public function accountAdjustment(Request $request)
     {
         dd($request->all());
     }

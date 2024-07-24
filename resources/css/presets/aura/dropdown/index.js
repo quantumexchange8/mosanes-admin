@@ -94,8 +94,8 @@ export default {
 
             // Shape
             'rounded-r-lg',
-            // { 'rotate-180': parent.instance.$name === 'InputGroup' || state.focused },
-            // { 'rotate-0':  !state.focused },
+            { 'rotate-180': parent.instance.$name === 'InputGroup' || state.focused },
+            { 'rotate-0':  !state.focused },
         ]
     }),
     panel: {

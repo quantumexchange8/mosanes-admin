@@ -5,7 +5,7 @@ import SidebarCollapsible from '@/Components/Sidebar/SidebarCollapsible.vue'
 import SidebarCollapsibleItem from '@/Components/Sidebar/SidebarCollapsibleItem.vue'
 import {ref} from "vue";
 import {usePage} from "@inertiajs/vue3";
-import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup } from '@tabler/icons-vue';
+import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, IconReceiptDollar } from '@tabler/icons-vue';
 
 </script>
 
@@ -40,6 +40,13 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup } f
                 :href="route('member.listing')"
                 :active="route().current('member.listing')"
             />
+
+            <SidebarCollapsibleItem
+                title="Member Listing Detail"
+                :href="route('member.detail')"
+                :active="route().current('member.detail')"
+            />
+
         </SidebarCollapsible>
 
         <!-- Group -->
@@ -52,6 +59,18 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup } f
                 <IconUsersGroup :size="20" stroke-width="1.25" />
             </template>
         </SidebarLink>
+
+        <!-- Transaction -->
+        <SidebarLink
+            title="Transaction"
+            :href="route('transaction')"
+            :active="route().current('transaction')"
+        >
+            <template #icon>
+                <IconReceiptDollar :size="20" stroke-width="1.25" />
+            </template>
+        </SidebarLink>
+
 
         <!-- Components -->
         <SidebarCollapsible

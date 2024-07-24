@@ -1,11 +1,12 @@
 <?php
 
+use Inertia\Inertia;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Application;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
-use Illuminate\Support\Facades\Route;
-use Inertia\Inertia;
+use App\Http\Controllers\TransactionController;
 
 Route::get('/', function () {
     return redirect(route('login'));
@@ -35,10 +36,8 @@ Route::middleware('auth')->group(function () {
         Route::post('/updateContactInfo', [MemberController::class, 'updateContactInfo'])->name('member.updateContactInfo');
         Route::post('/updateCryptoWalletInfo', [MemberController::class, 'updateCryptoWalletInfo'])->name('member.updateCryptoWalletInfo');
         Route::post('/updateKYCStatus', [MemberController::class, 'updateKYCStatus'])->name('member.updateKYCStatus');
-        Route::post('/cashWalletAdjustment', [MemberController::class, 'cashWalletAdjustment'])->name('member.cashWalletAdjustment');
-        Route::post('/rebateWalletAdjustment', [MemberController::class, 'rebateWalletAdjustment'])->name('member.rebateWalletAdjustment');
-        Route::post('/accountBalanceAdjustment', [MemberController::class, 'accountBalanceAdjustment'])->name('member.accountBalanceAdjustment');
-        Route::post('/accountCreditAdjustment', [MemberController::class, 'accountCreditAdjustment'])->name('member.accountCreditAdjustment');
+        Route::post('/walletAdjustment', [MemberController::class, 'walletAdjustment'])->name('member.walletAdjustment');
+        Route::post('/accountAdjustment', [MemberController::class, 'accountAdjustment'])->name('member.accountAdjustment');
         Route::post('/accountDelete', [MemberController::class, 'accountDelete'])->name('member.accountDelete');
     });
 
@@ -57,6 +56,17 @@ Route::middleware('auth')->group(function () {
         Route::patch('/edit_group/{id}', [GroupController::class, 'editGroup'])->name('group.edit');
 
         Route::delete('/delete_group/{id}', [GroupController::class, 'deleteGroup'])->name('group.delete');
+    });
+
+    /**
+     * ==============================
+     *          Transaction
+     * ==============================
+     */
+    Route::prefix('transaction')->group(function () {
+        Route::get('/', [TransactionController::class, 'listing'])->name('transaction');
+        Route::get('/getTransactionListingData', [TransactionController::class, 'getTransactionListingData'])->name('transaction.getTransactionListingData');
+
     });
 
     /**

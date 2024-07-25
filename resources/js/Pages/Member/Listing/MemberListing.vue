@@ -15,9 +15,19 @@ import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import {FilterMatchMode} from "primevue/api";
 import Loader from "@/Components/Loader.vue";
 import Dropdown from "primevue/dropdown";
-import {IconSearch, IconCircleXFilled, IconAdjustments} from '@tabler/icons-vue';
+import {
+    IconSearch,
+    IconCircleXFilled,
+    IconAdjustments,
+    IconDotsVertical,
+    IconReportSearch,
+    IconPencilMinus,
+    IconTrash
+} from '@tabler/icons-vue';
 import Badge from '@/Components/Badge.vue';
 import Vue3Autocounter from 'vue3-autocounter';
+import DropdownOverlay from "@/Components/Dropdown.vue";
+import MemberTableActions from "@/Pages/Member/Listing/Partials/MemberTableActions.vue";
 
 const total_members = ref(999);
 const total_agents = ref(999);
@@ -252,7 +262,6 @@ const rgbaColor = (hex, opacity) => {
                                     </Button>
                                 </div>
                             </div>
-
                         </div>
                     </template>
                     <template #empty> No users found. </template>
@@ -315,7 +324,13 @@ const rgbaColor = (hex, opacity) => {
                             </div>
                         </template>
                     </Column>
-                    <Column field="representative.name" header="" style="width: 25%"></Column>
+                    <Column field="representative.name" header="" style="width: 10%">
+                        <template #body="slotProps">
+                            <MemberTableActions
+                                :member="slotProps.data"
+                            />
+                        </template>
+                    </Column>
                 </DataTable>
             </div>
 <!--            <div class="flex flex-col justify-center md:justify-normal items-center px-4 md:px-6 py-6 gap-5 md:gap-6 self-stretch max-w-[1440px] rounded-2xl border border-gray-200 bg-white shadow-table">-->
@@ -375,7 +390,7 @@ const rgbaColor = (hex, opacity) => {
     </AuthenticatedLayout>
 
     <OverlayPanel ref="op">
-        <div class="flex flex-col gap-8 w-60">
+        <div class="flex flex-col gap-8 w-60 py-5 px-4">
             <!-- Filter Role-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">

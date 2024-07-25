@@ -42,9 +42,9 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, Ic
             />
 
             <SidebarCollapsibleItem
-                title="Member Listing Detail"
-                :href="route('member.detail')"
-                :active="route().current('member.detail')"
+                title="Member Network"
+                :href="route('member.network')"
+                :active="route().current('member.network')"
             />
 
         </SidebarCollapsible>
@@ -85,6 +85,12 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, Ic
                 title="Buttons"
                 :href="route('components.buttons')"
                 :active="route().current('components.buttons')"
+            />
+
+            <SidebarCollapsibleItem
+                title="Member Network"
+                :href="route('member.network')"
+                :active="route().current('member.network')"
             />
         </SidebarCollapsible>
 

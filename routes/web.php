@@ -2,11 +2,18 @@
 
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Foundation\Application;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\TransactionController;
+
+Route::get('locale/{locale}', function ($locale) {
+    App::setLocale($locale);
+    Session::put("locale", $locale);
+
+    return redirect()->back();
+});
 
 Route::get('/', function () {
     return redirect(route('login'));
@@ -32,13 +39,17 @@ Route::middleware('auth')->group(function () {
         Route::post('/uploadKyc', [MemberController::class, 'uploadKyc'])->name('member.uploadKyc');
 
         // details
-        Route::get('/detail', [MemberController::class, 'detail'])->name('member.detail');
+        Route::get('/detail/{id_number}', [MemberController::class, 'detail'])->name('member.detail');
         Route::post('/updateContactInfo', [MemberController::class, 'updateContactInfo'])->name('member.updateContactInfo');
         Route::post('/updateCryptoWalletInfo', [MemberController::class, 'updateCryptoWalletInfo'])->name('member.updateCryptoWalletInfo');
         Route::post('/updateKYCStatus', [MemberController::class, 'updateKYCStatus'])->name('member.updateKYCStatus');
         Route::post('/walletAdjustment', [MemberController::class, 'walletAdjustment'])->name('member.walletAdjustment');
         Route::post('/accountAdjustment', [MemberController::class, 'accountAdjustment'])->name('member.accountAdjustment');
         Route::post('/accountDelete', [MemberController::class, 'accountDelete'])->name('member.accountDelete');
+
+        // network
+        Route::get('/network', [NetworkController::class, 'network'])->name('member.network');
+        Route::get('/getDownlineData', [NetworkController::class, 'getDownlineData'])->name('member.getDownlineData');
     });
 
     /**

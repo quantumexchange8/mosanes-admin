@@ -36,6 +36,7 @@ class HandleInertiaRequests extends Middleware
                 'profile_photo' => $request->user() ? $request->user()->getFirstMediaUrl('profile_photo') : null,
             ],
             'toast' => session('toast'),
+            'locale' => session('locale') ? session('locale') : app()->getLocale(),
         ];
     }
 }

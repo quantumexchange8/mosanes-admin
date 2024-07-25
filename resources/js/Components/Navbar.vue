@@ -6,11 +6,35 @@ import {
     IconMenu2
 } from '@tabler/icons-vue';
 import ProfilePhoto from "@/Components/ProfilePhoto.vue";
-import {Link} from "@inertiajs/vue3";
+import {Link, usePage} from "@inertiajs/vue3";
+import OverlayPanel from "primevue/overlaypanel";
+import {ref} from "vue";
+import {loadLanguageAsync} from "laravel-vue-i18n";
 
 defineProps({
     title: String
 })
+
+const op = ref();
+const toggle = (event) => {
+    op.value.toggle(event);
+}
+
+const currentLocale = ref(usePage().props.locale);
+const locales = [
+    {'label': 'English', 'value': 'en'},
+    {'label': '中文', 'value': 'tw'},
+];
+
+const changeLanguage = async (langVal) => {
+    try {
+        currentLocale.value = langVal;
+        await loadLanguageAsync(langVal);
+        await axios.get(`/locale/${langVal}`);
+    } catch (error) {
+        console.error('Error changing locale:', error);
+    }
+};
 </script>
 
 <template>
@@ -30,7 +54,10 @@ defineProps({
             {{ title }}
         </div>
         <div class="flex items-center">
-            <div class="w-12 h-12 p-3.5 flex items-center justify-center rounded-full hover:cursor-pointer hover:bg-gray-100 text-gray-800">
+            <div
+                class="w-12 h-12 p-3.5 flex items-center justify-center rounded-full hover:cursor-pointer hover:bg-gray-100 text-gray-800"
+                @click="toggle"
+            >
                 <IconWorld size="20" stroke-width="1.25" />
             </div>
             <Link
@@ -49,4 +76,17 @@ defineProps({
             </Link>
         </div>
     </nav>
+
+    <OverlayPanel ref="op">
+        <div class="py-2 flex flex-col items-center w-[120px]">
+            <div
+                v-for="locale in locales"
+                class="p-3 flex items-center gap-3 self-stretch text-sm hover:bg-gray-100 hover:cursor-pointer"
+                :class="{'bg-primary-50 text-primary-500': locale.value === currentLocale}"
+                @click="changeLanguage(locale.value)"
+            >
+                {{ locale.label }}
+            </div>
+        </div>
+    </OverlayPanel>
 </template>

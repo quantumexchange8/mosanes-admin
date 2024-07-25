@@ -23,10 +23,8 @@ class MemberController extends Controller
     {
         $query = User::with(['groupHasUser'])
             ->whereNot('role', 'super-admin')
-            ->latest();
-
-        return response()->json([
-            'users' => $query->get()->map(function ($user) {
+            ->latest()
+            ->get()->map(function ($user) {
                 return [
                     'id' => $user->id,
                     'name' => $user->name,
@@ -39,7 +37,10 @@ class MemberController extends Controller
                     'group_color' => $user->groupHasUser->group->color ?? null,
                     'status' => $user->status,
                 ];
-            }),
+            });
+
+        return response()->json([
+            'users' => $query
         ]);
     }
 
@@ -96,7 +97,7 @@ class MemberController extends Controller
     }
 
 
-    public function detail()
+    public function detail($id_number)
     {
         return Inertia::render('Member/Listing/Partials/MemberListingDetail');
     }

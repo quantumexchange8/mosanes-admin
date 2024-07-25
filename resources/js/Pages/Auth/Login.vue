@@ -52,7 +52,7 @@ const submit = () => {
             <form @submit.prevent="submit" class="flex flex-col items-center gap-6 self-stretch">
                 <div class="flex flex-col items-start gap-5 self-stretch">
                     <div class="flex flex-col items-start gap-1 self-stretch">
-                        <InputLabel for="email" value="Email" :invalid="!!form.errors.email" />
+                        <InputLabel for="email" :value="$t('public.email')" :invalid="!!form.errors.email" />
 
                         <InputText
                             id="email"

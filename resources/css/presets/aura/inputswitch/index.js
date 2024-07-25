@@ -24,13 +24,13 @@ export default {
             'before:h-4 before:w-4',
             'before:rounded-full',
             'before:duration-200',
-            'before:bg-surface-0 before:dark:bg-surface-500',
+            'before:bg-white',
 
             // Colors
             {
-                'bg-surface-300 dark:bg-surface-800': !(props.modelValue == props.trueValue) && !props.invalid,
-                'bg-primary': props.modelValue == props.trueValue && !props.invalid,
-                'before:dark:bg-surface-950': props.modelValue == props.trueValue
+                'bg-gray-200': !(props.modelValue == props.trueValue) && !props.invalid,
+                'bg-primary-500': props.modelValue == props.trueValue && !props.invalid,
+                'before:dark:bg-white': props.modelValue == props.trueValue
             },
 
             // Invalid State
@@ -38,8 +38,8 @@ export default {
             { 'peer-hover:bg-red-500 dark:peer-hover:bg-red-200': props.invalid },
 
             // States
-            { 'peer-hover:bg-surface-400 dark:peer-hover:bg-surface-700': !(props.modelValue == props.trueValue) && !props.disabled && !props.invalid },
-            { 'peer-hover:bg-primary-hover': props.modelValue == props.trueValue && !props.disabled && !props.invalid },
+            // { 'peer-hover:bg-surface-400 dark:peer-hover:bg-surface-700': !(props.modelValue == props.trueValue) && !props.disabled && !props.invalid },
+            // { 'peer-hover:bg-primary-hover': props.modelValue == props.trueValue && !props.disabled && !props.invalid },
             'peer-focus-visible:ring-1 peer-focus-visible:ring-primary-500 dark:peer-focus-visible:ring-primary-400',
 
             // Transition

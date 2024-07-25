@@ -18,7 +18,7 @@ export default {
         ]
     },
     content: {
-        class: ['py-5 px-4 items-center flex', 'rounded-lg', 'border border-surface-200']
+        class: ['items-center flex', 'rounded-lg', 'border border-surface-200']
     },
     transition: {
         enterFromClass: 'opacity-0 scale-y-[0.8]',

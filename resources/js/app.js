@@ -6,6 +6,7 @@ import { createApp, h } from 'vue';
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';
 import { ZiggyVue } from '../../vendor/tightenco/ziggy';
+import { i18nVue } from 'laravel-vue-i18n'
 import PrimeVue from "primevue/config";
 import ConfirmationService from 'primevue/confirmationservice';
 
@@ -18,6 +19,13 @@ createInertiaApp({
         return createApp({ render: () => h(App, props) })
             .use(plugin)
             .use(ZiggyVue)
+            .use(i18nVue, {
+                resolve: async lang => {
+                    const langs = import.meta.glob('../../lang/*.json');
+                    if (typeof langs[`../../lang/${lang}.json`] == "undefined") return; //Temporary workaround
+                    return await langs[`../../lang/${lang}.json`]();
+                }
+            })
             .use(PrimeVue, {
                 unstyled: true,
                 pt: Aura

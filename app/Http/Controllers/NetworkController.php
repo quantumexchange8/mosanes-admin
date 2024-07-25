@@ -10,21 +10,7 @@ class NetworkController extends Controller
 {
     public function network()
     {
-        $upline = User::where('id_number', 'AID00000')
-            ->select('id', 'name', 'id_number')
-            ->get()
-            ->map(function ($user) {
-                return [
-                    'id' => $user->id,
-                    'name' => $user->name,
-                    'id_number' => $user->id_number,
-                    'profile_photo' => $user->getFirstMediaUrl('profile_photo')
-                ];
-            });
-
-        return Inertia::render('Member/Network/MemberNetwork', [
-            'upline' => $upline
-        ]);
+        return Inertia::render('Member/Network/MemberNetwork');
     }
 
     public function getDownlineData(Request $request)
@@ -32,7 +18,19 @@ class NetworkController extends Controller
         $upline_id = $request->upline_id;
         $parent_id = $request->parent_id ?: 2;
 
+        if ($request->filled('search')) {
+            $search = '%' . $request->input('search') . '%';
+            $parent = User::whereIn('role', ['agent', 'member'])
+                ->where('id_number', 'LIKE', $search)
+                ->orWhere('email', 'LIKE', $search)
+                ->first();
+
+            $parent_id = $parent->id;
+            $upline_id = $parent->upline_id;
+        }
+
         $parent = User::with(['directChildren:id,name,id_number,upline_id,role,hierarchyList'])
+            ->whereIn('role', ['agent', 'member'])
             ->select('id', 'name', 'id_number', 'upline_id', 'role', 'hierarchyList')
             ->find($parent_id);
 
@@ -54,10 +52,15 @@ class NetworkController extends Controller
 
     private function formatUserData($user)
     {
+        if ($user->upline) {
+            $upper_upline = $user->upline->upline;
+        }
+
         return array_merge(
             $user->only(['id', 'name', 'id_number', 'upline_id', 'role']),
             [
                 'profile_photo' => $user->getFirstMediaUrl('profile_photo'),
+                'upper_upline_id' => $upper_upline->id ?? null,
                 'level' => $this->calculateLevel($user->hierarchyList),
                 'total_agent_count' => $this->getChildrenCount('agent', $user->id),
                 'total_member_count' => $this->getChildrenCount('member', $user->id),

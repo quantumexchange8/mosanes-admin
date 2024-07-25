@@ -1,45 +1,40 @@
 <script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue';
 import Button from '@/Components/Button.vue';
-import { IconRefresh, IconAdjustmentsHorizontal } from '@tabler/icons-vue';
+import { IconRefresh } from '@tabler/icons-vue';
 import DataTable from 'primevue/datatable';
-import { ref } from 'vue';
+import { onMounted, ref, watchEffect } from 'vue';
 import Column from 'primevue/column';
 import Empty from '@/Components/Empty.vue';
+import Loader from "@/Components/Loader.vue";
+import { usePage } from '@inertiajs/vue3';
+import AccountTypeSetting from '@/Pages/AccountType/Partials/AccountTypeSetting.vue';
 
 const accountTypes = ref();
-accountTypes.value = [
-{
-    name: "MarketMaster",
-    max_acc: 10,
-    trade_delay: "0 sec",
-    total_acc: 250
-},
-{
-    name: "InvestPro",
-    max_acc: 8,
-    trade_delay: "0 sec",
-    total_acc: 150
-},
-{
-    name: "FinanceGuru",
-    max_acc: 3,
-    trade_delay: "0 sec",
-    total_acc: 75
-},
-{
-    name: "TraderJoe",
-    max_acc: 5,
-    trade_delay: "0 sec",
-    total_acc: 100
-},
-{
-    name: "WealthWizard",
-    max_acc: 12,
-    trade_delay: "0 sec",
-    total_acc: 300
-},
-];
+const loading = ref(false);
+
+const getAccountTypes = async () => {
+    loading.value = true;
+
+    try {
+        const response = await axios.get('/account_type/getAccountTypes');
+        accountTypes.value = response.data.accountTypes;
+    } catch (error) {
+        console.error('Error getting account types:', error);
+    } finally {
+        loading.value = false;
+    }
+}
+
+onMounted(() => {
+    getAccountTypes();
+})
+
+watchEffect(() => {
+    if (usePage().props.toast !== null) {
+        getAccountTypes();
+    }
+});
 </script>
 
 <template>
@@ -48,6 +43,8 @@ accountTypes.value = [
             <div class="flex justify-end items-center self-stretch">
                 <Button
                     variant="primary-flat"
+                    type="button"
+                    :href="route('accountType.syncAccountTypes')"
                 >
                     <IconRefresh size="20" stroke-width="1.25" color="#FFF" />
                     Synchronise
@@ -58,10 +55,19 @@ accountTypes.value = [
                 <DataTable
                     :value="accountTypes"
                     removableSort
+                    :loading="loading"
                 >
                     <template #empty>
                         <Empty title="No Account Type Yet" message="Looks like you haven't created any account types yet. Let's get started by adding your first one!" />
                     </template>
+
+                    <template #loading>
+                        <div class="flex flex-col gap-2 items-center justify-center">
+                            <Loader />
+                            <span class="text-sm text-gray-700">Loading account types data. Please wait.</span>
+                        </div>
+                    </template>
+
                     <Column field="name" sortable style="width: 25%" >
                         <template #header>
                             <span>name</span>
@@ -75,7 +81,7 @@ accountTypes.value = [
                             <span>max.account</span>
                         </template>
                         <template #body="slotProps">
-                            {{ slotProps.data.max_acc }}
+                            {{ slotProps.data.maximum_account_number }}
                         </template>
                     </Column>
                     <Column field="trade_delay" style="width: 20%" >
@@ -83,7 +89,7 @@ accountTypes.value = [
                             <span>trade delay</span>
                         </template>
                         <template #body="slotProps">
-                            {{ slotProps.data.trade_delay }}
+                            {{ slotProps.data.trade_open_duration }}
                         </template>
                     </Column>
                     <Column field="total_acc" sortable style="width: 20%" >
@@ -91,20 +97,15 @@ accountTypes.value = [
                             <span>total account</span>
                         </template>
                         <template #body="slotProps">
-                            {{ slotProps.data.total_acc }}
+                            {{ slotProps.data.total_account }}
                         </template>
                     </Column>
                     <Column field="action" style="width: 15%" >
                         <template #body="slotProps">
                             <div class="py-2 px-3 flex justify-center items-center gap-2 flex-1">
                                 <div>toggle</div>
-                                <Button
-                                    variant="gray-text"
-                                    size="sm"
-                                    iconOnly
-                                >
-                                    <IconAdjustmentsHorizontal size="16" stroke-width="1.25" color="#667085" />
-                                </Button>
+                                
+                                <AccountTypeSetting :account_type="slotProps.data" />
                             </div>
                         </template>
                     </Column>

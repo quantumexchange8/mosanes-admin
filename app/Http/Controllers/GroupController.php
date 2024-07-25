@@ -7,6 +7,7 @@ use App\Http\Requests\GroupRequest;
 use App\Models\Group;
 use App\Models\GroupHasUser;
 use App\Models\User;
+use App\Services\DropdownOptionService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -57,21 +58,9 @@ class GroupController extends Controller
         ]);
     }
 
-    public function loadAgents()
+    public function getAgents()
     {
-        $has_group = GroupHasUser::pluck('user_id');
-
-        $users = User::where('role', 'agent')
-            ->whereNotIn('id', $has_group)
-            ->select('id', 'name')
-            ->get()
-            ->map(function ($user) {
-                return [
-                    'value' => $user->id,
-                    'name' => $user->name,
-                    'profile_photo' => $user->getFirstMediaUrl('profile_photo')
-                ];
-            });
+        $users = (new DropdownOptionService())->getAgents();
 
         return response()->json($users);
     }

@@ -16,7 +16,7 @@ const color = ref('ff0000');
 const agents = ref();
 const getAgents = async () => {
     try {
-        const agentResponse = await axios.get('/group/loadAgents');
+        const agentResponse = await axios.get('/group/getAgents');
         agents.value = agentResponse.data;
     } catch (error) {
         console.error('Error fetching agents:', error);

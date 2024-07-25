@@ -24,7 +24,7 @@
 
     const getAgents = async () => {
         try {
-            const agentResponse = await axios.get('/group/loadAgents');
+            const agentResponse = await axios.get('/group/getAgents');
             agents.value = agentResponse.data;
             agents.value.push(currentLeader.value);
         } catch (error) {
@@ -113,49 +113,49 @@
                         <div class="flex flex-col items-start gap-1 self-stretch md:flex-1">
                             <InputLabel for="agent" value="Agent" :invalid="!!form.errors.agent" />
                             <Dropdown
-                                    id="agent"
-                                    v-model="form.agent"
-                                    :options="agents"
-                                    filter
-                                    :filterFields="['name', 'phone_code']"
-                                    optionLabel="name"
-                                    placeholder="Select agent"
-                                    class="w-full"
-                                    scroll-height="236px"
-                                    :invalid="!!form.errors.agent"
-                                >
-                                    <template #value="slotProps">
-                                        <div v-if="slotProps.value" class="flex items-center gap-3">
-                                            <div class="flex items-center gap-2">
-                                                <div class="w-5 h-5 rounded-full overflow-hidden">
-                                                    <template v-if="slotProps.value.profile_photo">
-                                                        <img :src="slotProps.value.profile_photo" alt="profile_picture" />
-                                                    </template>
-                                                    <template v-else>
-                                                        <DefaultProfilePhoto />
-                                                    </template>
-                                                </div>
-                                                <div>{{ slotProps.value.name }}</div>
-                                            </div>
-                                        </div>
-                                        <span v-else class="text-gray-400">
-                                                {{ slotProps.placeholder }}
-                                        </span>
-                                    </template>
-                                    <template #option="slotProps">
+                                id="agent"
+                                v-model="form.agent"
+                                :options="agents"
+                                filter
+                                :filterFields="['name', 'phone_code']"
+                                optionLabel="name"
+                                placeholder="Select agent"
+                                class="w-full"
+                                scroll-height="236px"
+                                :invalid="!!form.errors.agent"
+                            >
+                                <template #value="slotProps">
+                                    <div v-if="slotProps.value" class="flex items-center gap-3">
                                         <div class="flex items-center gap-2">
                                             <div class="w-5 h-5 rounded-full overflow-hidden">
-                                                <template v-if="slotProps.option.profile_photo">
-                                                    <img :src="slotProps.option.profile_photo" alt="profile_picture" />
+                                                <template v-if="slotProps.value.profile_photo">
+                                                    <img :src="slotProps.value.profile_photo" alt="profile_picture" />
                                                 </template>
                                                 <template v-else>
                                                     <DefaultProfilePhoto />
                                                 </template>
                                             </div>
-                                            <div>{{ slotProps.option.name }}</div>
+                                            <div>{{ slotProps.value.name }}</div>
                                         </div>
-                                    </template>
-                                </Dropdown>
+                                    </div>
+                                    <span v-else class="text-gray-400">
+                                            {{ slotProps.placeholder }}
+                                    </span>
+                                </template>
+                                <template #option="slotProps">
+                                    <div class="flex items-center gap-2">
+                                        <div class="w-5 h-5 rounded-full overflow-hidden">
+                                            <template v-if="slotProps.option.profile_photo">
+                                                <img :src="slotProps.option.profile_photo" alt="profile_picture" />
+                                            </template>
+                                            <template v-else>
+                                                <DefaultProfilePhoto />
+                                            </template>
+                                        </div>
+                                        <div>{{ slotProps.option.name }}</div>
+                                    </div>
+                                </template>
+                            </Dropdown>
                             <InputError :message="form.errors.agent" />
                         </div>
                         <div class="flex flex-col items-start gap-1 self-stretch md:flex-1">

@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AccountTypeController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GroupController;
@@ -60,7 +61,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('group')->group(function () {
         Route::get('/', [GroupController::class, 'show'])->name('group');
         Route::get('/getGroups', [GroupController::class, 'getGroups'])->name('group.getGroups');
-        Route::get('/loadAgents', [GroupController::class, 'loadAgents'])->name('group.loadAgents');
+        Route::get('/getAgents', [GroupController::class, 'getAgents'])->name('group.getAgents');
 
         Route::post('/create_group', [GroupController::class, 'createGroup'])->name('group.create');
 
@@ -78,6 +79,20 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [TransactionController::class, 'listing'])->name('transaction');
         Route::get('/getTransactionListingData', [TransactionController::class, 'getTransactionListingData'])->name('transaction.getTransactionListingData');
 
+    });
+
+    /**
+     * ==============================
+     *         Account Type
+     * ==============================
+     */
+    Route::prefix('account_type')->group(function () {
+        Route::get('/', [AccountTypeController::class, 'show'])->name('accountType');
+        Route::get('/getAccountTypes', [AccountTypeController::class, 'getAccountTypes'])->name('accountType.getAccountTypes');
+        Route::get('/syncAccountTypes', [AccountTypeController::class, 'syncAccountTypes'])->name('accountType.syncAccountTypes');
+        Route::get('/getLevearges', [AccountTypeController::class, 'getLeverages'])->name('accountType.getLeverages');
+
+        Route::post('/update/{id}', [AccountTypeController::class, 'updateAccountType'])->name('accountType.update');
     });
 
     /**

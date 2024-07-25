@@ -8,8 +8,8 @@ import Calendar from 'primevue/calendar';
 import DefaultProfilePhoto from '@/Components/DefaultProfilePhoto.vue';
 import NewGroup from '@/Pages/Group/Partials/NewGroup.vue';
 import GroupMenu from '@/Pages/Group/Partials/GroupMenu.vue';
-import IllustrationEmpty from '@/Pages/Group/Partials/IllustrationEmpty.vue';
 import Vue3Autocounter from 'vue3-autocounter';
+import Empty from '@/Components/Empty.vue';
 
 const { formatAmount } = transactionFormat();
 
@@ -116,15 +116,7 @@ const date = ref('');
 
                 <template v-if="groupsLength === 0">
                     <div class="py-5 flex flex-col items-center gap-5 self-stretch">
-                        <IllustrationEmpty />
-                        <div class="flex flex-col items-center gap-2 self-stretch">
-                            <div class="self-stretch text-gray-950 text-center font-semibold">
-                                No Groups Created
-                            </div>
-                            <div class="self-stretch text-gray-700 text-center text-sm">
-                                You haven't created any groups yet. Start building your first group to get started!
-                            </div>
-                        </div>
+                        <Empty title="No Groups Created" message="You haven't created any groups yet. Start building your first group to get started!" />
                     </div>
                 </template>
 

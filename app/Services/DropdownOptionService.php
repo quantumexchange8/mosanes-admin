@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Models\Country;
 use App\Models\Group;
+use App\Models\GroupHasUser;
+use App\Models\SettingLeverage;
 use App\Models\User;
 use Illuminate\Support\Collection;
 
@@ -44,5 +46,38 @@ class DropdownOptionService
                     'color' => $group->color,
                 ];
             });
+    }
+
+    public function getLeverages(): Collection
+    {
+        $leverages = SettingLeverage::where('status', 'active')
+                    ->get()
+                    ->map(function ($leverage) {
+                        return [
+                            'name' => $leverage->display,
+                            'value' => $leverage->value,
+                        ];
+                    });
+        $leverages->prepend(['name' => 'Free', 'value' => 0]);
+        return $leverages;
+    }
+
+    public function getAgents(): Collection
+    {
+        $has_group = GroupHasUser::pluck('user_id');
+
+        $users = User::where('role', 'agent')
+            ->whereNotIn('id', $has_group)
+            ->select('id', 'name')
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'value' => $user->id,
+                    'name' => $user->name,
+                    'profile_photo' => $user->getFirstMediaUrl('profile_photo')
+                ];
+            });
+
+        return $users;
     }
 }

@@ -19,6 +19,12 @@ class AccountTypeController extends Controller
     {
         $accountTypes = AccountType::all()
         ->map(function($accountType) {
+            if ($accountType->trade_open_duration >= 60) {
+                $accountType['trade_delay'] = ($accountType->trade_open_duration / 60).' min';
+            } else {
+                $accountType['trade_delay'] = $accountType->trade_open_duration. ' sec';
+            }
+
             $accountType['total_account'] = 21;
 
             return $accountType;

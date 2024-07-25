@@ -89,7 +89,7 @@ watchEffect(() => {
                             <span>trade delay</span>
                         </template>
                         <template #body="slotProps">
-                            {{ slotProps.data.trade_open_duration }}
+                            {{ slotProps.data.trade_delay }}
                         </template>
                     </Column>
                     <Column field="total_acc" sortable style="width: 20%" >

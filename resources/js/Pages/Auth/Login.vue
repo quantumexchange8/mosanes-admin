@@ -45,8 +45,8 @@ const submit = () => {
 
                 </div>
                 <div class="w-full flex flex-col items-start gap-3 self-stretch">
-                    <div class="self-stretch text-center text-gray-950 text-xl font-semibold">Log in to your account</div>
-                    <div class="self-stretch text-center text-gray-500">Welcome back! Please enter your details.</div>
+                    <div class="self-stretch text-center text-gray-950 text-xl font-semibold">{{ $t('public.login_header') }}</div>
+                    <div class="self-stretch text-center text-gray-500">{{ $t('public.login_header_caption') }}</div>
                 </div>
             </div>
             <form @submit.prevent="submit" class="flex flex-col items-center gap-6 self-stretch">
@@ -60,7 +60,7 @@ const submit = () => {
                             class="block w-full"
                             v-model="form.email"
                             autofocus
-                            placeholder="Enter your email"
+                            :placeholder="$t('public.enter_your_email')"
                             :invalid="!!form.errors.email"
                             autocomplete="username"
                         />
@@ -69,7 +69,7 @@ const submit = () => {
                     </div>
 
                     <div class="flex flex-col items-start gap-1 self-stretch">
-                        <InputLabel for="password" value="Password" />
+                        <InputLabel for="password" :value="$t('public.password')" />
 
                         <InputText
                             id="password"
@@ -87,7 +87,7 @@ const submit = () => {
                 <div class="flex justify-between items-center self-stretch">
                     <label class="flex items-center cursor-pointer gap-2">
                         <Checkbox name="remember" v-model:checked="form.remember" />
-                        <span class="text-sm text-gray-600 font-medium">Remember me</span>
+                        <span class="text-sm text-gray-600 font-medium">{{ $t('public.remember_me') }}</span>
                     </label>
 
                     <Link
@@ -95,11 +95,13 @@ const submit = () => {
                         :href="route('password.request')"
                         class="text-right text-sm text-primary-500 font-semibold"
                     >
-                        Forgot your password?
+                        {{ $t('public.forgot_your_password') }}
                     </Link>
 
                 </div>
-                <Button variant="primary-flat" size="base" class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">Sign In</Button>
+                <Button variant="primary-flat" size="base" class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                    {{ $t('public.sign_in') }}
+                </Button>
             </form>
         </div>
     </GuestLayout>

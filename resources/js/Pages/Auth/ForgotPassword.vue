@@ -60,12 +60,12 @@ onBeforeUnmount(() => {
         
         <div v-if="!submitted" class="w-full flex flex-col items-center justify-center gap-8 pt-12">
             <div class="flex flex-col items-start gap-3 self-stretch">
-                <div class="self-stretch text-center text-gray-950 text-xl font-semibold">Forgot password?</div>
-                <div class="self-stretch text-center text-gray-500">No worries, we'll send you reset instructions.</div>
+                <div class="self-stretch text-center text-gray-950 text-xl font-semibold">{{ $t('public.forgot_password') }}</div>
+                <div class="self-stretch text-center text-gray-500">{{ $t('public.forgot_password_caption') }}</div>
             </div>
             <form @submit.prevent="submit" class="flex flex-col items-center gap-6 self-stretch">
                 <div class="flex flex-col items-start gap-1 self-stretch">
-                    <InputLabel for="email" value="Email" />
+                    <InputLabel for="email" :value="$t('public.email')" />
 
                     <InputText
                         id="email"
@@ -73,7 +73,7 @@ onBeforeUnmount(() => {
                         class="block w-full"
                         v-model="form.email"
                         autofocus
-                        placeholder="Enter your email"
+                        :placeholder="$t('public.enter_your_email')"
                         :invalid="!!form.errors.email"
                         autocomplete="username"
                     />
@@ -81,22 +81,22 @@ onBeforeUnmount(() => {
                     <InputError :message="form.errors.email" />
                 </div>
                 <div class="flex flex-col items-center gap-4 self-stretch">
-                    <Button size="base" variant="primary-flat" class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" @click.prevent="submit">Send Reset Password Link</Button>
-                    <Button size="base" variant="gray-text" class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" @click.prevent="goToLoginPage">Back to Log In</Button>
+                    <Button size="base" variant="primary-flat" class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" @click.prevent="submit">{{ $t('public.send_reset_password_link') }}</Button>
+                    <Button size="base" variant="gray-text" class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" @click.prevent="goToLoginPage">{{ $t('public.back_to_login') }}</Button>
                 </div>
             </form>
         </div>
 
         <div v-else class="w-full flex flex-col items-center justify-center gap-8 pt-12">
             <div class="flex flex-col items-start gap-3 self-stretch">
-                <div class="self-stretch text-center text-gray-950 text-xl font-semibold">Check your email</div>
-                <div class="self-stretch text-center text-gray-500">We've sent a reset password link to <br/><span class="text-gray-900 font-medium">{{ submittedEmail }}</span> </div>
+                <div class="self-stretch text-center text-gray-950 text-xl font-semibold">{{ $t('public.check_your_email') }}</div>
+                <div class="self-stretch text-center text-gray-500">{{ $t('public.check_your_email_caption') }} <br/><span class="text-gray-900 font-medium">{{ submittedEmail }}</span> </div>
             </div>
             <div class="flex flex-col items-center justify-center gap-6 self-stretch">
-                <Button size="base" variant="primary-flat" class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" @click.prevent="goToLoginPage">Back to Log In</Button>
+                <Button size="base" variant="primary-flat" class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing" @click.prevent="goToLoginPage">{{ $t('public.back_to_login') }}</Button>
                 <div class="flex justify-between items-center self-stretch">
-                    <div class="text-gray-700 text-sm font-medium">Didn't receive the email?</div>
-                    <div class="text-gray-300 text-right text-sm font-semibold">Resend in {{ countdown }}s</div>
+                    <div class="text-gray-700 text-sm font-medium">{{ $t('public.not_receive_email') }}</div>
+                    <div class="text-gray-300 text-right text-sm font-semibold">{{ $t('public.resend_in') }} {{ countdown }}s</div>
                 </div>
             </div>
         </div>

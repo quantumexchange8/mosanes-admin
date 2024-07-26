@@ -69,23 +69,23 @@
             <div class="flex flex-col items-center gap-8 self-stretch">
                 <div class="flex flex-col items-center gap-3 self-stretch">
                     <div class="self-stretch text-gray-950 text-sm font-bold">
-                        Group Information
+                        {{ $t('public.group_information') }}
                     </div>
                     <div class="grid items-center gap-3 self-stretch grid-cols-1 md:grid-cols-2 md:gap-5">
                         <div class="flex flex-col items-start gap-1 self-stretch">
-                            <InputLabel for="groupName" value="Group Name" :invalid="!!form.errors.group_name" />
+                            <InputLabel for="groupName" :value="$t('public.group_name')" :invalid="!!form.errors.group_name" />
                             <InputText
                                 id="groupName"
                                 type="text"
                                 class="block w-full"
                                 v-model="name"
-                                placeholder="eg. Amazing Team"
+                                :placeholder="$t('public.group_name_placeholder')"
                                 :invalid="!!form.errors.group_name"
                             />
                             <InputError :message="form.errors.group_name" />
                         </div>
                         <div class="flex flex-col items-start gap-1 self-stretch">
-                            <InputLabel for="feeCharges" value="Fee Charges" :invalid="!!form.errors.fee_charges" />
+                            <InputLabel for="feeCharges" :value="$t('public.fee_charges')" :invalid="!!form.errors.fee_charges" />
                             <InputText
                                 id="feeCharges"
                                 type="number"
@@ -97,7 +97,7 @@
                             <InputError :message="form.errors.fee_charges" />
                         </div>
                         <div class="flex flex-col items-start gap-1 self-stretch md:col-span-2">
-                            <InputLabel for="color" value="Colour" :invalid="!!form.errors.color" />
+                            <InputLabel for="color" :value="$t('public.color')" :invalid="!!form.errors.color" />
 
                             <ColorPicker v-model="color" id="color"/>
 
@@ -107,11 +107,11 @@
                 </div>
                 <div class="flex flex-col items-center gap-3 self-stretch">
                     <div class="self-stretch text-gray-950 text-sm font-bold">
-                        Agent
+                        {{ $t('public.agent') }}
                     </div>
                     <div class="flex flex-col items-start gap-3 self-stretch md:flex-row md:justify-center md:content-start md:gap-5 md:flex-wrap">
                         <div class="flex flex-col items-start gap-1 self-stretch md:flex-1">
-                            <InputLabel for="agent" value="Agent" :invalid="!!form.errors.agent" />
+                            <InputLabel for="agent" :value="$t('public.agent')" :invalid="!!form.errors.agent" />
                             <Dropdown
                                 id="agent"
                                 v-model="form.agent"
@@ -119,7 +119,7 @@
                                 filter
                                 :filterFields="['name', 'phone_code']"
                                 optionLabel="name"
-                                placeholder="Select agent"
+                                :placeholder="$t('public.select_agent_placeholder')"
                                 class="w-full"
                                 scroll-height="236px"
                                 :invalid="!!form.errors.agent"
@@ -159,7 +159,7 @@
                             <InputError :message="form.errors.agent" />
                         </div>
                         <div class="flex flex-col items-start gap-1 self-stretch md:flex-1">
-                            <InputLabel for="groupMembers" value="Total Group Members" :invalid="!!form.errors.group_members" />
+                            <InputLabel for="groupMembers" :value="$t('public.total_group_members')" :invalid="!!form.errors.group_members" />
                             <InputText
                                 id="groupMembers"
                                 type="number"
@@ -180,7 +180,7 @@
                     size="base"
                     :disabled="form.processing"
                 >
-                    Save
+                    {{ $t('public.save') }}
                 </Button>
             </div>
         </form>

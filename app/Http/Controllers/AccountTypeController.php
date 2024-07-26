@@ -38,7 +38,7 @@ class AccountTypeController extends Controller
         //function
 
         return back()->with('toast', [
-            'title' => 'Account type has been synchronised.',
+            'title' => trans('public.toast_sync_account_type'),
             'type'=> 'success',
         ]);
     }
@@ -62,7 +62,7 @@ class AccountTypeController extends Controller
         $account_type->save();
 
         return back()->with('toast', [
-            'title' => "You've successfully updated the account type!",
+            'title' => trans('public.toast_update_account_type_success'),
             'type' => 'success',
         ]);
     }

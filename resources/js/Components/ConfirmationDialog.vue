@@ -56,7 +56,7 @@ const buttonVariant = {
                             class="w-full"
                             size="base"
                         >
-                            Cancel
+                            {{ $t('public.cancel') }}
                         </Button>
                         <Button
                             :variant="buttonVariant"

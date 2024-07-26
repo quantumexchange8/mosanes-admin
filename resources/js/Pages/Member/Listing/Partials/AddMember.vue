@@ -71,13 +71,13 @@ watchEffect(() => {
         class='w-full md:w-auto'
         @click="visible = true"
     >
-        Add member
+        {{ $t('public.add_member') }}
     </Button>
 
     <Dialog
         v-model:visible="visible"
         modal
-        header="New Member"
+        :header="$t('public.new_member')"
         class="dialog-xs md:dialog-md"
     >
         <form @submit.prevent="submitForm()">
@@ -86,36 +86,36 @@ watchEffect(() => {
                 <!-- Basic Information -->
                 <div class="flex flex-col gap-3 items-center self-stretch">
                     <div class="text-gray-950 font-semibold text-sm self-stretch">
-                        Basic Information
+                        {{ $t('public.basic_information') }}
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 w-full">
                         <div class="space-y-1 h-[66px]">
-                            <InputLabel for="name" value="Full Name" />
+                            <InputLabel for="name" :value="$t('public.full_name')" />
                             <InputText
                                 id="name"
                                 type="text"
                                 class="block w-full"
                                 v-model="form.name"
-                                placeholder="Name as per NRIC or passport"
+                                :placeholder="$t('public.full_name_placeholder')"
                                 :invalid="!!form.errors.name"
                                 autofocus
                             />
                             <InputError :message="form.errors.name" />
                         </div>
                         <div class="space-y-1 h-[66px]">
-                            <InputLabel for="email" value="Email" />
+                            <InputLabel for="email" :value="$t('public.email')" />
                             <InputText
                                 id="email"
                                 type="email"
                                 class="block w-full"
                                 v-model="form.email"
-                                placeholder="Enter Email"
+                                :placeholder="$t('public.enter_email')"
                                 :invalid="!!form.errors.email"
                             />
                             <InputError :message="form.errors.email" />
                         </div>
                         <div class="space-y-1 h-[66px]">
-                            <InputLabel for="phone" value="Phone Number" />
+                            <InputLabel for="phone" :value="$t('public.phone_number')" />
                             <div class="flex gap-2 items-center self-stretch relative">
                                 <Dropdown
                                     v-model="selectedCountry"
@@ -123,7 +123,7 @@ watchEffect(() => {
                                     filter
                                     :filterFields="['name', 'phone_code']"
                                     optionLabel="name"
-                                    placeholder="Code"
+                                    :placeholder="$t('public.phone_code')"
                                     class="w-[100px]"
                                     scroll-height="236px"
                                     :invalid="!!form.errors.phone"
@@ -148,21 +148,21 @@ watchEffect(() => {
                                     type="text"
                                     class="block w-full"
                                     v-model="form.phone"
-                                    placeholder="Phone Number"
+                                    :placeholder="$t('public.phone_number')"
                                     :invalid="!!form.errors.phone"
                                 />
                             </div>
                             <InputError :message="form.errors.phone" />
                         </div>
                         <div class="space-y-1 h-[66px]">
-                            <InputLabel for="email" value="Upline" />
+                            <InputLabel for="email" :value="$t('public.upline')" />
                             <Dropdown
                                 v-model="form.upline"
                                 :options="uplines"
                                 filter
                                 :filterFields="['name', 'phone_code']"
                                 optionLabel="name"
-                                placeholder="Select Upline"
+                                :placeholder="$t('public.upline_placeholder')"
                                 class="w-full"
                                 scroll-height="236px"
                                 :invalid="!!form.errors.upline"
@@ -207,10 +207,10 @@ watchEffect(() => {
                 <!-- Kyc Verification -->
                 <div class="flex flex-col gap-3 items-center self-stretch">
                     <div class="text-gray-950 font-semibold text-sm self-stretch">
-                        KYC Verification
+                        {{ $t('public.kyc_verification') }}
                     </div>
                     <div class="flex flex-col gap-3 items-start self-stretch">
-                        <span class="text-xs text-gray-500">Maximum file size is 10 MB. Supported file types are .jpg and .png.</span>
+                        <span class="text-xs text-gray-500">{{ $t('public.kyc_caption') }}</span>
                         <FileUpload
                             class="w-full"
                             name="kyc_verification"
@@ -227,7 +227,7 @@ watchEffect(() => {
                                             variant="primary-tonal"
                                             @click="chooseCallback()"
                                         >
-                                            Browse
+                                            {{ $t('public.browse') }}
                                         </Button>
                                     </div>
                                 </div>
@@ -239,11 +239,11 @@ watchEffect(() => {
                 <!-- Create Password -->
                 <div class="flex flex-col gap-3 items-center self-stretch">
                     <div class="text-gray-950 font-semibold text-sm self-stretch">
-                        Create Password
+                        {{ $t('public.create_password') }}
                     </div>
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-5 w-full">
                         <div class="space-y-1 h-[66px]">
-                            <InputLabel for="password" value="Password" />
+                            <InputLabel for="password" :value="$t('public.password')" />
                             <Password
                                 v-model="form.password"
                                 toggleMask
@@ -252,7 +252,7 @@ watchEffect(() => {
                             <InputError :message="form.errors.password" />
                         </div>
                         <div class="space-y-1 h-[66px]">
-                            <InputLabel for="password_confirmation" value="Confirm Password" />
+                            <InputLabel for="password_confirmation" :value="$t('public.confirm_password')" />
                             <Password
                                 v-model="form.password_confirmation"
                                 toggleMask
@@ -270,7 +270,7 @@ watchEffect(() => {
                     @click="submitForm"
                     :disabled="form.processing"
                 >
-                    Create
+                    {{ $t('public.create') }}
                 </Button>
             </div>
         </form>

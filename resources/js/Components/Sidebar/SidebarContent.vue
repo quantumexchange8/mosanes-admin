@@ -17,7 +17,7 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, Ic
     >
         <!-- Dashboard -->
         <SidebarLink
-            title="Dashboard"
+            :title="$t('public.dashboard')"
             :href="route('dashboard')"
             :active="route().current('dashboard')"
         >
@@ -28,7 +28,7 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, Ic
 
         <!-- Member -->
         <SidebarCollapsible
-            title="Member"
+            :title="$t('public.member')"
             :active="route().current('member.*')"
         >
             <template #icon>
@@ -36,13 +36,13 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, Ic
             </template>
 
             <SidebarCollapsibleItem
-                title="Member Listing"
+                :title="$t('public.member_listing')"
                 :href="route('member.listing')"
                 :active="route().current('member.listing')"
             />
 
             <SidebarCollapsibleItem
-                title="Member Network"
+                :title="$t('public.member_network')"
                 :href="route('member.network')"
                 :active="route().current('member.network')"
             />
@@ -51,7 +51,7 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, Ic
 
         <!-- Group -->
         <SidebarLink
-            title="Group"
+            :title="$t('public.group')"
             :href="route('group')"
             :active="route().current('group')"
         >
@@ -62,7 +62,7 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, Ic
 
         <!-- Transaction -->
         <SidebarLink
-            title="Transaction"
+            :title="$t('public.transaction')"
             :href="route('transaction')"
             :active="route().current('transaction')"
         >
@@ -73,7 +73,7 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, Ic
 
         <!-- Account Type -->
         <SidebarLink
-            title="Account Type"
+            :title="$t('public.account_type')"
             :href="route('accountType')"
             :active="route().current('accountType')"
         >

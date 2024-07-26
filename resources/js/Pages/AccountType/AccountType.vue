@@ -38,7 +38,7 @@ watchEffect(() => {
 </script>
 
 <template>
-    <AuthenticatedLayout title="Account Type">
+    <AuthenticatedLayout :title="$t('public.account_type')">
         <div class="flex flex-col items-center gap-8">
             <div class="flex justify-end items-center self-stretch">
                 <Button
@@ -47,7 +47,7 @@ watchEffect(() => {
                     :href="route('accountType.syncAccountTypes')"
                 >
                     <IconRefresh size="20" stroke-width="1.25" color="#FFF" />
-                    Synchronise
+                    {{ $t('public.synchronise') }}
                 </Button>
             </div>
 
@@ -58,19 +58,19 @@ watchEffect(() => {
                     :loading="loading"
                 >
                     <template #empty>
-                        <Empty title="No Account Type Yet" message="Looks like you haven't created any account types yet. Let's get started by adding your first one!" />
+                        <Empty :title="$t('public.no_account_type_header')" :message="$t('public.no_account_type_caption')" />
                     </template>
 
                     <template #loading>
                         <div class="flex flex-col gap-2 items-center justify-center">
                             <Loader />
-                            <span class="text-sm text-gray-700">Loading account types data. Please wait.</span>
+                            <span class="text-sm text-gray-700">{{ $t('public.loading_account_type') }}</span>
                         </div>
                     </template>
 
                     <Column field="name" sortable style="width: 25%" >
                         <template #header>
-                            <span>name</span>
+                            <span>{{ $t('public.name') }}</span>
                         </template>
                         <template #body="slotProps">
                             {{ slotProps.data.name }}
@@ -78,7 +78,7 @@ watchEffect(() => {
                     </Column>
                     <Column field="max_acc" style="width: 20%" >
                         <template #header>
-                            <span>max.account</span>
+                            <span>{{ $t('public.max_account') }}</span>
                         </template>
                         <template #body="slotProps">
                             {{ slotProps.data.maximum_account_number }}
@@ -86,7 +86,7 @@ watchEffect(() => {
                     </Column>
                     <Column field="trade_delay" style="width: 20%" >
                         <template #header>
-                            <span>trade delay</span>
+                            <span>{{ $t('public.trade_delay') }}</span>
                         </template>
                         <template #body="slotProps">
                             {{ slotProps.data.trade_delay }}
@@ -94,7 +94,7 @@ watchEffect(() => {
                     </Column>
                     <Column field="total_acc" sortable style="width: 20%" >
                         <template #header>
-                            <span>total account</span>
+                            <span>{{ $t('public.total_account') }}</span>
                         </template>
                         <template #body="slotProps">
                             {{ slotProps.data.total_account }}

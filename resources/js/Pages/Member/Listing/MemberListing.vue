@@ -28,6 +28,7 @@ import Badge from '@/Components/Badge.vue';
 import Vue3Autocounter from 'vue3-autocounter';
 import DropdownOverlay from "@/Components/Dropdown.vue";
 import MemberTableActions from "@/Pages/Member/Listing/Partials/MemberTableActions.vue";
+import { trans, wTrans } from "laravel-vue-i18n";
 
 const total_members = ref(999);
 const total_agents = ref(999);
@@ -46,17 +47,17 @@ const dataOverviews = computed(() => [
     {
         icon: MemberIcon,
         total: total_members.value,
-        label: 'Total Members',
+        label: trans('public.total_members'),
     },
     {
         icon: AgentIcon,
         total: total_agents.value,
-        label: 'Total Agents',
+        label: trans('public.total_agents'),
     },
     {
         icon: UserIcon,
         total: total_users.value,
-        label: 'Total Users',
+        label: trans('public.total_users'),
     },
 ]);
 
@@ -180,10 +181,12 @@ const rgbaColor = (hex, opacity) => {
     const b = parseInt(hex.slice(4, 6), 16);
     return `rgba(${r}, ${g}, ${b}, ${opacity})`;
 }
+
+const paginator_caption = wTrans('public.paginator_caption');
 </script>
 
 <template>
-    <AuthenticatedLayout title="Member Listing">
+    <AuthenticatedLayout :title="$t('public.member_listing')">
         <div class="flex flex-col gap-5 items-center">
             <div class="flex justify-end w-full">
                 <AddMember />
@@ -217,7 +220,7 @@ const rgbaColor = (hex, opacity) => {
                     :rowsPerPageOptions="[10, 20, 50, 100]"
                     tableStyle="min-width: 50rem"
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
-                    currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+                    :currentPageReportTemplate="paginator_caption"
                     :globalFilterFields="['name']"
                     ref="dt"
                     :loading="loading"
@@ -228,7 +231,7 @@ const rgbaColor = (hex, opacity) => {
                                 <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                                     <IconSearch size="20" stroke-width="1.25" />
                                 </div>
-                                <InputText v-model="filters['global'].value" placeholder="Keyword Search" class="font-normal pl-12 w-full md:w-60" />
+                                <InputText v-model="filters['global'].value" :placeholder="$t('public.keyword_search')" class="font-normal pl-12 w-full md:w-60" />
                                 <div
                                     v-if="filters['global'].value !== null"
                                     class="absolute top-2/4 -mt-2 right-4 text-gray-300 hover:text-gray-400 select-none cursor-pointer"
@@ -246,7 +249,7 @@ const rgbaColor = (hex, opacity) => {
                                 >
                                     <IconAdjustments size="20" color="#0C111D" stroke-width="1.25" />
                                     <div class="text-sm text-gray-950 font-medium">
-                                        Filter
+                                        {{ $t('public.filter') }}
                                     </div>
                                     <Badge class="w-5 h-5 text-xs text-white" variant="numberbadge">
                                         {{ filterCount }}
@@ -258,17 +261,17 @@ const rgbaColor = (hex, opacity) => {
                                         @click="exportCSV($event)"
                                         class="w-full md:w-auto"
                                     >
-                                        Export
+                                        {{ $t('public.export') }}
                                     </Button>
                                 </div>
                             </div>
                         </div>
                     </template>
-                    <template #empty> No users found. </template>
+                    <template #empty> {{ $t('public.no_user_header') }} </template>
                     <template #loading>
                         <div class="flex flex-col gap-2 items-center justify-center">
                             <Loader />
-                            <span class="text-sm text-gray-700">Loading users data. Please wait.</span>
+                            <span class="text-sm text-gray-700">{{ $t('public.loading_users_caption') }}</span>
                         </div>
                     </template>
                     <Column field="id_number" sortable style="width: 25%">
@@ -279,7 +282,7 @@ const rgbaColor = (hex, opacity) => {
                             {{ slotProps.data.id_number }}
                         </template>
                     </Column>
-                    <Column field="name" sortable header="Name" style="width: 35%">
+                    <Column field="name" sortable :header="$t('public.name')" style="width: 35%">
                         <template #body="slotProps">
                             <div class="flex items-center gap-3">
                                 <div class="w-7 h-7 rounded-full overflow-hidden">
@@ -298,7 +301,7 @@ const rgbaColor = (hex, opacity) => {
                     </Column>
                     <Column field="group" style="width: 15%">
                         <template #header>
-                            <span class="hidden md:block items-center justify-center w-full text-center">group</span>
+                            <span class="hidden md:block items-center justify-center w-full text-center">{{ $t('public.group') }}</span>
                         </template>
                         <template #body="slotProps">
                             <div class="flex items-center justify-center">
@@ -394,16 +397,16 @@ const rgbaColor = (hex, opacity) => {
             <!-- Filter Role-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    Filter by role
+                    {{ $t('public.filter_role_header') }}
                 </div>
                 <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
                         <RadioButton v-model="filters['role'].value" inputId="role_member" value="member" />
-                        <label for="role_member">Member</label>
+                        <label for="role_member">{{ $t('public.member') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
                         <RadioButton v-model="filters['role'].value" inputId="role_agent" value="agent" />
-                        <label for="role_agent">Agent</label>
+                        <label for="role_agent">{{ $t('public.agent') }}</label>
                     </div>
                 </div>
             </div>
@@ -411,7 +414,7 @@ const rgbaColor = (hex, opacity) => {
             <!-- Filter Group-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    Filter by group
+                    {{ $t('public.filter_group_header') }}
                 </div>
                 <Dropdown
                     v-model="group_id"
@@ -419,7 +422,7 @@ const rgbaColor = (hex, opacity) => {
                     filter
                     :filterFields="['name']"
                     optionLabel="name"
-                    placeholder="Select group"
+                    :placeholder="$t('public.select_group_placeholder')"
                     class="w-full"
                     scroll-height="236px"
                 >
@@ -444,7 +447,7 @@ const rgbaColor = (hex, opacity) => {
             <!-- Filter Upline-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    Filter by upline
+                    {{ $t('public.filter_upline_header') }}
                 </div>
                 <Dropdown
                     v-model="upline_id"
@@ -452,7 +455,7 @@ const rgbaColor = (hex, opacity) => {
                     filter
                     :filterFields="['name']"
                     optionLabel="name"
-                    placeholder="Select upline"
+                    :placeholder="upline_placeholder"
                     class="w-full"
                     scroll-height="236px"
                 >
@@ -491,16 +494,16 @@ const rgbaColor = (hex, opacity) => {
             <!-- Filter Statys-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    Filter by status
+                    {{ $t('public.filter_status_header') }}
                 </div>
                 <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
                         <RadioButton v-model="filters['status'].value" inputId="status_active" value="active" />
-                        <label for="status_active">Active</label>
+                        <label for="status_active">{{ $t('public.active') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
                         <RadioButton v-model="filters['status'].value" inputId="status_inactive" value="inactive" />
-                        <label for="status_inactive">Inactive</label>
+                        <label for="status_inactive">{{ $t('public.inactive') }}</label>
                     </div>
                 </div>
             </div>
@@ -512,7 +515,7 @@ const rgbaColor = (hex, opacity) => {
                     class="flex justify-center w-full"
                     @click="clearFilter()"
                 >
-                    Clear All
+                    {{ $t('public.clear_all') }}
                 </Button>
             </div>
         </div>

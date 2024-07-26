@@ -56,7 +56,7 @@ const date = ref('');
             <div class="w-full p-4 md:py-6 md:px-8 flex flex-col items-center gap-5 self-stretch rounded-2xl bg-white shadow-toast">
                 <div class="w-full flex flex-col justify-center items-start md:flex-row md:items-center md:gap-3 md:self-stretch">
                     <div class="flex flex-col justify-center shrink-0 self-stretch text-gray-950 text-sm font-semibold md:flex-1 md:text-base">
-                        Total Net Balance ($)
+                        {{ $t('public.total_net_balance') }} ($)
                     </div>
                     <div class="self-stretch text-gray-950 text-xxl font-semibold md:flex-1 md:text-right">
                         <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalNetBalance" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
@@ -71,7 +71,7 @@ const date = ref('');
                         <div class="flex items-center gap-2 self-stretch">
                             <IconWallet size="20" stroke-width="1.25" color="white" class="md:size-4 xl:size-5" />
                             <div class="text-white text-sm md:text-xs xl:text-sm">
-                                Total Deposit ($)
+                                {{ $t('public.total_deposit') }} ($)
                             </div>
                         </div>
                     </div>
@@ -83,7 +83,7 @@ const date = ref('');
                         <div class="flex items-center gap-2 self-stretch">
                             <IconCreditCardPay size="20" stroke-width="1.25" color="white" class="md:size-4 xl:size-5" />
                             <div class="text-white text-sm md:text-xs xl:text-sm">
-                                Total Withdrawal ($)
+                                {{ $t('public.total_withdrawal') }} ($)
                             </div>
                         </div>
                     </div>
@@ -95,7 +95,7 @@ const date = ref('');
                         <div class="flex items-center gap-2 self-stretch">
                             <IconReceiptTax size="20" stroke-width="1.25" color="white" class="md:size-4 xl:size-5" />
                             <div class="text-white text-sm md:text-xs xl:text-sm">
-                                Total Fee Charges ($)
+                                {{ $t('public.total_fee_charges') }} ($)
                             </div>
                         </div>
                     </div>
@@ -108,7 +108,7 @@ const date = ref('');
                         v-model="date"
                         selectionMode="range"
                         :manualInput="false"
-                        dateFormat="dd/mm/yy"
+                        dateFormat="yy/mm/dd"
                         class="w-full md:w-[272px]"
                     />
                     <NewGroup />
@@ -116,7 +116,7 @@ const date = ref('');
 
                 <template v-if="groupsLength === 0">
                     <div class="py-5 flex flex-col items-center gap-5 self-stretch">
-                        <Empty title="No Groups Created" message="You haven't created any groups yet. Start building your first group to get started!" />
+                        <Empty :title="$t('public.no_group_header')" :message="$t('public.no_group_caption')" />
                     </div>
                 </template>
 
@@ -174,7 +174,7 @@ const date = ref('');
                             <div class="py-3 grid grid-cols-2 items-start content-start gap-y-3 gap-x-5 self-stretch flex-wrap md:grid-cols-3 md:gap-2 xl:grid-cols-6">
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
-                                        Deposit ($)
+                                        {{ $t('public.deposit') }} ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
                                         {{ formatAmount(group.deposit) }}
@@ -182,7 +182,7 @@ const date = ref('');
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
-                                        Withdrawal ($)
+                                        {{ $t('public.withdrawal') }} ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
                                         {{ formatAmount(group.withdrawal) }}
@@ -190,7 +190,7 @@ const date = ref('');
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
-                                        {{ group.fee_charges }}% Fee Charges ($)
+                                        {{ group.fee_charges }}% {{ $t('public.fee_charges') }} ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
                                         {{ formatAmount(group.charges) }}
@@ -198,7 +198,7 @@ const date = ref('');
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
-                                        Net Balance ($)
+                                        {{ $t('public.net_balance') }} ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
                                         {{ formatAmount(group.net_balance) }}
@@ -206,7 +206,7 @@ const date = ref('');
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
-                                        Account Balance ($)
+                                        {{ $t('public.account_balance') }} ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
                                         {{ formatAmount(group.account_balance) }}
@@ -214,7 +214,7 @@ const date = ref('');
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
-                                        Account Equity ($)
+                                        {{ $t('public.account_equity') }} ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
                                         {{ formatAmount(group.account_equity) }}

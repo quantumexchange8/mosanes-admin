@@ -88,7 +88,7 @@ class GroupController extends Controller
         });
 
         return back()->with('toast', [
-            'title' => "You've successfully created a new group!",
+            'title' => trans('public.toast_create_group_success'),
             'type' => 'success',
         ]);
     }
@@ -104,7 +104,7 @@ class GroupController extends Controller
         $group->save();
 
         return back()->with('toast', [
-            'title' => "You've successfully updated the group details!",
+            'title' => trans('public.toast_update_group_success'),
             'type' => 'success',
         ]);
     }
@@ -116,7 +116,7 @@ class GroupController extends Controller
         GroupHasUser::where('group_id', $id)->delete();
 
         return back()->with('toast', [
-            'title' => "Group has been deleted!",
+            'title' => trans('public.toast_delete_group_success'),
             'type' => 'success',
         ]);
     }

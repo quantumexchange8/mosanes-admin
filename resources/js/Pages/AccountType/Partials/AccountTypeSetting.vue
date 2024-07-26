@@ -37,8 +37,7 @@ const leverages = ref();
 const getLeverages = async () => {
     try {
         const response = await axios.get('/account_type/getLevearges');
-        leverages.value = response.data.leverages
-        console.log(response.data);
+        leverages.value = response.data.leverages;
     } catch (error) {
         console.error('Error getting leverages:', error);
     }
@@ -83,19 +82,19 @@ onMounted(() => {
     <Dialog
         v-model:visible="visible"
         modal
-        header="account_type_setting"
+        :header="$t('public.account_type_setting')"
         class="dialog-xs md:dialog-md"
     >
         <form @submit.prevent="submitForm()">
             <div class="flex flex-col items-center gap-8 self-stretch">
                 <div class="flex flex-col items-center gap-3 self-stretch">
                     <div class="self-stretch text-gray-950 text-sm font-bold">
-                        Account Information
+                        {{ $t('public.account_information') }}
                     </div>
                     <div class="grid justify-center items-start content-start gap-5 self-stretch flex-wrap grid-cols-2">
                         <div class="flex flex-col items-start gap-1 flex-1">
                             <InputLabel for="account_type_name" :invalid="!!form.errors.account_type_name">
-                                Account Type Name
+                                {{ $t('public.account_type_name') }}
                             </InputLabel>
                             <InputText
                                 v-model="form.account_type_name"
@@ -107,7 +106,7 @@ onMounted(() => {
                             <InputError :message="form.errors.account_type_name" />
                         </div>
                         <div class="flex flex-col items-start gap-1 flex-1">
-                            <InputLabel for="category" value="Category" :invalid="!!form.errors.category" />
+                            <InputLabel for="category" :value="$t('public.category')" :invalid="!!form.errors.category" />
                             <Dropdown
                                 v-model="form.category"
                                 id="category"
@@ -118,7 +117,7 @@ onMounted(() => {
                         </div>
                         <div class="flex flex-col items-start gap-1 flex-1 col-span-2">
                             <InputLabel for="description" :invalid="!!form.errors.description">
-                                Description
+                                {{ $t('public.description_en') }}
                             </InputLabel>
                             <InputText
                                 v-model="form.description"
@@ -128,7 +127,7 @@ onMounted(() => {
                                 placeholder="Tell more about this..."
                             />
                             <div class="self-stretch text-gray-500 text-xs">
-                                Description will be displayed to user when open new account.
+                                {{ $t('public.description_caption') }}
                             </div>
                             <InputError :message="form.errors.description" />
                         </div>
@@ -136,11 +135,11 @@ onMounted(() => {
                 </div>
                 <div class="flex flex-col items-center gap-3 self-stretch">
                     <div class="self-stretch text-gray-950 text-sm font-bold">
-                        Trading Conditions
+                        {{ $t('public.trading_conditions') }}
                     </div>
                     <div class="flex justify-center items-start content-start gap-5 self-stretch flex-wrap">
                         <div class="flex flex-col items-start gap-1 flex-1">
-                            <InputLabel for="leverage" value="Leverage" :invalid="!!form.errors.leverage" />
+                            <InputLabel for="leverage" :value="$t('public.leverage')" :invalid="!!form.errors.leverage" />
                             <Dropdown
                                 v-model="form.leverage"
                                 id="category"
@@ -152,7 +151,7 @@ onMounted(() => {
                             <InputError :message="form.errors.leverage" />
                         </div>
                         <div class="flex flex-col items-start gap-1 flex-1">
-                            <InputLabel for="trade_delay_duration" value="Trade Delay Duration" :invalid="!!form.errors.trade_delay_duration" />
+                            <InputLabel for="trade_delay_duration" :value="$t('public.trade_delay_duration')" :invalid="!!form.errors.trade_delay_duration" />
                             <Dropdown
                                 v-model="form.trade_delay_duration"
                                 id="trade_delay_duration"
@@ -167,11 +166,11 @@ onMounted(() => {
                 </div>
                 <div class="flex flex-col items-center gap-3 self-stretch">
                     <div class="self-stretch text-gray-950 text-sm font-bold">
-                        Other Settings
+                        {{ $t('public.other_settings') }}
                     </div>
                     <div class="grid justify-center items-start content-start gap-5 self-stretch flex-wrap grid-cols-2">
                         <div class="flex flex-col items-start gap-1 flex-1">
-                            <InputLabel for="max_account" value="Maximum Account Creation" :invalid="!!form.errors.max_account" />
+                            <InputLabel for="max_account" :value="$t('public.maximum_account_creation')" :invalid="!!form.errors.max_account" />
                             <InputText
                                 v-model="form.max_account"
                                 id="max_account"
@@ -189,7 +188,7 @@ onMounted(() => {
                     variant="primary-flat"
                     :disabled="form.processing"
                 >
-                    Save
+                    {{ $t('public.save') }}
                 </Button>
             </div>
         </form>

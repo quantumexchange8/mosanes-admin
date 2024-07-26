@@ -34,7 +34,7 @@ const updateBalEquity = () => {
 </script>
 
 <template>
-    <AuthenticatedLayout title="Dashboard">
+    <AuthenticatedLayout :title="$t('public.dashboard')">
         <div class="w-full flex flex-col items-center gap-5">
             <div
                 class="w-full h-40 py-6 pl-4 md:p-8 flex justify-between self-stretch rounded-2xl bg-primary-100 shadow-toast relative bg-[left_-1px] bg-no-repeat xl:bg-[length:1440px]"
@@ -42,10 +42,10 @@ const updateBalEquity = () => {
             >
                 <div class="w-3/4 md:w-full flex flex-col items-start gap-1">
                     <div class="self-stretch text-primary-900 text-base md:text-xxl font-bold">
-                        Welcome Back, {{ page.props.auth.user.name }}!
+                        {{ $t('public.greeting') }}
                     </div>
                     <div class="self-stretch text-primary-900 text-xs md:text-base">
-                        Ready to grow your trading community? Let's get started!
+                        {{ $t('public.greeting_caption') }}
                     </div>
                 </div>
 
@@ -58,7 +58,7 @@ const updateBalEquity = () => {
                 <div class="p-4 md:py-6 md:px-8 flex flex-col items-center gap-8 flex-1 self-stretch rounded-2xl shadow-toast bg-white">
                     <div class="flex items-center self-stretch">
                         <div class="flex-1 text-gray-950 font-semibold">
-                            Account Balance and Equity
+                            {{ $t('public.account_balance_equity') }}
                         </div>
                         <Button
                             variant="gray-text"
@@ -75,7 +75,7 @@ const updateBalEquity = () => {
                     <div class="flex items-center gap-3 self-stretch">
                         <div class="flex flex-col items-start gap-2 flex-1">
                             <div class="self-stretch text-gray-500 text-xs md:text-sm">
-                                Balance ($)
+                                {{ $t('public.balance') }} ($)
                             </div>
                             <div class="text-gray-950 text-lg md:text-xl font-semibold">
                                 <vue3-autocounter ref="counterBalance" :startAmount="0" :endAmount="balance" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
@@ -86,7 +86,7 @@ const updateBalEquity = () => {
 
                         <div class="flex flex-col items-end gap-2 flex-1">
                             <div class="self-stretch text-gray-500 text-right text-xs md:text-sm">
-                                Equity ($)
+                                {{ $t('public.equity') }} ($)
                             </div>
                             <div class="text-gray-950 text-lg md:text-xl font-semibold">
                                 <vue3-autocounter ref="counterEquity" :startAmount="0" :endAmount="equity" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
@@ -98,7 +98,7 @@ const updateBalEquity = () => {
                 <div class="p-4 md:py-6 md:px-8 flex flex-col items-start gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white">
                     <div class="flex items-center self-stretch">
                         <div class="flex-1 text-gray-950 font-semibold text-sm md:text-base">
-                            Pending Withdrawal ($)
+                            {{ $t('public.pending_withdrawal') }} ($)
                         </div>
                         <Button
                             variant="gray-text"
@@ -120,7 +120,7 @@ const updateBalEquity = () => {
                             {{ pendingWithdrawalCount }}
                         </Badge>
                         <div class="text-gray-500 text-xs md:text-sm">
-                            accounts request to withdraw
+                            {{ $t('public.pending_withdrawal_caption') }}
                         </div>
                     </div>
                 </div>
@@ -131,7 +131,7 @@ const updateBalEquity = () => {
                     <div class="flex items-start gap-5 self-stretch">
                         <div class="flex flex-col items-start flex-1">
                             <div class="py-2 text-gray-500 text-sm">
-                                Net Asset ($)
+                                {{ $t('public.net_asset') }} ($)
                             </div>
                             <div class="text-gray-950 text-xl md:text-xxl font-semibold">
                                 <vue3-autocounter ref="counter" :startAmount="0" :endAmount="netAsset" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
@@ -154,7 +154,7 @@ const updateBalEquity = () => {
 
                             <div class="flex flex-col items-start gap-1 flex-1">
                                 <div class="self-stretch text-gray-500 text-xs">
-                                    Total Deposit ($)
+                                    {{ $t('public.total_deposit') }} ($)
                                 </div>
                                 <div class="self-stretch text-gray-950 text-base md:text-lg font-semibold">
                                     <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalDeposit" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
@@ -165,7 +165,7 @@ const updateBalEquity = () => {
                                 size="sm"
                                 type="button"
                             >
-                                Details
+                                {{ $t('public.details') }}
                             </Button>
                         </div>
 
@@ -174,7 +174,7 @@ const updateBalEquity = () => {
 
                             <div class="flex flex-col items-start gap-1 flex-1">
                                 <div class="self-stretch text-gray-500 text-xs">
-                                    Total Withdrawal ($)
+                                    {{ $t('public.total_withdrawal') }} ($)
                                 </div>
                                 <div class="self-stretch text-gray-950 text-base md:text-lg font-semibold">
                                     <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalWithdrawal" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
@@ -185,7 +185,7 @@ const updateBalEquity = () => {
                                 size="sm"
                                 type="button"
                             >
-                                Details
+                                {{ $t('public.details') }}
                             </Button>
                         </div>
 
@@ -194,7 +194,7 @@ const updateBalEquity = () => {
 
                             <div class="flex flex-col items-start gap-1 flex-1">
                                 <div class="self-stretch text-gray-500 text-xs">
-                                    Total Rebate Payout ($)
+                                    {{ $t('public.total_rebate_payout') }} ($)
                                 </div>
                                 <div class="self-stretch text-gray-950 text-base md:text-lg font-semibold">
                                     <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalRebate" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
@@ -205,7 +205,7 @@ const updateBalEquity = () => {
                                 size="sm"
                                 type="button"
                             >
-                                Details
+                                {{ $t('public.details') }}
                             </Button>
                         </div>
                     </div>
@@ -214,7 +214,7 @@ const updateBalEquity = () => {
                 <div class="p-4 md:py-6 md:px-8 flex flex-col gap-5 flex-1 self-stretch items-stretch rounded-2xl bg-white shadow-toast">
                     <div class="flex items-center self-stretch">
                         <div class="flex-1 text-gray-950 font-semibold">
-                            Recent Posts from Forum
+                            {{ $t('public.recent_posts') }}
                         </div>
                         <Button
                             variant="gray-text"

@@ -30,13 +30,13 @@ length.value = 0;
                 v-slot="{ iconSizeClasses }"
                 class="w-full md:w-auto"
             >
-                Export
+                {{ $t('public.export') }}
                 <IconCloudDownload size="20" stroke-width="1.25" color="#2970FF"/>
             </Button>
         </div>
 
         <template v-if="length === 0">
-            <Empty message="No Transactions Yet" />
+            <Empty :message="$t('public.no_transaction_caption')" />
         </template>
 
         <template v-else>

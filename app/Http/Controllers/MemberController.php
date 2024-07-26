@@ -91,7 +91,7 @@ class MemberController extends Controller
         $user->save();
 
         return back()->with('toast', [
-            'title' => "You’ve successfully created a new member!",
+            'title' => trans("public.toast_create_member_success"),
             'type' => 'success',
         ]);
     }
@@ -135,7 +135,7 @@ class MemberController extends Controller
     {
         // dd($request->all());
         return redirect()->back()->with('toast', [
-            'title' => 'Trading account has been deleted!',
+            'title' => trans('public.toast_delete_trading_account_success'),
             'type' => 'success'
         ]);
 

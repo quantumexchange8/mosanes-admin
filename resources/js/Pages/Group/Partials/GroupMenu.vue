@@ -9,6 +9,7 @@ import { useConfirm } from "primevue/useconfirm";
 import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import { router } from '@inertiajs/vue3';
 import GroupTransactions from '@/Pages/Group/Partials/GroupTransactions.vue';
+import { trans } from 'laravel-vue-i18n';
 
 const props = defineProps({
     group: Object,
@@ -28,10 +29,10 @@ const requireConfirmation = (id) => {
     console.log(confirm)
     confirm.require({
         group: 'headless',
-        header: 'Delete Group',
-        message: 'Are you sure you want to delete this group? \n' +
-            'This action cannot be undone.',
-        acceptButton: 'Yes, delete it',
+        header: trans('public.delete_group_header'),
+        message: trans('public.delete_group_caption')+'\n'+
+                trans('public.delete_caption'),
+        acceptButton: trans('public.delete_confirm'),
         accept: () => {
             // route or function
             router.visit(route('group.delete', id), {method: 'delete'})
@@ -62,7 +63,7 @@ const requireConfirmation = (id) => {
                 >
                     <IconReportSearch size="20" stroke-width="1.25" color="#667085" />
                     <div class="text-gray-950 text-sm font-medium">
-                        Transactions
+                        {{ $t('public.transaction') }}
                     </div>
                 </div>
 
@@ -72,7 +73,7 @@ const requireConfirmation = (id) => {
                 >
                     <IconPencilMinus size="20" stroke-width="1.25" color="#667085" />
                     <div class="text-gray-950 text-sm font-medium">
-                        Edit
+                        {{ $t('public.edit') }}
                     </div>
                 </div>
 
@@ -84,7 +85,7 @@ const requireConfirmation = (id) => {
                 >
                     <IconTrash size="20" stroke-width="1.25" color="#F04438" />
                     <div class="text-error-500 text-sm font-medium">
-                        Delete
+                        {{ $t('public.delete') }}
                     </div>
                 </div>
             </div>
@@ -94,7 +95,7 @@ const requireConfirmation = (id) => {
     <Dialog
         v-model:visible="visible"
         modal
-        :header="dialogTitle"
+        :header="$t(`public.${dialogTitle}`)"
         class="dialog-xs"
         :class="[
             {'sm:dialog-md': dialogTitle === 'edit_group'},

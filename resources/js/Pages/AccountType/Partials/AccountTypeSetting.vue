@@ -10,7 +10,8 @@ import InputLabel from '@/Components/InputLabel.vue';
 import { useForm } from '@inertiajs/vue3';
 
 const props = defineProps({
-    account_type:Object,
+    account_type: Object,
+    buttonText: String,
 })
 
 const visible = ref(false);
@@ -57,6 +58,7 @@ const submitForm = () => {
         preserveScroll: true,
         onSuccess: () => {
             visible.value = false;
+            emit('detailsVisible', false);
         },
         onError: (e) => {
             console.log('Error submit form:', e);
@@ -67,13 +69,29 @@ const submitForm = () => {
 onMounted(() => {
     getLeverages()
 })
+
+const emit = defineEmits(['detailsVisible']);
+const openSettingDialog = () => {
+    visible.value = true;
+}
 </script>
 
 <template>
     <Button
+        v-if="buttonText"
+        variant="primary-flat"
+        type="button"
+        class="w-full"
+        @click="openSettingDialog"
+    >
+        {{ buttonText }}
+    </Button>
+    <Button
+        v-else
         variant="gray-text"
         size="sm"
         iconOnly
+        v-tooltip.top="'Setting'"
         @click="visible = true"
     >
         <IconAdjustmentsHorizontal size="16" stroke-width="1.25" color="#667085" />
@@ -91,45 +109,61 @@ onMounted(() => {
                     <div class="self-stretch text-gray-950 text-sm font-bold">
                         {{ $t('public.account_information') }}
                     </div>
-                    <div class="grid justify-center items-start content-start gap-5 self-stretch flex-wrap grid-cols-2">
-                        <div class="flex flex-col items-start gap-1 flex-1">
-                            <InputLabel for="account_type_name" :invalid="!!form.errors.account_type_name">
-                                {{ $t('public.account_type_name') }}
-                            </InputLabel>
-                            <InputText
-                                v-model="form.account_type_name"
-                                id="account_type_name"
-                                type="text"
-                                class="w-full"
-                                disabled
-                            />
-                            <InputError :message="form.errors.account_type_name" />
-                        </div>
-                        <div class="flex flex-col items-start gap-1 flex-1">
-                            <InputLabel for="category" :value="$t('public.category')" :invalid="!!form.errors.category" />
-                            <Dropdown
-                                v-model="form.category"
-                                id="category"
-                                :options="categories"
-                                class="w-full"
-                            />
-                            <InputError :message="form.errors.category" />
-                        </div>
-                        <div class="flex flex-col items-start gap-1 flex-1 col-span-2">
-                            <InputLabel for="description" :invalid="!!form.errors.description">
-                                {{ $t('public.description_en') }}
-                            </InputLabel>
-                            <InputText
-                                v-model="form.description"
-                                id="description"
-                                type="text"
-                                class="w-full"
-                                placeholder="Tell more about this..."
-                            />
-                            <div class="self-stretch text-gray-500 text-xs">
-                                {{ $t('public.description_caption') }}
+                    <div class="w-full flex flex-col gap-1">
+                        <div class="grid justify-center items-start content-start gap-3 self-stretch flex-wrap grid-cols-1 md:grid-cols-2 md:gap-5">
+                            <div class="flex flex-col items-start gap-1 flex-1">
+                                <InputLabel for="account_type_name" :invalid="!!form.errors.account_type_name">
+                                    {{ $t('public.account_type_name') }}
+                                </InputLabel>
+                                <InputText
+                                    v-model="form.account_type_name"
+                                    id="account_type_name"
+                                    type="text"
+                                    class="w-full"
+                                    disabled
+                                />
+                                <InputError :message="form.errors.account_type_name" />
                             </div>
-                            <InputError :message="form.errors.description" />
+                            <div class="flex flex-col items-start gap-1 flex-1">
+                                <InputLabel for="category" :value="$t('public.category')" :invalid="!!form.errors.category" />
+                                <Dropdown
+                                    v-model="form.category"
+                                    id="category"
+                                    :options="categories"
+                                    class="w-full"
+                                />
+                                <InputError :message="form.errors.category" />
+                            </div>
+                            <div class="flex flex-col items-start gap-1 flex-1">
+                                <InputLabel for="description" :invalid="!!form.errors.description">
+                                    {{ $t('public.description_en') }}
+                                </InputLabel>
+                                <InputText
+                                    v-model="form.description"
+                                    id="description"
+                                    type="text"
+                                    class="w-full"
+                                    placeholder="Tell more about this..."
+                                />
+                                <InputError :message="form.errors.description" />
+                            </div>
+                            <div class="flex flex-col items-start gap-1 flex-1">
+                                <InputLabel for="description" :invalid="!!form.errors.description">
+                                    {{ $t('public.description_zh') }}
+                                </InputLabel>
+                                <InputText
+                                    v-model="form.description"
+                                    id="description"
+                                    type="text"
+                                    class="w-full"
+                                    placeholder="Tell more about this..."
+                                />
+                                <InputError :message="form.errors.description" />
+                            </div>
+                        </div>
+
+                        <div class="self-stretch text-gray-500 text-xs">
+                            {{ $t('public.description_caption') }}
                         </div>
                     </div>
                 </div>
@@ -137,8 +171,8 @@ onMounted(() => {
                     <div class="self-stretch text-gray-950 text-sm font-bold">
                         {{ $t('public.trading_conditions') }}
                     </div>
-                    <div class="flex justify-center items-start content-start gap-5 self-stretch flex-wrap">
-                        <div class="flex flex-col items-start gap-1 flex-1">
+                    <div class="flex justify-center items-start content-start gap-5 self-stretch flex-wrap flex-col md:flex-row">
+                        <div class="w-full flex flex-col items-start gap-1 flex-1">
                             <InputLabel for="leverage" :value="$t('public.leverage')" :invalid="!!form.errors.leverage" />
                             <Dropdown
                                 v-model="form.leverage"
@@ -150,7 +184,7 @@ onMounted(() => {
                             />
                             <InputError :message="form.errors.leverage" />
                         </div>
-                        <div class="flex flex-col items-start gap-1 flex-1">
+                        <div class="w-full flex flex-col items-start gap-1 flex-1">
                             <InputLabel for="trade_delay_duration" :value="$t('public.trade_delay_duration')" :invalid="!!form.errors.trade_delay_duration" />
                             <Dropdown
                                 v-model="form.trade_delay_duration"
@@ -168,7 +202,7 @@ onMounted(() => {
                     <div class="self-stretch text-gray-950 text-sm font-bold">
                         {{ $t('public.other_settings') }}
                     </div>
-                    <div class="grid justify-center items-start content-start gap-5 self-stretch flex-wrap grid-cols-2">
+                    <div class="grid justify-center items-start content-start gap-5 self-stretch flex-wrap grid-cols-1 md:grid-cols-2">
                         <div class="flex flex-col items-start gap-1 flex-1">
                             <InputLabel for="max_account" :value="$t('public.maximum_account_creation')" :invalid="!!form.errors.max_account" />
                             <InputText
@@ -183,7 +217,7 @@ onMounted(() => {
                     </div>
                 </div>
             </div>
-            <div class="pt-7 flex flex-col items-end self-stretch">
+            <div class="pt-5 md:pt-7 flex flex-col items-end self-stretch">
                 <Button
                     variant="primary-flat"
                     :disabled="form.processing"

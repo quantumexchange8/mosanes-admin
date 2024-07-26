@@ -58,7 +58,7 @@ class AccountTypeController extends Controller
         $account_type->leverage = $request->leverage;
         $account_type->trade_open_duration = $request->trade_delay_duration;
         $account_type->maximum_account_number = $request->max_account;
-        // $account_type->status = 'active';
+        $account_type->status = 'active';
         $account_type->save();
 
         return back()->with('toast', [

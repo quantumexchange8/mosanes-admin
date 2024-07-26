@@ -274,7 +274,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                             <span class="text-sm text-gray-700">{{ $t('public.loading_users_caption') }}</span>
                         </div>
                     </template>
-                    <Column field="id_number" sortable style="width: 25%">
+                    <Column field="id_number" sortable style="width: 25%" headerClass="hidden md:table-cell">
                         <template #header>
                             <span class="hidden md:block">id</span>
                         </template>
@@ -282,7 +282,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                             {{ slotProps.data.id_number }}
                         </template>
                     </Column>
-                    <Column field="name" sortable :header="$t('public.name')" style="width: 35%">
+                    <Column field="name" sortable :header="$t('public.name')" style="width: 35%" headerClass="hidden md:table-cell">
                         <template #body="slotProps">
                             <div class="flex items-center gap-3">
                                 <div class="w-7 h-7 rounded-full overflow-hidden">
@@ -299,7 +299,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                             </div>
                         </template>
                     </Column>
-                    <Column field="group" style="width: 15%">
+                    <Column field="group" style="width: 15%" headerClass="hidden md:table-cell">
                         <template #header>
                             <span class="hidden md:block items-center justify-center w-full text-center">{{ $t('public.group') }}</span>
                         </template>
@@ -327,7 +327,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                             </div>
                         </template>
                     </Column>
-                    <Column field="representative.name" header="" style="width: 10%">
+                    <Column field="representative.name" header="" style="width: 10%" headerClass="hidden md:table-cell">
                         <template #body="slotProps">
                             <MemberTableActions
                                 :member="slotProps.data"

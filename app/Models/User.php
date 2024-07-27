@@ -91,4 +91,9 @@ class User extends Authenticatable implements HasMedia
     {
         return $this->belongsTo(User::class, 'upline_id', 'id');
     }
+
+    public function paymentAccounts(): HasMany
+    {
+        return $this->hasMany(PaymentAccount::class, 'user_id', 'id');
+    }
 }

@@ -41,6 +41,8 @@ Route::middleware('auth')->group(function () {
 
         // details
         Route::get('/detail/{id_number}', [MemberController::class, 'detail'])->name('member.detail');
+        Route::get('/getUserData', [MemberController::class, 'getUserData'])->name('member.getUserData');
+
         Route::post('/updateContactInfo', [MemberController::class, 'updateContactInfo'])->name('member.updateContactInfo');
         Route::post('/updateCryptoWalletInfo', [MemberController::class, 'updateCryptoWalletInfo'])->name('member.updateCryptoWalletInfo');
         Route::post('/updateKYCStatus', [MemberController::class, 'updateKYCStatus'])->name('member.updateKYCStatus');

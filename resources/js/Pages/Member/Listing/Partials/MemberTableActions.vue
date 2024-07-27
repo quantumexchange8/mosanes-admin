@@ -22,6 +22,7 @@ const toggle = (event) => {
         size="sm"
         type="button"
         iconOnly
+        pill
         @click="toggle"
     >
         <IconDotsVertical size="16" stroke-width="1.25" color="#667085" />

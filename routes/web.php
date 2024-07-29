@@ -36,6 +36,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/getMemberListingData', [MemberController::class, 'getMemberListingData'])->name('member.getMemberListingData');
         Route::get('/getFilterData', [MemberController::class, 'getFilterData'])->name('member.getFilterData');
         Route::post('/addNewMember', [MemberController::class, 'addNewMember'])->name('member.addNewMember');
+        Route::post('/updateMemberStatus', [MemberController::class, 'updateMemberStatus'])->name('member.updateMemberStatus');
 
         Route::post('/uploadKyc', [MemberController::class, 'uploadKyc'])->name('member.uploadKyc');
 

@@ -230,4 +230,10 @@ return [
     "insufficient_balance" => "Insufficient Balance",
     "type" => "Type",
     "adjustment_type" => "Adjustment Type",
+    "deactivate_member" => "Deactivate Member",
+    "deactivate_member_caption" => "Are you sure you want to deactivate this member? This action will restrict their access.",
+    "toast_member_has_deactivated" => "Member has been deactivated.",
+    "toast_member_has_activated" => "Member has been activated.",
+    "activate_member" => "Activate Member",
+    "activate_member_caption" => "Are you sure you want to activate this member? This will grant them access to the platform.",
 ];

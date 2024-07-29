@@ -35,7 +35,6 @@ getAdjustmentHistoryData();
 const rowClicked = (data) => {
     visible.value = true;
     selected_row.value = data;
-    console.log(data)
 }
 </script>
 

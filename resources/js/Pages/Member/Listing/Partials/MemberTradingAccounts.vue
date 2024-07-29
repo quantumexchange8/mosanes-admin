@@ -1,7 +1,7 @@
 <script setup>
 import Button from '@/Components/Button.vue';
 import { IconDots, IconAlertCircle } from '@tabler/icons-vue';
-import { 
+import {
     BalanceAdjustmentIcon,
     CreditAdjustmentIcon,
     DeleteIcon,
@@ -21,7 +21,6 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 import Empty from '@/Components/Empty.vue';
 import { useConfirm } from 'primevue/useconfirm';
-import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 
 const hasData = ref(false);
 const form = useForm({
@@ -158,7 +157,7 @@ const requireConfirmation = () => {
                 <Dropdown align="right">
                     <template #trigger>
                         <Button iconOnly variant="gray-text" type="button" class="inline-flex" size="sm">
-                            <IconDots size="16" stroke-width="1.25" color="#667085" />                        
+                            <IconDots size="16" stroke-width="1.25" color="#667085" />
                         </Button>
                     </template>
                     <template #content>
@@ -223,7 +222,7 @@ const requireConfirmation = () => {
                     <InputLabel for="amount" value="Amount" />
                     <IconField iconPosition="left" class="w-full">
                         <div class="text-gray-950 text-sm">$</div>
-                        <InputText 
+                        <InputText
                             id="amount"
                             type="number"
                             class="block w-full"
@@ -246,8 +245,8 @@ const requireConfirmation = () => {
                                 @click="handleChipClick(chip.label)"
                             />
                         </div>
-                    </div> 
-                    <Textarea 
+                    </div>
+                    <Textarea
                         id="remarks"
                         type="text"
                         class="flex flex-1 self-stretch"
@@ -255,8 +254,8 @@ const requireConfirmation = () => {
                         autofocus
                         placeholder="Account balance adjustment :)"
                         :invalid="form.errors.remarks"
-                        rows="5" 
-                        cols="30" 
+                        rows="5"
+                        cols="30"
                     />
                 </div>
             </div>
@@ -266,6 +265,4 @@ const requireConfirmation = () => {
             </div>
         </form>
     </Dialog>
-
-    <ConfirmationDialog variant="error" />
 </template>

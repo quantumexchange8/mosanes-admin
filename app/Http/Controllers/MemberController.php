@@ -103,6 +103,19 @@ class MemberController extends Controller
         ]);
     }
 
+    public function updateMemberStatus(Request $request)
+    {
+        $user = User::find($request->id);
+
+        $user->status = $user->status == 'active' ? 'inactive' : 'active';
+        $user->save();
+
+        return back()->with('toast', [
+            'title' => $user->status == 'active' ? trans("public.toast_member_has_activated") : trans("public.toast_member_has_deactivated"),
+            'type' => 'success',
+        ]);
+    }
+
 
     public function detail($id_number)
     {

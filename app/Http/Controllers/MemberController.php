@@ -5,9 +5,12 @@ namespace App\Http\Controllers;
 use App\Http\Requests\AddMemberRequest;
 use App\Models\Country;
 use App\Models\PaymentAccount;
+use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
 use App\Services\DropdownOptionService;
+use App\Services\RunningNumberService;
+use Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -181,25 +184,36 @@ class MemberController extends Controller
         $wallet_names = $request->wallet_name;
         $token_addresses = $request->token_address;
 
-//        $errors = [];
-//
-//        // Validate wallets
-//        foreach ($wallet_names as $index => $wallet_name) {
-//            if (empty($wallet_name)) {
-//                $errors["wallet_name.$index"] = trans('validation.required', ['attribute' => trans('public.wallet_name') . ' #' .$index + 1]);
-//            }
-//        }
-//
-//        // Validate addresses
-//        foreach ($token_addresses as $index => $token_address) {
-//            if (empty($token_address)) {
-//                $errors["token_address.{$index}"] = trans('validation.required', ['attribute' => trans('public.token_address') . ' #' .$index + 1]);
-//            }
-//        }
-//
-//        if (!empty($errors)) {
-//            throw ValidationException::withMessages($errors);
-//        }
+        $errors = [];
+
+        // Validate wallets and addresses
+        foreach ($wallet_names as $index => $wallet_name) {
+            $token_address = $token_addresses[$index] ?? '';
+
+            if (empty($wallet_name) && !empty($token_address)) {
+                $errors["wallet_name.$index"] = trans('validation.required', ['attribute' => trans('public.wallet_name') . ' #' . ($index + 1)]);
+            }
+
+            if (!empty($wallet_name) && empty($token_address)) {
+                $errors["token_address.$index"] = trans('validation.required', ['attribute' => trans('public.token_address') . ' #' . ($index + 1)]);
+            }
+        }
+
+        foreach ($token_addresses as $index => $token_address) {
+            $wallet_name = $wallet_names[$index] ?? '';
+
+            if (empty($token_address) && !empty($wallet_name)) {
+                $errors["token_address.$index"] = trans('validation.required', ['attribute' => trans('public.token_address') . ' #' . ($index + 1)]);
+            }
+
+            if (!empty($token_address) && empty($wallet_name)) {
+                $errors["wallet_name.$index"] = trans('validation.required', ['attribute' => trans('public.wallet_name') . ' #' . ($index + 1)]);
+            }
+        }
+
+        if (!empty($errors)) {
+            throw ValidationException::withMessages($errors);
+        }
 
         if ($wallet_names && $token_addresses) {
             foreach ($wallet_names as $index => $wallet_name) {
@@ -218,8 +232,6 @@ class MemberController extends Controller
                 } else {
                     $conditions['id'] = 0;
                 }
-
-                \Log::debug($conditions);
 
                 PaymentAccount::updateOrCreate(
                     $conditions,
@@ -246,14 +258,93 @@ class MemberController extends Controller
         dd($request->all());
     }
 
-    public function WalletAdjustment(Request $request)
+    public function getFinancialInfoData(Request $request)
     {
-        dd($request->all());
+        $query = Transaction::query()
+            ->where('user_id', $request->id)
+            ->where('status', 'successful')
+            ->select('id', 'from_meta_login', 'to_meta_login', 'transaction_type', 'amount', 'transaction_amount', 'status', 'created_at');
+
+        $total_deposit = (clone $query)->where('transaction_type', 'deposit')->sum('transaction_amount');
+        $total_withdrawal = (clone $query)->where('transaction_type', 'withdrawal')->sum('amount');
+        $transaction_history = $query->whereIn('transaction_type', ['deposit', 'withdrawal'])
+            ->latest()
+            ->get();
+
+        $rebate_wallet = Wallet::where('user_id', $request->id)
+            ->where('type', 'rebate_wallet')
+            ->first();
+
+        return response()->json([
+            'totalDeposit' => $total_deposit,
+            'totalWithdrawal' => $total_withdrawal,
+            'transactionHistory' => $transaction_history,
+            'rebateWallet' => $rebate_wallet,
+        ]);
+    }
+
+    public function walletAdjustment(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'action' => ['required'],
+            'amount' => ['required', 'numeric', 'gt:1'],
+            'remarks' => ['nullable'],
+        ])->setAttributeNames([
+            'action' => trans('public.action'),
+            'amount' => trans('public.amount'),
+            'remarks' => trans('public.remarks'),
+        ]);
+        $validator->validate();
+
+        $action = $request->action;
+        $amount = $request->amount;
+        $wallet = Wallet::find($request->id);
+
+        if ($action == 'rebate_out' && $wallet->balance < $amount) {
+            throw ValidationException::withMessages(['amount' => trans('public.insufficient_balance')]);
+        }
+
+        Transaction::create([
+            'user_id' => $wallet->user_id,
+            'category' => 'wallet',
+            'transaction_type' => $action,
+            'from_wallet_id' => $action == 'rebate_out' ? $wallet->id : null,
+            'to_wallet_id' => $action == 'rebate_in' ? $wallet->id : null,
+            'transaction_number' => RunningNumberService::getID('transaction'),
+            'amount' => $amount,
+            'transaction_charges' => 0,
+            'transaction_amount' => $amount,
+            'old_wallet_amount' => $wallet->balance,
+            'new_wallet_amount' => $action == 'rebate_out' ? $wallet->balance - $amount : $wallet->balance + $amount,
+            'status' => 'successful',
+            'remarks' => $request->remarks,
+            'approved_at' => now(),
+            'handle_by' => Auth::id(),
+        ]);
+
+        $wallet->balance = $action === 'rebate_out' ? $wallet->balance - $amount : $wallet->balance + $amount;
+        $wallet->save();
+
+        return redirect()->back()->with('toast', [
+            'title' => trans('public.rebate_adjustment_success'),
+            'type' => 'success'
+        ]);
     }
 
     public function accountAdjustment(Request $request)
     {
         dd($request->all());
+    }
+
+    public function getAdjustmentHistoryData(Request $request)
+    {
+        $adjustment_history = Transaction::where('user_id', $request->id)
+            ->whereIn('transaction_type', ['rebate_in', 'rebate_out'])
+            ->where('status', 'successful')
+            ->latest()
+            ->get();
+
+        return response()->json($adjustment_history);
     }
 
     public function accountDelete(Request $request)

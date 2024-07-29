@@ -12,6 +12,7 @@ import ProfileInfo from "@/Pages/Member/Listing/MemberDetail/ProfileInfo.vue";
 import KycVerification from "@/Pages/Member/Listing/MemberDetail/KycVerification.vue";
 import CryptoWalletInfo from "@/Pages/Member/Listing/MemberDetail/CryptoWalletInfo.vue";
 import {wTrans} from "laravel-vue-i18n";
+import AdjustmentHistory from "@/Pages/Member/Listing/MemberDetail/AdjustmentHistory.vue";
 
 const props = defineProps({
     user: Object
@@ -42,7 +43,7 @@ watchEffect(() => {
 const tabs = ref([
       {
           title: wTrans('public.financial_info'),
-          component: h(MemberFinancialInfo)
+          component: h(MemberFinancialInfo, {user_id: props.user.id}),
       },
       {
           title: wTrans('public.trading_accounts'),
@@ -50,7 +51,7 @@ const tabs = ref([
       },
       {
           title: wTrans('public.adjustment_history'),
-          component: h(MemberTradingAccounts),
+          component: h(AdjustmentHistory, {user_id: props.user.id}),
       },
 ]);
 </script>

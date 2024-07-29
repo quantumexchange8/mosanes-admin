@@ -22,11 +22,11 @@ return new class extends Migration {
             $table->string('from_wallet_address')->nullable();
             $table->string('to_wallet_address')->nullable();
             $table->string('txn_hash')->nullable();
-            $table->string('amount')->nullable();
-            $table->string('transaction_charges')->nullable();
-            $table->string('transaction_amount')->nullable();
-            $table->string('old_wallet_amount')->nullable();
-            $table->string('new_wallet_amount')->nullable();
+            $table->decimal('amount', 13)->nullable();
+            $table->decimal('transaction_charges', 13)->nullable();
+            $table->decimal('transaction_amount', 13)->nullable();
+            $table->decimal('old_wallet_amount', 13)->nullable();
+            $table->decimal('new_wallet_amount', 13)->nullable();
             $table->string('status')->nullable();
             $table->string('comment')->nullable();
             $table->string('remarks')->nullable();

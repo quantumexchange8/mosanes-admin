@@ -19,15 +19,13 @@ export default {
             { 'border-surface-300': !props.invalid },
 
             // Invalid State
-            'invalid:focus:ring-red-200',
-            'invalid:hover:border-red-500',
             { 'border-red-500': props.invalid },
 
             // States
             {
-                'hover:border-surface-400': !context.disabled && !props.invalid,
-                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 focus:z-10': !context.disabled,
-                'bg-surface-200 select-none pointer-events-none cursor-default': context.disabled
+                'hover:border-gray-500': !context.disabled && !props.invalid,
+                'focus:outline-none focus:ring-0 focus:border-primary-500': !context.disabled,
+                'bg-gray-50 text-gray-300 placeholder:text-gray-300 select-none pointer-events-none cursor-default': context.disabled
             },
 
             // Filled State *for FloatLabel
@@ -35,6 +33,7 @@ export default {
 
             // Misc
             'appearance-none',
+            'shadow-input',
             'transition-colors duration-200'
         ]
     })

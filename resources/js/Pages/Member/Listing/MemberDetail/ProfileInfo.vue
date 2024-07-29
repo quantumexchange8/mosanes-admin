@@ -199,21 +199,21 @@ const submitForm = () => {
             <div class="flex justify-center items-center gap-5 self-stretch">
                 <div class="flex flex-col justify-center items-start gap-2 w-1/2">
                     <div class="text-gray-500 text-xs w-full truncate">{{ $t('public.group') }}</div>
-                    <div class="h-3 bg-gray-200 rounded-full w-20 my-1"></div>
+                    <div class="h-3 bg-gray-200 rounded-full w-20 mt-1 mb-1.5"></div>
                 </div>
                 <div class="flex flex-col justify-center items-start gap-2 w-1/2">
                     <div class="text-gray-500 text-xs w-full truncate">{{ $t('public.upline') }}</div>
-                    <div class="h-3 bg-gray-200 rounded-full w-36 my-1"></div>
+                    <div class="h-3 bg-gray-200 rounded-full w-36 mt-1 mb-1.5"></div>
                 </div>
             </div>
             <div class="flex justify-center items-center gap-5 self-stretch">
                 <div class="flex flex-col justify-center items-start gap-2 w-1/2">
                     <div class="text-gray-500 text-xs w-full truncate">{{ $t('public.total_referred_member') }}</div>
-                    <div class="h-2 bg-gray-200 rounded-full w-36 my-2"></div>
+                    <div class="h-2 bg-gray-200 rounded-full w-36 mt-2 mb-1"></div>
                 </div>
                 <div class="flex flex-col justify-center items-start gap-2 w-1/2">
                     <div class="text-gray-500 text-xs w-full truncate">{{ $t('public.total_referred_agent') }}</div>
-                    <div class="h-2 bg-gray-200 rounded-full w-36 my-2"></div>
+                    <div class="h-2 bg-gray-200 rounded-full w-36 mt-2 mb-1"></div>
                 </div>
             </div>
         </div>

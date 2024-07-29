@@ -8,7 +8,7 @@ export default {
             'align-bottom',
 
             // Size
-            'w-5 h-5',
+            'w-4 h-4',
 
             // Misc
             'cursor-pointer',
@@ -21,7 +21,7 @@ export default {
             'flex justify-center items-center',
 
             // Size
-            'w-5 h-5',
+            'w-4 h-4',
 
             // Shape
             'border',
@@ -86,7 +86,7 @@ export default {
             'rounded-full',
 
             // Size
-            'w-3 h-3',
+            'w-2 h-2',
 
             // Conditions
             {

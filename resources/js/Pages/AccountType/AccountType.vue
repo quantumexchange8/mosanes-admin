@@ -21,7 +21,6 @@ const getAccountTypes = async () => {
     try {
         const response = await axios.get('/account_type/getAccountTypes');
         accountTypes.value = response.data.accountTypes;
-        console.log(accountTypes.value);
     } catch (error) {
         console.error('Error getting account types:', error);
     } finally {
@@ -117,10 +116,10 @@ const rowClicked = (data) => {
                     <Column field="action" style="width: 15%" >
                         <template #body="slotProps">
                             <div class="py-2 px-3 flex justify-center items-center gap-2 flex-1">
-                                <AccountTypeStatus :account_type="slotProps.data" />
-                                
+                                <AccountTypeStatus :accountTypeId="slotProps.data.id" />
+
                                 <div class="hidden md:inline-flex">
-                                    <AccountTypeSetting :account_type="slotProps.data" />
+                                    <AccountTypeSetting :accountTypeId="slotProps.data.id" />
                                 </div>
                             </div>
                         </template>

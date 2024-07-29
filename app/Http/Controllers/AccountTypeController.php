@@ -24,7 +24,8 @@ class AccountTypeController extends Controller
             } else {
                 $accountType['trade_delay'] = $accountType->trade_open_duration. ' sec';
             }
-
+            
+            // need to change to calculate total account created for each type
             $accountType['total_account'] = 21;
 
             return $accountType;
@@ -40,6 +41,13 @@ class AccountTypeController extends Controller
         return back()->with('toast', [
             'title' => trans('public.toast_sync_account_type'),
             'type'=> 'success',
+        ]);
+    }
+
+    public function findAccountType($id)
+    {
+        return response()->json([
+            'account_type' => AccountType::find($id),
         ]);
     }
 

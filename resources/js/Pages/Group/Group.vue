@@ -164,6 +164,7 @@ const date = ref('');
                                         size="sm"
                                         type="button"
                                         iconOnly
+                                        pill
                                         v-slot="{ iconSizeClasses }"
                                     >
                                         <IconRefresh size="16" stroke-width="1.25" color="#667085" />

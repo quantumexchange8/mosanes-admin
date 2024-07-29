@@ -90,6 +90,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/', [AccountTypeController::class, 'show'])->name('accountType');
         Route::get('/getAccountTypes', [AccountTypeController::class, 'getAccountTypes'])->name('accountType.getAccountTypes');
         Route::get('/syncAccountTypes', [AccountTypeController::class, 'syncAccountTypes'])->name('accountType.syncAccountTypes');
+        Route::get('/findAccountType/{id}', [AccountTypeController::class, 'findAccountType'])->name('accountType.findAccountType');
         Route::get('/getLevearges', [AccountTypeController::class, 'getLeverages'])->name('accountType.getLeverages');
 
         Route::post('/update/{id}', [AccountTypeController::class, 'updateAccountType'])->name('accountType.update');

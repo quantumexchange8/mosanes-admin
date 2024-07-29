@@ -49,6 +49,7 @@ const requireConfirmation = (id) => {
                 size="sm"
                 type="button"
                 iconOnly
+                pill
                 v-slot="{ iconSizeClasses }"
             >
                 <IconDotsVertical size="16" stroke-width="1.25" color="#667085" />

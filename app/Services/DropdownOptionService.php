@@ -2,11 +2,12 @@
 
 namespace App\Services;
 
-use App\Models\Country;
+use App\Models\User;
 use App\Models\Group;
+use App\Models\Country;
+use App\Models\Transaction;
 use App\Models\GroupHasUser;
 use App\Models\SettingLeverage;
-use App\Models\User;
 use Illuminate\Support\Collection;
 
 class DropdownOptionService
@@ -80,4 +81,21 @@ class DropdownOptionService
 
         return $users;
     }
+
+    public function getTransactionMonths(): Collection
+    {
+        // Fetch the created_at dates of all transactions
+        $transactionDates = Transaction::pluck('created_at');
+
+        // Map the dates to the desired format and remove duplicates
+        $months = $transactionDates
+            ->map(function ($date) {
+                return \Carbon\Carbon::parse($date)->format('m/Y');
+            })
+            ->unique()
+            ->values();
+
+        return $months;
+    }
+
 }

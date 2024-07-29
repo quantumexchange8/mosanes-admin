@@ -1,12 +1,12 @@
 <?php
 
-use App\Http\Controllers\AccountTypeController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MemberController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\TransactionController;
 
 Route::get('locale/{locale}', function ($locale) {
@@ -80,6 +80,7 @@ Route::middleware('auth')->group(function () {
     Route::prefix('transaction')->group(function () {
         Route::get('/', [TransactionController::class, 'listing'])->name('transaction');
         Route::get('/getTransactionListingData', [TransactionController::class, 'getTransactionListingData'])->name('transaction.getTransactionListingData');
+        Route::get('/getTransactionMonths', [TransactionController::class, 'getTransactionMonths'])->name('transaction.getTransactionMonths');
 
     });
 

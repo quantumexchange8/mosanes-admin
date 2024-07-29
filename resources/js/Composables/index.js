@@ -71,7 +71,8 @@ export function transactionFormat() {
             day: '2-digit',
             timeZone: 'Asia/Kuala_Lumpur'
         });
-        return formattedDate.split('-').join('/');
+        const [year, month, day] = formattedDate.split('-');
+        return `${year}/${month}/${day}`;
     }
 
     function formatTime(date) {

@@ -192,7 +192,7 @@ const rowClicked = (data) => {
         </div>
 
         <div class="pt-5">
-            <AccountTypeSetting :account_type="selected_row" buttonText="Setting" @detailsVisible="visibleDetails = $event" />
+            <AccountTypeSetting :accountTypeId="selected_row.id" buttonText="Setting" @detailsVisible="visibleDetails = $event" />
         </div>
     </Dialog>
 </template>

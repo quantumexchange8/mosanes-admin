@@ -32,7 +32,7 @@ const btnContent = ref()
 const variant = ref()
 
 watch((checked), (newValue) => {
-    console.log(newValue);
+    // console.log(newValue);
     if (newValue) {
         header.value = trans('public.deactivate_header');
         content.value = trans('public.deactivate_content');
@@ -44,7 +44,7 @@ watch((checked), (newValue) => {
         btnContent.value = trans('public.confirm');
         variant.value = 'primary'
     }
-    console.log(variant.value);
+    // console.log(variant.value);
 })
 
 const confirm = useConfirm();

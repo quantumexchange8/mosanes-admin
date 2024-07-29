@@ -73,6 +73,7 @@ const submitForm = () => {
         preserveScroll: true,
         onSuccess: () => {
             visible.value = false;
+            emit('detailsVisible', false);
         },
         onError: (e) => {
             console.log('Error submit form:', e);
@@ -87,6 +88,11 @@ onMounted(() => {
 watch(() => props.accountTypeId, () => {
     getData()
 })
+
+const emit = defineEmits(['detailsVisible']);
+const openSettingDialog = () => {
+    visible.value = true;
+}
 </script>
 
 <template>
@@ -95,7 +101,8 @@ watch(() => props.accountTypeId, () => {
         variant="primary-flat"
         type="button"
         class="w-full"
-        @click="visible = true"
+        @click="openSettingDialog()"
+        :disabled="disabling"
     >
         {{ buttonText }}
     </Button>
@@ -108,6 +115,7 @@ watch(() => props.accountTypeId, () => {
         pill
         v-tooltip.bottom="'Setting'"
         @click="visible = true"
+        :disabled="disabling"
     >
         <IconAdjustmentsHorizontal size="16" stroke-width="1.25" color="#667085" />
     </Button>

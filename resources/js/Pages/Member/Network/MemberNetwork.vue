@@ -171,7 +171,7 @@ const clearSearch = () => {
 
                     <div v-else class="flex gap-5 justify-center flex-wrap w-full max-w-[988px]">
                         <div
-                            class="rounded-xl pt-3 flex flex-col items-center w-full max-w-[168px] xl:max-w-[148px] shadow-toast border border-gray-25 select-none cursor-pointer sm:basis-1/5 xl:basis-1/6"
+                            class="rounded-xl pt-3 flex flex-col items-center w-full max-w-[168px] xl:max-w-[148px] shadow-toast border border-gray-25 sm:basis-1/5 xl:basis-1/6"
                             :class="{
                                       'bg-gradient-to-r from-gray-900 to-gray-500': upline.role === 'agent' && upline.level === 0,
                                       'bg-gradient-to-r from-warning-500 to-[#FDEF5B]': upline.role === 'agent' && upline.level !== 0,
@@ -227,7 +227,7 @@ const clearSearch = () => {
                     <!-- loading state -->
                     <div v-if="loading" class="flex gap-5 justify-center flex-wrap w-full max-w-[988px]">
                         <div
-                            class="rounded-xl pt-3 flex flex-col items-center w-full max-w-[168px] xl:max-w-[148px] shadow-toast border border-gray-25 select-none cursor-pointer sm:basis-1/5 xl:basis-1/6"
+                            class="rounded-xl pt-3 flex flex-col items-center w-full max-w-[168px] xl:max-w-[148px] shadow-toast border border-gray-25 sm:basis-1/5 xl:basis-1/6"
                             :class="{
                                 'bg-gradient-to-r from-gray-900 to-gray-500': parent.length === 0 || parent.level === 0,
                                 'bg-gradient-to-r from-warning-500 to-[#FDEF5B]': parent && parent.role === 'agent' && parent.level !== 0,

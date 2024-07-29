@@ -26,9 +26,9 @@ import {
 } from '@tabler/icons-vue';
 import Badge from '@/Components/Badge.vue';
 import Vue3Autocounter from 'vue3-autocounter';
-import DropdownOverlay from "@/Components/Dropdown.vue";
 import MemberTableActions from "@/Pages/Member/Listing/Partials/MemberTableActions.vue";
 import { trans, wTrans } from "laravel-vue-i18n";
+import {generalFormat} from "@/Composables/index.js";
 
 const total_members = ref(999);
 const total_agents = ref(999);
@@ -37,6 +37,7 @@ const loading = ref(false);
 const dt = ref();
 const users = ref();
 const counterDuration = ref(10);
+const { formatRgbaColor } = generalFormat();
 
 onMounted(() => {
     getResults();
@@ -175,13 +176,6 @@ watchEffect(() => {
     }
 });
 
-const rgbaColor = (hex, opacity) => {
-    const r = parseInt(hex.slice(0, 2), 16);
-    const g = parseInt(hex.slice(2, 4), 16);
-    const b = parseInt(hex.slice(4, 6), 16);
-    return `rgba(${r}, ${g}, ${b}, ${opacity})`;
-}
-
 const paginator_caption = wTrans('public.paginator_caption');
 </script>
 
@@ -308,7 +302,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                                 <div
                                     v-if="slotProps.data.group_id"
                                     class="flex items-center gap-2 rounded justify-center py-1 px-2"
-                                    :style="{ backgroundColor: rgbaColor(slotProps.data.group_color, 0.1) }"
+                                    :style="{ backgroundColor: formatRgbaColor(slotProps.data.group_color, 0.1) }"
                                 >
                                     <div
                                         class="w-1.5 h-1.5 grow-0 shrink-0 rounded-full"

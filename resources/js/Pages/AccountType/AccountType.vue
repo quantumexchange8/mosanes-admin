@@ -81,12 +81,12 @@ const rowClicked = (data) => {
                         </div>
                     </template>
 
-                    <Column field="name" sortable class="w-1/2 md:w-1/4">
+                    <Column field="name" sortable class="w-1/2 md:w-1/4"    >
                         <template #header>
-                            <span>{{ $t('public.name') }}</span>
+                            <span class="w-10 truncate sm:w-auto">{{ $t('public.name') }}</span>
                         </template>
                         <template #body="slotProps">
-                            {{ slotProps.data.name }}
+                            <span class="w-20 truncate inline-block sm:w-auto">{{ slotProps.data.name }}</span>
                         </template>
                     </Column>
                     <Column field="max_acc" style="width: 20%" class="hidden md:table-cell">
@@ -107,7 +107,7 @@ const rowClicked = (data) => {
                     </Column>
                     <Column field="total_acc" sortable class="w-1/3 md:w-1/5" bodyClass="text-center md:text-left" >
                         <template #header>
-                            <span>{{ $t('public.total_account') }}</span>
+                            <span class="w-14 truncate sm:w-auto">{{ $t('public.total_account') }}</span>
                         </template>
                         <template #body="slotProps">
                             {{ slotProps.data.total_account }}

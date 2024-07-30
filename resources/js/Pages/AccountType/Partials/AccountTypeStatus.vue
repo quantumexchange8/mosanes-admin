@@ -1,9 +1,9 @@
 <script setup>
 import InputSwitch from 'primevue/inputswitch';
-import ConfirmationDialog from '@/Components/ConfirmationDialog.vue';
 import { useConfirm } from "primevue/useconfirm";
 import { trans } from 'laravel-vue-i18n';
 import { onMounted, ref, watch } from 'vue';
+import { router } from '@inertiajs/vue3';
 
 const props = defineProps({
     accountTypeId: Number,
@@ -12,6 +12,12 @@ const props = defineProps({
 const account_type = ref();
 const disabling = ref(true);
 const checked = ref();
+const group = ref()
+const header = ref()
+const content = ref()
+const btnContent = ref()
+const confirm = useConfirm();
+
 const getData = async () => {
     try {
         disabling.value = true;
@@ -20,44 +26,34 @@ const getData = async () => {
         checked.value = account_type.value.status === 'active';
 
     } catch (error) {
-        console.error('Error getting leverages:', error);
+        console.error('Error getting data:', error);
     } finally {
         disabling.value = false;
     }
 }
 
-const header = ref()
-const content = ref()
-const btnContent = ref()
-const variant = ref()
-
 watch((checked), (newValue) => {
-    // console.log(newValue);
     if (newValue) {
+        group.value = 'headless-gray'
         header.value = trans('public.deactivate_header');
         content.value = trans('public.deactivate_content');
         btnContent.value = trans('public.deactivate');
-        variant.value = 'gray'
     } else {
+        group.value = 'headless-primary'
         header.value = trans('public.activate_header');
         content.value = trans('public.activate_content');
         btnContent.value = trans('public.confirm');
-        variant.value = 'primary'
     }
-    // console.log(variant.value);
 })
 
-const confirm = useConfirm();
 const requireConfirmation = () => {
-    console.log(confirm)
     confirm.require({
-        group: 'headless',
+        group: group.value,
         header: header.value,
         message: content.value,
         acceptButton: btnContent.value,
         accept: () => {
-            // route or function
-            console.log('success');
+            router.visit(route('accountType.updateStatus', props.accountTypeId), {method: 'patch'})
         },
     });
 };
@@ -77,10 +73,9 @@ watch(() => props.accountTypeId, () => {
     >
         <InputSwitch
             v-model="checked"
+            readonly
             @click="requireConfirmation()"
             :disabled="disabling"
         />
     </div>
-
-    <ConfirmationDialog :variant="variant" />
 </template>

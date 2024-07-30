@@ -100,6 +100,8 @@ Route::middleware('auth')->group(function () {
         Route::get('/getLevearges', [AccountTypeController::class, 'getLeverages'])->name('accountType.getLeverages');
 
         Route::post('/update/{id}', [AccountTypeController::class, 'updateAccountType'])->name('accountType.update');
+
+        Route::patch('/updateStatus/{id}', [AccountTypeController::class, 'updateStatus'])->name('accountType.updateStatus');
     });
 
     /**

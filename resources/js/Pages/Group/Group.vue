@@ -1,6 +1,6 @@
 ;<script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { onMounted, onUpdated, ref } from 'vue';
+import { onMounted, ref, watchEffect } from 'vue';
 import { transactionFormat } from '@/Composables/index.js';
 import { IconWallet, IconCreditCardPay, IconReceiptTax, IconUserFilled, IconRefresh } from '@tabler/icons-vue';
 import Button from '@/Components/Button.vue';
@@ -10,6 +10,7 @@ import NewGroup from '@/Pages/Group/Partials/NewGroup.vue';
 import GroupMenu from '@/Pages/Group/Partials/GroupMenu.vue';
 import Vue3Autocounter from 'vue3-autocounter';
 import Empty from '@/Components/Empty.vue';
+import { usePage } from '@inertiajs/vue3';
 
 const { formatAmount } = transactionFormat();
 
@@ -21,6 +22,7 @@ const totalFeeCharges = ref(945789.39);
 const groups = ref();
 const groupsLength = ref();
 const total = ref();
+const date = ref('');
 
 const getGroups = async () => {
     try {
@@ -43,11 +45,12 @@ onMounted(() => {
     getGroups();
 })
 
-onUpdated(() => {
-    getGroups();
-})
+watchEffect(() => {
+    if (usePage().props.toast !== null) {
+        getGroups();
+    }
+});
 
-const date = ref('');
 </script>
 
 <template>
@@ -169,7 +172,7 @@ const date = ref('');
                                     >
                                         <IconRefresh size="16" stroke-width="1.25" color="#667085" />
                                     </Button>
-                                    <GroupMenu :group="group" :indexNum="index" />
+                                    <GroupMenu :group="group" />
                                 </div>
                             </div>
                             <div class="py-3 grid grid-cols-2 items-start content-start gap-y-3 gap-x-5 self-stretch flex-wrap md:grid-cols-3 md:gap-2 xl:grid-cols-6">

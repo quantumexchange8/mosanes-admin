@@ -74,4 +74,16 @@ class AccountTypeController extends Controller
             'type' => 'success',
         ]);
     }
+
+    public function updateStatus($id)
+    {
+        $account_type = AccountType::find($id);
+        $account_type->status = $account_type->status == 'active' ? 'inactive' : 'active';
+        $account_type->save();
+
+        return back()->with('toast', [
+            'title' => $account_type->status == 'active' ? trans("public.toast_account_type_activated") : trans("public.toast_account_type_deactivated"),
+            'type' => 'success',
+        ]);
+    }
 }

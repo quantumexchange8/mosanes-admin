@@ -89,8 +89,7 @@ return [
     "save" => "Save",
     "no_transaction_caption" => "No Transactions Yet",
     "delete_group_header" => "Delete Group",
-    "delete_group_caption" => "Are you sure you want to delete this group?",
-    "delete_caption" => "This action cannot be undone.",
+    "delete_group_caption" => "Are you sure you want to delete this group? This action cannot be undone.",
     "delete_confirm" => "Yes, delete it",
     "cancel" => "Cancel",
     "deposit" => "Deposit",
@@ -236,4 +235,6 @@ return [
     "toast_member_has_activated" => "Member has been activated.",
     "activate_member" => "Activate Member",
     "activate_member_caption" => "Are you sure you want to activate this member? This will grant them access to the platform.",
+    "toast_account_type_activated" => "Account type has been activated.",
+    "toast_account_type_deactivated" => "Account type has been deactivated.",
 ];

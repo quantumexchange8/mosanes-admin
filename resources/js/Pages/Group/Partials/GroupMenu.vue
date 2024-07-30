@@ -13,7 +13,6 @@ import { trans } from 'laravel-vue-i18n';
 
 const props = defineProps({
     group: Object,
-    indexNum: Number,
 })
 
 const visible = ref(false);
@@ -26,15 +25,12 @@ const openDialog = (title) => {
 
 const confirm = useConfirm();
 const requireConfirmation = (id) => {
-    console.log(confirm)
     confirm.require({
-        group: 'headless',
+        group: 'headless-error',
         header: trans('public.delete_group_header'),
-        message: trans('public.delete_group_caption')+'\n'+
-                trans('public.delete_caption'),
+        message: trans('public.delete_group_caption'),
         acceptButton: trans('public.delete_confirm'),
         accept: () => {
-            // route or function
             router.visit(route('group.delete', id), {method: 'delete'})
         },
     });
@@ -111,6 +107,4 @@ const requireConfirmation = (id) => {
             <GroupTransactions />
         </template>
     </Dialog>
-
-    <ConfirmationDialog variant="error" />
 </template>

@@ -8,6 +8,7 @@ return new class extends Migration {
     public function up(): void
     {
         Schema::create('trading_accounts', function (Blueprint $table) {
+            $table->id();
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedInteger('meta_login')->unique();
             $table->unsignedBigInteger('account_type_id')->default(1);

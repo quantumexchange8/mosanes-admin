@@ -5,7 +5,15 @@ import SidebarCollapsible from '@/Components/Sidebar/SidebarCollapsible.vue'
 import SidebarCollapsibleItem from '@/Components/Sidebar/SidebarCollapsibleItem.vue'
 import {ref} from "vue";
 import {usePage} from "@inertiajs/vue3";
-import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, IconReceiptDollar, IconId } from '@tabler/icons-vue';
+import {
+    IconLayoutDashboard,
+    IconComponents,
+    IconUserCircle,
+    IconUsersGroup,
+    IconReceiptDollar,
+    IconId,
+    IconBusinessplan
+} from '@tabler/icons-vue';
 
 </script>
 
@@ -57,6 +65,17 @@ import { IconLayoutDashboard, IconComponents, IconUserCircle, IconUsersGroup, Ic
         >
             <template #icon>
                 <IconUsersGroup :size="20" stroke-width="1.25" />
+            </template>
+        </SidebarLink>
+
+        <!-- Group -->
+        <SidebarLink
+            :title="$t('public.rebate_allocate')"
+            :href="route('rebate_allocate')"
+            :active="route().current('rebate_allocate')"
+        >
+            <template #icon>
+                <IconBusinessplan :size="20" stroke-width="1.25" />
             </template>
         </SidebarLink>
 

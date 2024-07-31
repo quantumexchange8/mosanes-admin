@@ -99,10 +99,10 @@ watch( () => props.selectedMonths, (newValue) => {
     if (newValue.length > 0) {
         // Convert selectedMonths to start-of-month dates
         const startDates = newValue.map(dateStr => getStartOfMonth(dateStr));
-        
+
         // Find the earliest date
         const earliestDate = new Date(Math.min(...startDates.map(date => date.getTime())));
-        
+
         computedMinDate = earliestDate;
     }
 
@@ -128,7 +128,7 @@ watch(selectedDate, (newDateRange) => {
     // Implement logic to handle changes in the selected date range
     if (Array.isArray(newDateRange)) {
         const [startDate, endDate] = newDateRange;
-        
+
         // Check if both dates are valid
         if (startDate && endDate) {
             // Both dates are valid, call function with the full range
@@ -181,7 +181,7 @@ watchEffect(() => {
 });
 
 // dialog
-const data = ref({}); 
+const data = ref({});
 const openDialog = (rowData) => {
     visible.value = true;
     data.value = rowData;
@@ -241,7 +241,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                             :minDate="minDate"
                             :maxDate="maxDate"
                             dateFormat="dd/mm/yy"
-                            showIcon 
+                            showIcon
                             iconDisplay="input"
                             :placeholder="$t('public.date_placeholder')"
                             class="w-full md:w-[272px]"
@@ -273,20 +273,20 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 <span class="text-sm text-gray-700">{{ $t('public.loading_transactions_caption') }}</span>
             </div>
         </template>
-        <Column 
-            field="created_at" 
-            sortable 
-            :header="$t('public.date')" 
+        <Column
+            field="created_at"
+            sortable
+            :header="$t('public.date')"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
                 {{ formatDate(slotProps.data.created_at)}}
             </template>
         </Column>
-        <Column 
-            field="name" 
-            sortable 
-            :header="$t('public.name')" 
+        <Column
+            field="name"
+            sortable
+            :header="$t('public.name')"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
@@ -305,20 +305,20 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 </div>
             </template>
         </Column>
-        <Column 
-            field="volume" 
-            sortable 
-            :header="$t('public.volume_header')" 
+        <Column
+            field="volume"
+            sortable
+            :header="$t('public.volume_header')"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
                 {{ formatAmount(slotProps.data.volume) }}
             </template>
         </Column>
-        <Column 
-            field="payout" 
-            sortable 
-            :header="$t('public.payout_header')" 
+        <Column
+            field="payout"
+            sortable
+            :header="$t('public.payout_header')"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
@@ -394,25 +394,25 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 </div>
             </div>
             <!-- above md -->
-            <div class="hidden md:flex py-2 items-center self-stretch border-b border-gray-200 bg-gray-100">
+            <div class="hidden md:flex py-2 items-center self-stretch border-b border-gray-200 bg-gray-100 uppercase">
                 <div class="flex items-center px-2 gap-2.5 flex-grow">
                     <span class="text-gray-950 text-xs font-semibold">
-                        {{ $t('public.product_name') }}
+                        {{ $t('public.product') }}
                     </span>
                 </div>
                 <div class="flex items-center px-2 gap-2.5 flex-grow">
                     <span class="text-gray-950 text-xs font-semibold">
-                        {{ $t('public.product_volume') }}
+                        {{ $t('public.volume') }} (Ł)
                     </span>
                 </div>
                 <div class="flex items-center px-2 gap-2.5 flex-grow">
                     <span class="text-gray-950 text-xs font-semibold">
-                        {{ $t('public.product_rebate') }}
+                        {{ $t('public.rebate') }} / Ł ($)
                     </span>
                 </div>
                 <div class="flex items-center px-2 gap-2.5 flex-grow">
                     <span class="text-gray-950 text-xs font-semibold">
-                        {{ $t('public.product_total') }}
+                        {{ $t('public.total') }} ($)
                     </span>
                 </div>
             </div>

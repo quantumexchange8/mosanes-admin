@@ -17,7 +17,7 @@ export default {
         ]
     }),
     input: {
-        root: ({ parent, context }) => ({
+        root: ({ props, parent, context }) => ({
             class: [
                 // Font
                 'caret-primary-500 text-sm',
@@ -29,7 +29,6 @@ export default {
                 { 'text-center': parent.props.showButtons && parent.props.buttonLayout == 'vertical' },
 
                 // Spacing
-                'py-3 px-4',
                 'm-0',
 
                 // Shape

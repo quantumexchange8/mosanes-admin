@@ -117,6 +117,7 @@ const handleChipClick = (label) => {
                         inputId="currency-us"
                         prefix="$ "
                         class="w-full"
+                        inputClass="py-3 px-4"
                         :min="0"
                         :step="100"
                         :minFractionDigits="2"

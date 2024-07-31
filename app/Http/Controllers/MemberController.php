@@ -60,6 +60,11 @@ class MemberController extends Controller
         ]);
     }
 
+    public function getAvailableUplineData()
+    {
+
+    }
+
     public function addNewMember(AddMemberRequest $request)
     {
         $upline_id = $request->upline['value'];

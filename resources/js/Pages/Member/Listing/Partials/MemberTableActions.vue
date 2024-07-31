@@ -7,6 +7,7 @@ import InputSwitch from "primevue/inputswitch";
 import {Link, useForm} from "@inertiajs/vue3";
 import {useConfirm} from "primevue/useconfirm";
 import {trans} from "laravel-vue-i18n";
+import UpgradeToAgent from "@/Pages/Member/Listing/Partials/UpgradeToAgent.vue";
 
 const props = defineProps({
     member: Object,
@@ -45,6 +46,7 @@ const toggle = (event) => {
         <InputSwitch
             v-model="checked"
             readonly
+            :disabled="form.processing"
             @click="requireConfirmation"
         />
         <Button
@@ -67,6 +69,9 @@ const toggle = (event) => {
                     Member Details
                 </div>
             </Link>
+            <UpgradeToAgent
+                :member="member"
+            />
         </div>
     </OverlayPanel>
 </template>

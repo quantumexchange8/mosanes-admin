@@ -1,10 +1,12 @@
 <?php
 
-use App\Http\Controllers\RebateController;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\PammController;
 use App\Http\Controllers\GroupController;
 use App\Http\Controllers\MemberController;
+use App\Http\Controllers\RebateController;
 use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AccountTypeController;
@@ -77,6 +79,16 @@ Route::middleware('auth')->group(function () {
         Route::patch('/edit_group/{id}', [GroupController::class, 'editGroup'])->name('group.edit');
 
         Route::delete('/delete_group/{id}', [GroupController::class, 'deleteGroup'])->name('group.delete');
+    });
+
+    /**
+     * ==============================
+     *        Pamm Allocate
+     * ==============================
+     */
+    Route::prefix('pamm_allocate')->group(function () {
+        Route::get('/', [PammController::class, 'pamm_allocate'])->name('pamm_allocate');
+
     });
 
     /**

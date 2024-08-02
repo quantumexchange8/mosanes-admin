@@ -12,7 +12,8 @@ import {
     IconUsersGroup,
     IconReceiptDollar,
     IconId,
-    IconBusinessplan
+    IconCoinMonero,
+    IconBusinessplan,
 } from '@tabler/icons-vue';
 
 </script>
@@ -68,7 +69,18 @@ import {
             </template>
         </SidebarLink>
 
-        <!-- Group -->
+        <!-- Pamm Allocate -->
+        <SidebarLink
+            :title="$t('public.pamm_allocate')"
+            :href="route('pamm_allocate')"
+            :active="route().current('pamm_allocate')"
+        >
+            <template #icon>
+                <IconCoinMonero :size="20" stroke-width="1.25" />
+            </template>
+        </SidebarLink>
+
+        <!-- Rebate Allocate -->
         <SidebarLink
             :title="$t('public.rebate_allocate')"
             :href="route('rebate_allocate')"

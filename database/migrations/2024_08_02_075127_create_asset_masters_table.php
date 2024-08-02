@@ -16,8 +16,8 @@ return new class extends Migration {
             $table->timestamp('started_at')->nullable();
             $table->integer('total_investors')->nullable();
             $table->decimal('total_fund', 13)->nullable();
-            $table->decimal('minimum_invesment')->nullable();
-            $table->integer('minimum_invesment_period')->nullable();
+            $table->decimal('minimum_investment')->nullable();
+            $table->integer('minimum_investment_period')->nullable();
             $table->decimal('performance_fee')->nullable();
             $table->decimal('total_gain')->nullable();
             $table->decimal('monthly_gain')->nullable();

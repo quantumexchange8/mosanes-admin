@@ -13,8 +13,8 @@ return new class extends Migration {
             $table->unsignedInteger('meta_login')->unique();
             $table->unsignedBigInteger('account_type_id')->default(1);
             $table->integer('currency_digits')->nullable();
-            $table->double('balance')->nullable();
-            $table->double('credit')->nullable();
+            $table->decimal('balance', 13)->nullable();
+            $table->decimal('credit', 13)->nullable();
             $table->double('margin')->nullable();
             $table->double('margin_free')->nullable();
             $table->double('margin_level')->nullable();
@@ -22,8 +22,8 @@ return new class extends Migration {
             $table->double('profit')->nullable();
             $table->double('storage')->nullable();
             $table->double('commission')->nullable();
-            $table->double('floating')->nullable();
-            $table->double('equity')->nullable();
+            $table->decimal('floating', 13)->nullable();
+            $table->decimal('equity', 13)->nullable();
             $table->integer('so_activation')->nullable();
             $table->integer('so_time')->nullable();
             $table->double('so_level')->nullable();

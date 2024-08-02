@@ -246,4 +246,8 @@ return [
     "cryptocurrency" => "Cryptocurrency",
     "update_rebate_success_alert" => "You’ve successfully updated the rebate details.",
     "upgrade_to_agent" => "Upgrade to Agent",
+    "upline_rebate" => "Upline's Rebate",
+    "member_details" => "Member Details",
+    "upgrade" => "Upgrade",
+    "upgrade_to_agent_success_alert" => "You’ve successfully upgraded a member!",
 ];

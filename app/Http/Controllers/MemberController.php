@@ -3,8 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\AddMemberRequest;
+use App\Models\AccountType;
 use App\Models\Country;
 use App\Models\PaymentAccount;
+use App\Models\RebateAllocation;
+use App\Models\SymbolGroup;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
@@ -60,11 +63,6 @@ class MemberController extends Controller
         ]);
     }
 
-    public function getAvailableUplineData()
-    {
-
-    }
-
     public function addNewMember(AddMemberRequest $request)
     {
         $upline_id = $request->upline['value'];
@@ -102,6 +100,24 @@ class MemberController extends Controller
         $user->id_number = $id_no;
         $user->save();
 
+        if ($upline->groupHasUser) {
+            $user->assignedGroup($upline->groupHasUser->group_id);
+        }
+
+        if ($user->role == 'agent') {
+            $uplineRebates = RebateAllocation::where('user_id', $user->upline_id)->get();
+
+            foreach ($uplineRebates as $uplineRebate) {
+                RebateAllocation::create([
+                    'user_id' => $user->id,
+                    'account_type_id' => $uplineRebate->account_type_id,
+                    'symbol_group_id' => $uplineRebate->symbol_group_id,
+                    'amount' => 0,
+                    'edited_by' => Auth::id(),
+                ]);
+            }
+        }
+
         return back()->with('toast', [
             'title' => trans("public.toast_create_member_success"),
             'type' => 'success',
@@ -121,6 +137,118 @@ class MemberController extends Controller
         ]);
     }
 
+
+    public function getAvailableUplineData(Request $request)
+    {
+        $user = User::with('upline')->find($request->user_id);
+        if (!$user) {
+            return response()->json(['error' => 'User not found'], 404);
+        }
+
+        $availableUpline = $user->upline;
+
+        while ($availableUpline && $availableUpline->role != 'agent') {
+            $availableUpline = $availableUpline->upline;
+        }
+
+        $availableUpline->profile_photo = $availableUpline->getFirstMediaUrl('profile_photo');
+
+        $uplineRebate = RebateAllocation::with('symbol_group:id,display')
+            ->where('user_id', $availableUpline->id);
+
+        $availableAccountTypeId = $uplineRebate->get()->pluck('account_type_id')->toArray();
+
+        $accountTypeSel = AccountType::whereIn('id', $availableAccountTypeId)
+            ->select('id', 'name')
+            ->get()
+            ->map(function ($accountType) {
+                return [
+                    'id' => $accountType->id,
+                    'name' => $accountType->name,
+                ];
+            });
+
+        return response()->json([
+            'availableUpline' => $availableUpline,
+            'rebateDetails' => $uplineRebate->get(),
+            'accountTypeSel' => $accountTypeSel,
+        ]);
+    }
+
+    public function upgradeAgent(Request $request)
+    {
+        $user_id = $request->user_id;
+        $amounts = $request->amounts;
+
+        // Find the upline user and their rebate allocations
+        $user = User::find($user_id);
+        $upline_user = $user->upline;
+        $uplineRebates = RebateAllocation::where('user_id', $upline_user->id)->get();
+
+        // Get the account_type_id and symbol_group_id combinations for the upline
+        $uplineCombinations = $uplineRebates->map(function($rebate) {
+            return [
+                'account_type_id' => $rebate->account_type_id,
+                'symbol_group_id' => $rebate->symbol_group_id
+            ];
+        })->toArray();
+
+        // Get the account_type_id and symbol_group_id combinations from the request
+        $requestCombinations = array_map(function($amount) {
+            return [
+                'account_type_id' => $amount['account_type_id'],
+                'symbol_group_id' => $amount['symbol_group_id']
+            ];
+        }, $amounts);
+
+        $errors = [];
+
+        // Validate amounts
+        foreach ($amounts as $index => $amount) {
+            $uplineRebate = RebateAllocation::find($amount['rebate_detail_id']);
+
+            if ($uplineRebate && $amount['amount'] > $uplineRebate->amount) {
+                $errors["amounts.$index"] = 'Amount should not be higher than $' . $uplineRebate->amount;
+            }
+        }
+
+        if (!empty($errors)) {
+            throw ValidationException::withMessages($errors);
+        }
+
+        // Create rebate allocations for amounts in the request
+        foreach ($amounts as $amount) {
+            RebateAllocation::create([
+                'user_id' => $user_id,
+                'account_type_id' => $amount['account_type_id'],
+                'amount' => $amount['amount'],
+                'symbol_group_id' => $amount['symbol_group_id'],
+                'edited_by' => Auth::id()
+            ]);
+        }
+
+        // Create entries for missing combinations with amount 0
+        foreach ($uplineCombinations as $combination) {
+            if (!in_array($combination, $requestCombinations)) {
+                RebateAllocation::create([
+                    'user_id' => $user_id,
+                    'account_type_id' => $combination['account_type_id'],
+                    'amount' => 0,
+                    'symbol_group_id' => $combination['symbol_group_id'],
+                    'edited_by' => Auth::id()
+                ]);
+            }
+        }
+
+        $user->id_number = $request->id_number;
+        $user->role = 'agent';
+        $user->save();
+
+        return back()->with('toast', [
+            'title' => trans('public.upgrade_to_agent_success_alert'),
+            'type' => 'success',
+        ]);
+    }
 
     public function detail($id_number)
     {

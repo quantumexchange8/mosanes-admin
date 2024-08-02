@@ -28,4 +28,9 @@ class RebateAllocation extends Model
     {
         return $this->belongsTo(SymbolGroup::class, 'symbol_group_id', 'id');
     }
+
+    public function account_type(): belongsTo
+    {
+        return $this->belongsTo(AccountType::class, 'account_type_id', 'id');
+    }
 }

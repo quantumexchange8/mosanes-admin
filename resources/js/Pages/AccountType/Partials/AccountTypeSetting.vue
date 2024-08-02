@@ -15,7 +15,7 @@ const props = defineProps({
 })
 
 const visible = ref(false);
-const categories = ref(['Individual', 'Manage']);
+const categories = ref(['individual', 'manage']);
 const trade_delay_duration_dropdown = ref([
     {name: '0 sec', value: '0'},
     {name: '1 sec', value: '1'},

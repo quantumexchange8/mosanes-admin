@@ -114,26 +114,26 @@ import {
         </SidebarLink>
 
         <!-- Components -->
-        <SidebarCollapsible
-            title="Components"
-            :active="route().current('components.*')"
-        >
-            <template #icon>
-                <IconComponents :size="20" stroke-width="1.25" />
-            </template>
+<!--        <SidebarCollapsible-->
+<!--            title="Components"-->
+<!--            :active="route().current('components.*')"-->
+<!--        >-->
+<!--            <template #icon>-->
+<!--                <IconComponents :size="20" stroke-width="1.25" />-->
+<!--            </template>-->
 
-            <SidebarCollapsibleItem
-                title="Buttons"
-                :href="route('components.buttons')"
-                :active="route().current('components.buttons')"
-            />
+<!--            <SidebarCollapsibleItem-->
+<!--                title="Buttons"-->
+<!--                :href="route('components.buttons')"-->
+<!--                :active="route().current('components.buttons')"-->
+<!--            />-->
 
-            <SidebarCollapsibleItem
-                title="Member Network"
-                :href="route('member.network')"
-                :active="route().current('member.network')"
-            />
-        </SidebarCollapsible>
+<!--            <SidebarCollapsibleItem-->
+<!--                title="Member Network"-->
+<!--                :href="route('member.network')"-->
+<!--                :active="route().current('member.network')"-->
+<!--            />-->
+<!--        </SidebarCollapsible>-->
 
 
         <!-- Profile -->

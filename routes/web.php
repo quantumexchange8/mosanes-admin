@@ -88,6 +88,7 @@ Route::middleware('auth')->group(function () {
      */
     Route::prefix('pamm_allocate')->group(function () {
         Route::get('/', [PammController::class, 'pamm_allocate'])->name('pamm_allocate');
+        Route::get('/getMasters', [PammController::class, 'getMasters'])->name('pamm_allocate.getMasters');
 
     });
 

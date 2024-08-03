@@ -16,13 +16,13 @@ const props = defineProps({
 });
 
 const baseClasses = [
-  "flex px-2 py-1 justify-center items-center text-xs font-semibold hover:-translate-y-1 transition-all duration-300 ease-in-out",
+  "flex px-2 py-1 justify-center items-center text-xs font-semibold hover:-translate-y-1 transition-all duration-300 ease-in-out w-auto",
 ];
 
 const variantClasses = computed(() => {
     if (props.value === 'primary' || props.value === 'member') {
         return 'bg-primary-50 text-primary-500'
-    } else if (props.value === 'success' || props.value === 'active' || props.value === 'live') {
+    } else if (props.value === 'successful' || props.value === 'active' || props.value === 'live') {
         return 'bg-success-50 text-success-500'
     } else if (props.value === 'error' || props.value === 'failed') {
         return 'bg-error-50 text-error-500'

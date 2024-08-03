@@ -5,6 +5,8 @@ import { transactionFormat } from "@/Composables/index.js";
 import { usePage } from "@inertiajs/vue3";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import StatusBadge from "@/Components/StatusBadge.vue";
+import { IconSearch, IconCircleXFilled, IconUserDollar, IconPremiumRights, IconAdjustments } from '@tabler/icons-vue';
+const { formatAmount } = transactionFormat();
 
 const items = ref([
     { id: 1, name: 'Alice Johnson', value: '$120' },
@@ -12,6 +14,18 @@ const items = ref([
     { id: 3, name: 'Charlie Brown', value: '$200' },
 ])
 
+const masters = ref();
+
+const getResults = async () => {
+    try {
+        const response = await axios.get('/pamm_allocate/getMasters');
+        masters.value = response.data.masters;
+    } catch (error) {
+        console.error('Error get masters:', error);
+    }
+};
+
+getResults();
 </script>
 
 <template>
@@ -77,40 +91,112 @@ const items = ref([
                     </div>
                 </div>
             </div>
+
             <!-- toolbar -->
-            <div class="grid grid-cols-1 gap-5 self-stretch md:grid-cols-2 md:content-center">
-                <div class="flex flex-col items-center p-6 gap-4 rounded-2xl bg-white shadow-toast">
-                    <div class="flex items-start gap-4 self-stretch">
-                        <div class="w-[42px] h-[42px] rounded-full overflow-hidden grow-0 shrink-0">
-                            <DefaultProfilePhoto />
+            <div
+                v-if="masters"
+                class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-5 self-stretch"
+            >
+                <div
+                    v-for="(master, index) in masters"
+                    :key="index"
+                    class="w-full p-6 flex flex-col items-center gap-4 rounded-2xl bg-white shadow-toast"
+                >
+                    <div class="w-full flex items-center gap-4">
+                        <div class="w-[42px] h-[42px] shrink-0 grow-0 rounded-full overflow-hidden">
+                            <div v-if="master.profile_photo">
+                                <img :src="master.profile_photo" alt="Profile Photo" />
+                            </div>
+                            <div v-else>
+                                <DefaultProfilePhoto />
+                            </div>
                         </div>
                         <div class="flex flex-col items-start">
-                            <span class="self-stretch overflow-hidden text-gray-950 text-ellipsis font-bold">{{ items[0].name }}</span>
-                            <span class="self-stretch overflow-hidden text-gray-500 text-ellipsis text-sm">{{ items[0].name }}</span>
+                            <div class="self-stretch truncate w-64 text-gray-950 font-bold">
+                                {{ master.asset_name }}
+                            </div>
+                            <div class="self-stretch truncate w-24 text-gray-500 text-sm">
+                                {{ master.trader_name }}
+                            </div>
                         </div>
-                        <!-- action -->
                     </div>
+
                     <div class="flex items-center gap-2 self-stretch">
                         <StatusBadge value="info">
-                            {{ 'test' }}
+                            $ {{ formatAmount(master.minimum_investment) }}
                         </StatusBadge>
                         <StatusBadge value="gray">
-                            {{ 'test' }}
+                            <div v-if="master.minimum_investment_period != 0">
+                                {{ master.minimum_investment_period }} {{ $t('public.months') }}
+                            </div>
+                            <div v-else>
+                                {{ $t('public.lock_free') }}
+                            </div>
                         </StatusBadge>
                         <StatusBadge value="gray">
-                            {{ 'test' }}
+                            {{ master.performance_fee||master.performance_fee == 0 ? formatAmount(master.performance_fee, 0)+'%' : $t('public.zero') }} {{ $t('public.fee') }}
                         </StatusBadge>
                     </div>
-                    <div class="flex justify-center items-center py-2 gap-2 self-stretch border-y border-gray-200">
-                        <div class="flex flex-col items-center"></div>
-                        <div class="flex flex-col items-center"></div>
-                        <div class="flex flex-col items-center"></div>
+
+                    <div class="py-2 flex justify-center items-center gap-2 self-stretch border-y border-solid border-gray-200">
+                        <div class="w-full flex flex-col items-center">
+                            <div class="self-stretch text-gray-950 text-center font-semibold">
+                                {{ master.total_gain }}%
+                            </div>
+                            <div class="self-stretch text-gray-500 text-center text-xs">
+                                {{ $t('public.total_gain') }}
+                            </div>
+                        </div>
+                        <div class="w-full flex flex-col items-center">
+                            <div class="self-stretch text-gray-950 text-center font-semibold">
+                                {{ master.monthly_gain }}%
+                            </div>
+                            <div class="self-stretch text-gray-500 text-center text-xs">
+                                {{ $t('public.monthly_gain') }}
+                            </div>
+                        </div>
+                        <div class="w-full flex flex-col items-center">
+                            <div class="self-stretch text-center font-semibold">
+                                <div
+                                    v-if="master.latest_profit != 0"
+                                    :class="(master.latest_profit < 0) ? 'text-error-500' : 'text-success-500'"
+                                >
+                                    {{ master.latest_profit }}
+                                </div>
+                                <div
+                                    v-else
+                                    class="text-gray-950"
+                                >
+                                    -
+                                </div>
+                            </div>
+                            <div class="self-stretch text-gray-500 text-center text-xs">
+                                {{ $t('public.lastest') }}
+                            </div>
+                        </div>
                     </div>
-                    <div class="flex items-end gap-5 self-stretch">
-                        <div class="flex flex-col items-center gap-1"></div>
-                        <div class="flex items-center gap-2"></div>
+
+                    <div class="flex flex-col items-center gap-1 self-stretch">
+                        <div class="py-1 flex items-center gap-3 self-stretch">
+                            <IconUserDollar size="20" stroke-width="1.25" />
+                            <div class="w-full text-gray-950 text-sm font-medium">
+                                {{ master.total_investors }} {{ $t('public.investors') }}
+                            </div>
+                        </div>
+                        <div class="py-1 flex items-center gap-3 self-stretch">
+                            <IconPremiumRights size="20" stroke-width="1.25" />
+                            <div class="w-full text-gray-950 text-sm font-medium">
+                                {{ $t('public.total_fund_size_caption') }}
+                                <span class="text-primary-500">$ {{ formatAmount(master.total_fund) }}</span>
+                            </div>
+                        </div>
                     </div>
+
                 </div>
+            </div>
+
+            <div v-else>
+                loading
             </div>
         </div>
     </AuthenticatedLayout>

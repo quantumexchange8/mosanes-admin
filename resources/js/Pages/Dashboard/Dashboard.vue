@@ -14,7 +14,7 @@ const page = usePage();
 
 const { formatAmount } = transactionFormat();
 
-const counterDuration = ref(10);
+const counterDuration = ref(0.3);
 const balance = ref(9879879.61)
 const equity = ref(945789.39)
 const pendingWithdrawal = ref(16976.96)

@@ -33,7 +33,7 @@ return new class extends Migration
             $table->string('referral_code')->nullable();
             $table->string('id_number')->nullable();
             $table->string('kyc_status')->default('approved');
-            $table->timestamp('kyc_approved_at')->default(now());
+            $table->timestamp('kyc_approved_at')->nullable();
             $table->text('kyc_approval_description')->nullable();
             $table->string('gender')->nullable();
             $table->integer('ct_user_id')->nullable();

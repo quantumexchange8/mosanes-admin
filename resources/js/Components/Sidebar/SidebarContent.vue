@@ -3,7 +3,7 @@ import PerfectScrollbar from '@/Components/PerfectScrollbar.vue'
 import SidebarLink from '@/Components/Sidebar/SidebarLink.vue'
 import SidebarCollapsible from '@/Components/Sidebar/SidebarCollapsible.vue'
 import SidebarCollapsibleItem from '@/Components/Sidebar/SidebarCollapsibleItem.vue'
-import {ref} from "vue";
+import {onMounted, ref, watchEffect} from "vue";
 import {usePage} from "@inertiajs/vue3";
 import {
     IconLayoutDashboard,
@@ -14,8 +14,29 @@ import {
     IconId,
     IconCoinMonero,
     IconBusinessplan,
+    IconClockDollar
 } from '@tabler/icons-vue';
 
+const pendingCounts = ref(0);
+
+const getPendingCounts = async () => {
+    try {
+        const response = await axios.get('/getPendingCounts');
+        pendingCounts.value = response.data.pendingCounts
+    } catch (error) {
+        console.error('Error pending counts:', error);
+    }
+};
+
+onMounted(() => {
+    getPendingCounts();
+})
+
+watchEffect(() => {
+    if (usePage().props.toast !== null) {
+        getPendingCounts();
+    }
+});
 </script>
 
 <template>
@@ -32,6 +53,18 @@ import {
         >
             <template #icon>
                 <IconLayoutDashboard :size="20" stroke-width="1.25" />
+            </template>
+        </SidebarLink>
+
+        <!-- Pending -->
+        <SidebarLink
+            :title="$t('public.pending')"
+            :href="route('pending')"
+            :active="route().current('pending')"
+            :pendingCounts="pendingCounts"
+        >
+            <template #icon>
+                <IconClockDollar :size="20" stroke-width="1.25" />
             </template>
         </SidebarLink>
 

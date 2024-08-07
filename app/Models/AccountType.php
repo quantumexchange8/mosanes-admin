@@ -22,6 +22,7 @@ class AccountType extends Model
         'trade_open_duration',
         'maximum_account_number',
         'descriptions',
+        'color',
         'edited_by',
     ];
 }

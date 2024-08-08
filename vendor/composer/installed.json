@@ -1,6 +1,62 @@
 {
     "packages": [
         {
+            "name": "aleedhillon/meta-five",
+            "version": "v1.1.1",
+            "version_normalized": "1.1.1.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/aleedhillon/meta-five.git",
+                "reference": "3996dc8f35fc8311f0766a8fafd578413a23f0c4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/aleedhillon/meta-five/zipball/3996dc8f35fc8311f0766a8fafd578413a23f0c4",
+                "reference": "3996dc8f35fc8311f0766a8fafd578413a23f0c4",
+                "shasum": ""
+            },
+            "require-dev": {
+                "orchestra/testbench": "^6.0"
+            },
+            "time": "2024-05-13T18:30:09+00:00",
+            "type": "library",
+            "extra": {
+                "laravel": {
+                    "providers": [
+                        "AleeDhillon\\MetaFive\\MetaFiveProvider"
+                    ]
+                }
+            },
+            "installation-source": "dist",
+            "autoload": {
+                "psr-4": {
+                    "AleeDhillon\\MetaFive\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Ali A. Dhillon",
+                    "email": "aleedhx@gmail.com"
+                }
+            ],
+            "description": "Metatrader 5 Web API Wrapper for Laravel",
+            "support": {
+                "issues": "https://github.com/aleedhillon/meta-five/issues",
+                "source": "https://github.com/aleedhillon/meta-five/tree/v1.1.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/aleedhillon",
+                    "type": "github"
+                }
+            ],
+            "install-path": "../aleedhillon/meta-five"
+        },
+        {
             "name": "brick/math",
             "version": "0.12.1",
             "version_normalized": "0.12.1.0",

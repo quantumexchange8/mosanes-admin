@@ -96,7 +96,7 @@ export default {
             // Color
             'bg-white',
             'border-surface-200 dark:border-surface-700',
-            'text-surface-700 dark:text-white/80'
+            'text-gray-950'
         ]
     },
     column: {
@@ -175,7 +175,8 @@ export default {
         footercell: ({ context }) => ({
             class: [
                 // Font
-                'font-bold',
+                'text-sm',
+                'font-semibold',
 
                 // Alignment
                 'text-left',
@@ -185,12 +186,11 @@ export default {
                 { 'border-x border-y': context?.showGridlines },
 
                 // Spacing
-                context?.size === 'small' ? 'p-2' : context?.size === 'large' ? 'p-5' : 'p-4',
+                context?.size === 'small' ? 'p-2' : context?.size === 'large' ? 'p-5' : 'py-4 px-3',
 
                 // Color
-                'border-surface-200 dark:border-surface-700',
-                'text-surface-700 dark:text-white/80',
-                'bg-surface-0 dark:bg-surface-900'
+                'text-gray-950',
+                'bg-white'
             ]
         }),
         sorticon: ({ context }) => ({
@@ -1115,7 +1115,7 @@ export default {
         class: ['sticky z-20', 'bg-surface-0 text-surface-600 dark:text-white/70', 'dark:bg-surface-900']
     },
     rowgroupfooter: {
-        class: ['sticky z-20', 'bg-surface-0 text-surface-600 dark:text-white/70', 'dark:bg-surface-900']
+        class: ['sticky z-20', 'bg-white text-gray-950']
     },
     rowgrouptoggler: {
         class: [

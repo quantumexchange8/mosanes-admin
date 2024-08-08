@@ -313,7 +313,7 @@ class MemberController extends Controller
         ])->setAttributeNames([
             'email' => trans('public.email'),
             'name' => trans('public.name'),
-            'dial_code' => trans('public.dial_code'),
+            'dial_code' => trans('public.phone_code'),
             'phone' => trans('public.phone'),
             'phone_number' => trans('public.phone_number'),
         ]);

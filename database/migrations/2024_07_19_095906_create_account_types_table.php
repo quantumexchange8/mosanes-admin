@@ -21,6 +21,7 @@ return new class extends Migration {
             $table->string('trade_open_duration')->nullable();
             $table->integer('maximum_account_number')->nullable();
             $table->text('descriptions')->nullable();
+            $table->string('color', 100)->nullable();
             $table->text('status')->nullable()->default('inactive');
             $table->unsignedBigInteger('edited_by');
             $table->softDeletes();

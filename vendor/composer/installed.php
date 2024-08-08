@@ -3,13 +3,22 @@
         'name' => 'laravel/laravel',
         'pretty_version' => 'dev-main',
         'version' => 'dev-main',
-        'reference' => '01da3ba2e9e9a59963ff84183face37c49b02eda',
+        'reference' => 'fb9bc87c1d5f97bb78c46492dbd300ec1ac2199e',
         'type' => 'project',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
         'dev' => true,
     ),
     'versions' => array(
+        'aleedhillon/meta-five' => array(
+            'pretty_version' => 'v1.1.1',
+            'version' => '1.1.1.0',
+            'reference' => '3996dc8f35fc8311f0766a8fafd578413a23f0c4',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../aleedhillon/meta-five',
+            'aliases' => array(),
+            'dev_requirement' => false,
+        ),
         'brick/math' => array(
             'pretty_version' => '0.12.1',
             'version' => '0.12.1.0',
@@ -409,7 +418,7 @@
         'laravel/laravel' => array(
             'pretty_version' => 'dev-main',
             'version' => 'dev-main',
-            'reference' => '01da3ba2e9e9a59963ff84183face37c49b02eda',
+            'reference' => 'fb9bc87c1d5f97bb78c46492dbd300ec1ac2199e',
             'type' => 'project',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),

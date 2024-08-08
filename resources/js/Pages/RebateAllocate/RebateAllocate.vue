@@ -114,9 +114,7 @@ watchEffect(() => {
             </div>
 
             <!-- data table -->
-<!--            <RebateStructureTable-->
-<!--                :companyProfile="companyProfile"-->
-<!--            />-->
+            <RebateStructureTable />
         </div>
     </AuthenticatedLayout>
 </template>

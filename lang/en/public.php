@@ -271,4 +271,8 @@ return [
     "most_investor" => "Most Investor",
     "my_favourites" => "My Favourites",
     "my_joining" => "My Joining",
+    "level" => "Level",
+    "search_agent" => "Search Agent",
+    "standard_account" => "Standard Account",
+    "premium_account" => "Premium Account",
 ];

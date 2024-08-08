@@ -62,9 +62,8 @@ const changeAgent = async (newAgent) => {
     loading.value = true;
 
     try {
-        const response = await axios.get(`/rebate_allocate/changeAgents?id=${newAgent.id}&level=${newAgent.level}&type_id=${accountType.value}`);
+        const response = await axios.get(`/rebate_allocate/changeAgents?id=${newAgent.id}&type_id=${accountType.value}`);
         agents.value = response.data;
-        // console.log(agents.value);
     } catch (error) {
         console.error('Error get change:', error);
     } finally {

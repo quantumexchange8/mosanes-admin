@@ -15,15 +15,15 @@ const page = usePage();
 const { formatAmount } = transactionFormat();
 
 const counterDuration = ref(0.3);
-const balance = ref(9879879.61)
-const equity = ref(945789.39)
-const pendingWithdrawal = ref(16976.96)
-const netAsset = ref(768709.42)
-const totalDeposit = ref(1802283.9)
-const totalWithdrawal = ref(937270.2)
-const totalRebate = ref(96304.28);
+const balance = ref(0.00)
+const equity = ref(0.00)
+const pendingWithdrawal = ref(0.00)
+const netAsset = ref(0.00)
+const totalDeposit = ref(0.00)
+const totalWithdrawal = ref(0.00)
+const totalRebate = ref(0.00)
 
-const pendingWithdrawalCount = ref(6)
+const pendingWithdrawalCount = ref(0)
 const counterEquity = ref(null);
 const counterBalance = ref(null);
 
@@ -230,7 +230,7 @@ const updateBalEquity = () => {
                     <div class="h-[300px] overflow-y-auto">
                         <div class="flex flex-col items-center gap-4 flex-1">
                             <template v-for="index in 5" :key="index">
-                                <div class="flex flex-col items-start gap-1 self-stretch">
+                                <!-- <div class="flex flex-col items-start gap-1 self-stretch">
                                     <div class="flex justify-between items-start self-stretch">
                                         <div class="flex items-start gap-3">
                                             <div class="w-7 h-7 rounded-full overflow-hidden">
@@ -260,7 +260,7 @@ const updateBalEquity = () => {
                                             Lorem ipsum dolor sit amet consectetur adipisicing elit. Similique sit, ducimus cupiditate praesentium aliquid alias perferendis nesciunt repellat cum incidunt? Ullam distinctio enim repellendus? Quia rem accusantium ratione dignissimos est.
                                         </div>
                                     </div>
-                                </div>
+                                </div> -->
                             </template>
                         </div>
                     </div>

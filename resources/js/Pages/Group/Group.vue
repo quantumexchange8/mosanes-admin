@@ -15,10 +15,10 @@ import { usePage } from '@inertiajs/vue3';
 const { formatAmount } = transactionFormat();
 
 const counterDuration = ref(10);
-const totalNetBalance = ref(9879879.61);
-const totalDeposit = ref(97697699.61);
-const totalWithdrawal = ref(987989.61);
-const totalFeeCharges = ref(945789.39);
+const totalNetBalance = ref(0.00);
+const totalDeposit = ref(0.00);
+const totalWithdrawal = ref(0.00);
+const totalFeeCharges = ref(0.00);
 const groups = ref();
 const groupsLength = ref();
 const total = ref();

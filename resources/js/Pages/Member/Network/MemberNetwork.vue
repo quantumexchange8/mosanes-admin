@@ -84,7 +84,7 @@ const clearSearch = () => {
 </script>
 
 <template>
-    <AuthenticatedLayout title="Member Network">
+    <AuthenticatedLayout :title="$t('public.member_network')">
         <div class="flex flex-col items-center gap-5">
             <div class="flex flex-col md:flex-row gap-3 items-center self-stretch">
                 <div class="relative w-full md:w-60">

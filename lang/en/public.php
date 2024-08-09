@@ -283,4 +283,5 @@ return [
     "rebate_wallet" => "Rebate",
     "toast_approve_withdrawal_request" => "You’ve successfully approved a withdrawal request.",
     "toast_reject_withdrawal_request" => "Withdrawal request has been rejected!",
+    "forgot_your_password" => "Forgot your password?",
 ];

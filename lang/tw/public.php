@@ -35,7 +35,7 @@ return [
     "total_withdrawal" => "總提款額",
     "total_rebate_payout" => "總返傭支付",
     "recent_posts" => "最新的論壇帖子",
-    "add_member" => "Add Member",
+    "add_member" => "添加新會員",
     "new_member" => "添加新會員",
     "basic_information" => "基本信息",
     "full_name" => "姓名",
@@ -268,6 +268,7 @@ return [
     "most_investor" => "最多投資者",
     "my_favourites" => "我的最愛",
     "my_joining" => "我已加入",
+    "level" => "層級",
     "pending" => "待辦事項",
     "revoke_pamm" => "停止資管綁定",
     "withdrawal_pending" => "提款申請",
@@ -279,4 +280,5 @@ return [
     "rebate_wallet" => "返傭錢包",
     "toast_approve_withdrawal_request" => "提款申請已被批准!",
     "toast_reject_withdrawal_request" => "提款申請已被拒絕!",
+    "forgot_your_password" => "忘記密碼",
 ];

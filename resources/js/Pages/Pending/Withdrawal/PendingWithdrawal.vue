@@ -161,7 +161,11 @@ const submit = (transactionId) => {
                     </Button>
                 </div>
             </template>
-            <template #empty> {{ $t('public.no_user_header') }} </template>
+            <template #empty>
+                <div class="py-1">
+                    {{ $t('public.no_transaction_yet') }}
+                </div>
+            </template>
             <template #loading>
                 <div class="flex flex-col gap-2 items-center justify-center">
                     <Loader />
@@ -217,7 +221,7 @@ const submit = (transactionId) => {
             <ColumnGroup type="footer">
                 <Row>
                     <Column :footer="$t('public.total') + ' ($):'" :colspan="3" footerStyle="text-align:right" />
-                    <Column :footer="totalAmount ? formatAmount(totalAmount) : $t('public.loading_transactions_caption')" />
+                    <Column :footer="formatAmount(totalAmount ? totalAmount : 0)" />
                 </Row>
             </ColumnGroup>
         </DataTable>

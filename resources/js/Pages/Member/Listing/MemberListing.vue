@@ -278,7 +278,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                     </Column>
                     <Column field="role" sortable style="width: 25%" headerClass="hidden md:table-cell">
                         <template #header>
-                            <span class="hidden md:block">$t('public.role')</span>
+                            <span class="hidden md:block">{{ $t('public.role') }}</span>
                         </template>
                         <template #body="slotProps">
                             {{ slotProps.data.role }}

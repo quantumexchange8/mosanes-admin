@@ -47,10 +47,10 @@ class GroupController extends Controller
             });
 
         $total = [];
-        $total['total_net_balance'] = 60340;
-        $total['total_deposit'] = 36521;
-        $total['total_withdrawal'] = 12054;
-        $total['total_charges'] = 24467;
+        $total['total_net_balance'] = 0;
+        $total['total_deposit'] = 0;
+        $total['total_withdrawal'] = 0;
+        $total['total_charges'] = 0;
 
         return response()->json([
             'groups' => $groups,

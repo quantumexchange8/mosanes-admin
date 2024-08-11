@@ -281,4 +281,5 @@ return [
     "toast_approve_withdrawal_request" => "提款申請已被批准!",
     "toast_reject_withdrawal_request" => "提款申請已被拒絕!",
     "forgot_your_password" => "忘記密碼",
+    "role" => "角色",
 ];

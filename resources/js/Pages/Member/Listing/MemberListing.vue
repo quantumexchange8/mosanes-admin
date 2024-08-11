@@ -276,6 +276,14 @@ const paginator_caption = wTrans('public.paginator_caption');
                             {{ slotProps.data.id_number }}
                         </template>
                     </Column>
+                    <Column field="role" sortable style="width: 25%" headerClass="hidden md:table-cell">
+                        <template #header>
+                            <span class="hidden md:block">$t('public.role')</span>
+                        </template>
+                        <template #body="slotProps">
+                            {{ slotProps.data.role }}
+                        </template>
+                    </Column>
                     <Column field="name" sortable :header="$t('public.name')" style="width: 35%" headerClass="hidden md:table-cell">
                         <template #body="slotProps">
                             <div class="flex items-center gap-3">

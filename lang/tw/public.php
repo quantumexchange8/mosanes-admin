@@ -355,4 +355,7 @@ return [
     "delete_member_desc" => "您確定要刪除此會員嗎? 一旦執行此操作將無法撤回.",
     "toast_delete_member_success" => "會員已被刪除!",
     "toast_kyc_upload_request" => "您已成功請求提交新的身分驗證圖",
+    "access_denied" => "拒絕訪問",
+    "access_denied_desc" => "您似乎沒有訪問此頁面的權限。請檢查您的憑證。",
+    "logout" => "登出",
 ];

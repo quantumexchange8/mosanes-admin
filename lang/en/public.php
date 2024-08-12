@@ -355,4 +355,7 @@ return [
     "delete_member_desc" => "Are you sure you want to delete this member? This action cannot be undone.",
     "toast_delete_member_success" => "Member has been deleted!",
     "toast_kyc_upload_request" => "You’ve successfully requested a new KYC submission.",
+    "access_denied" => "Access Denied",
+    "access_denied_desc" => "It looks like you don't have permission to access this page. Please check your credentials.",
+    "logout" => "Log Out",
 ];

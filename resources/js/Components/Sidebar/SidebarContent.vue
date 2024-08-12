@@ -103,7 +103,7 @@ watchEffect(() => {
         </SidebarLink>
 
         <!-- Pamm Allocate -->
-        <SidebarLink
+        <!-- <SidebarLink
             :title="$t('public.pamm_allocate')"
             :href="route('pamm_allocate')"
             :active="route().current('pamm_allocate')"
@@ -111,7 +111,7 @@ watchEffect(() => {
             <template #icon>
                 <IconCoinMonero :size="20" stroke-width="1.25" />
             </template>
-        </SidebarLink>
+        </SidebarLink> -->
 
         <!-- Rebate Allocate -->
         <SidebarLink

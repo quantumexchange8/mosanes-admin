@@ -399,15 +399,15 @@ const paginator_caption = wTrans('public.paginator_caption');
             <!-- Filter Role-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    {{ $t('public.filter_role_header') }}
+                    {{ $t('public.filter_role') }}
                 </div>
                 <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['role'].value" inputId="role_member" value="member" />
+                        <RadioButton v-model="filters['role'].value" inputId="role_member" value="member" class="w-4 h-4" />
                         <label for="role_member">{{ $t('public.member') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['role'].value" inputId="role_agent" value="agent" />
+                        <RadioButton v-model="filters['role'].value" inputId="role_agent" value="agent" class="w-4 h-4" />
                         <label for="role_agent">{{ $t('public.agent') }}</label>
                     </div>
                 </div>
@@ -416,7 +416,7 @@ const paginator_caption = wTrans('public.paginator_caption');
             <!-- Filter Group-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    {{ $t('public.filter_group_header') }}
+                    {{ $t('public.filter_group') }}
                 </div>
                 <Dropdown
                     v-model="group_id"
@@ -449,7 +449,7 @@ const paginator_caption = wTrans('public.paginator_caption');
             <!-- Filter Upline-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    {{ $t('public.filter_upline_header') }}
+                    {{ $t('public.filter_upline') }}
                 </div>
                 <Dropdown
                     v-model="upline_id"
@@ -496,15 +496,15 @@ const paginator_caption = wTrans('public.paginator_caption');
             <!-- Filter Statys-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    {{ $t('public.filter_status_header') }}
+                    {{ $t('public.filter_status') }}
                 </div>
                 <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_active" value="active" />
+                        <RadioButton v-model="filters['status'].value" inputId="status_active" value="active" class="w-4 h-4" />
                         <label for="status_active">{{ $t('public.active') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_inactive" value="inactive" />
+                        <RadioButton v-model="filters['status'].value" inputId="status_inactive" value="inactive" class="w-4 h-4" />
                         <label for="status_inactive">{{ $t('public.inactive') }}</label>
                     </div>
                 </div>

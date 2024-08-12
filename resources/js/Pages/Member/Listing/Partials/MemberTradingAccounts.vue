@@ -21,6 +21,7 @@ import DropdownLink from '@/Components/DropdownLink.vue';
 import StatusBadge from '@/Components/StatusBadge.vue';
 import Empty from '@/Components/Empty.vue';
 import { useConfirm } from 'primevue/useconfirm';
+import InputNumber from 'primevue/inputnumber';
 
 const hasData = ref(false);
 const form = useForm({
@@ -131,10 +132,11 @@ const handleChipClick = (label) => {
 const confirm = useConfirm();
 const requireConfirmation = () => {
     confirm.require({
-        group: 'headless',
-        header: 'Delete Trading Account',
-        message: 'Are you sure you want to delete this trading account? This action cannot be undone.',
-        acceptButton: 'Yes, delete it',
+        group: 'headless-error',
+        header: trans('public.delete_trading_account_header'),
+        message: trans('public.delete_trading_account_message'),
+        cancelButton: trans('public.cancel'),
+        acceptButton: trans('public.delete_confirm'),
         accept: () => {
             form.post(route('member.accountDelete'));
         },
@@ -202,7 +204,7 @@ const requireConfirmation = () => {
                     <div class="flex items-center gap-10">
                         <div class="flex items-center gap-2">
                             <div class="flex w-10 h-10 p-2.5 justify-center items-center rounded-[50px]">
-                                <RadioButton v-model="form.action" :inputId="actionLabel.in.toLowerCase()" :name="actionLabel.in" :value="actionLabel.in.toLowerCase()" />
+                                <RadioButton v-model="form.action" :inputId="actionLabel.in.toLowerCase()" :name="actionLabel.in" :value="actionLabel.in.toLowerCase()" class="w-4 h-4" />
                             </div>
                             <div class="text-gray-950 text-sm">
                                 {{ actionLabel.in }}
@@ -210,7 +212,7 @@ const requireConfirmation = () => {
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="flex w-10 h-10 p-2.5 justify-center items-center rounded-[50px]">
-                                <RadioButton v-model="form.action" :inputId="actionLabel.out.toLowerCase()" :name="actionLabel.out" :value="actionLabel.out.toLowerCase()" />
+                                <RadioButton v-model="form.action" :inputId="actionLabel.out.toLowerCase()" :name="actionLabel.out" :value="actionLabel.out.toLowerCase()" class="w-4 h-4" />
                             </div>
                             <div class="text-gray-950 text-sm">
                                 {{ actionLabel.out }}
@@ -220,17 +222,19 @@ const requireConfirmation = () => {
                 </div>
                 <div class="flex flex-col items-start gap-1 self-stretch">
                     <InputLabel for="amount" value="Amount" />
-                    <IconField iconPosition="left" class="w-full">
-                        <div class="text-gray-950 text-sm">$</div>
-                        <InputText
-                            id="amount"
-                            type="number"
-                            class="block w-full"
-                            v-model="form.amount"
-                            placeholder="Enter amount"
-                            :invalid="form.errors.amount"
-                        />
-                    </IconField>
+                    <InputNumber
+                        v-model="form.amount"
+                        inputId="currency-us"
+                        prefix="$ "
+                        class="w-full"
+                        inputClass="py-3 px-4"
+                        :min="0"
+                        :step="100"
+                        :minFractionDigits="2"
+                        fluid
+                        autofocus
+                        :invalid="!!form.errors.amount"
+                    />
                     <InputError :message="form.errors.amount" />
                 </div>
                 <div class="flex flex-col h-[150px] items-start gap-3 self-stretch">

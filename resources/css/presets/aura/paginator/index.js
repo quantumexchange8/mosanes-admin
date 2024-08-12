@@ -11,7 +11,7 @@ export default {
             'border-0 rounded-md',
 
             // Color
-            'bg-white',
+            // 'bg-white',
             'text-gray-700',
 
             // Font

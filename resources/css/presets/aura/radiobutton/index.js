@@ -7,9 +7,6 @@ export default {
             'inline-flex',
             'align-bottom',
 
-            // Size
-            'w-4 h-4',
-
             // Misc
             'cursor-pointer',
             'select-none'
@@ -21,7 +18,7 @@ export default {
             'flex justify-center items-center',
 
             // Size
-            'w-4 h-4',
+            'w-full h-full',
 
             // Shape
             'border',
@@ -86,7 +83,7 @@ export default {
             'rounded-full',
 
             // Size
-            'w-2 h-2',
+            'w-2.5 h-2.5',
 
             // Conditions
             {

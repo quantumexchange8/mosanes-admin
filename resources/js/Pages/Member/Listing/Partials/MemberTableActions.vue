@@ -57,11 +57,13 @@ const confirm = useConfirm();
 const form = useForm({
     id: props.member.id
 })
+
 const requireConfirmation = () => {
     confirm.require({
         group: props.member.status === 'active' ? 'headless-gray' : 'headless-primary',
         header: props.member.status === 'active' ? trans('public.deactivate_member') : trans('public.activate_member'),
         message: props.member.status === 'active' ? trans('public.deactivate_member_caption') : trans('public.activate_member_caption'),
+        cancelButton: trans('public.cancel'),
         acceptButton: props.member.status === 'active' ? trans('public.deactivate') : trans('public.confirm'),
         accept: () => {
             form.post(route('member.updateMemberStatus'), {

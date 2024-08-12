@@ -102,7 +102,16 @@ Route::middleware('auth')->group(function () {
     Route::prefix('pamm_allocate')->group(function () {
         Route::get('/', [PammController::class, 'pamm_allocate'])->name('pamm_allocate');
         Route::get('/getMasters', [PammController::class, 'getMasters'])->name('pamm_allocate.getMasters');
-
+        Route::get('/getMetrics', [PammController::class, 'getMetrics'])->name('pamm_allocate.getMetrics');
+        Route::get('/getOptions', [PammController::class, 'getOptions'])->name('pamm_allocate.getOptions');
+        Route::get('/getProfitLoss', [PammController::class, 'getProfitLoss'])->name('pamm_allocate.getProfitLoss');
+        
+        Route::post('/upload_image', [PammController::class, 'upload_image'])->name('pamm_allocate.upload_image');
+        Route::post('/validateStep', [PammController::class, 'validateStep'])->name('pamm_allocate.validateStep');
+        Route::post('/create_asset_master', [PammController::class, 'create_asset_master'])->name('pamm_allocate.create_asset_master');
+        Route::post('/edit_asset_master', [PammController::class, 'edit_asset_master'])->name('pamm_allocate.edit_asset_master');
+        Route::post('/update_asset_master_status', [PammController::class, 'update_asset_master_status'])->name('pamm_allocate.update_asset_master_status');
+        Route::post('/disband', [PammController::class, 'disband'])->name('pamm_allocate.disband');
     });
 
     /**

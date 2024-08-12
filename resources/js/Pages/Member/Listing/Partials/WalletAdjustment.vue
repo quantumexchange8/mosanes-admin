@@ -96,13 +96,13 @@ const handleChipClick = (label) => {
                     <div class="flex items-center gap-5">
                         <div class="flex items-center gap-2 text-sm text-gray-950">
                             <div class="flex p-2 justify-center items-center">
-                                <RadioButton v-model="form.action" inputId="rebate_in" :name="$t('public.rebate_in')" value="rebate_in" />
+                                <RadioButton v-model="form.action" inputId="rebate_in" :name="$t('public.rebate_in')" value="rebate_in" class="w-4 h-4" />
                             </div>
                             <label for="rebate_in">{{ $t('public.rebate_in') }}</label>
                         </div>
                         <div class="flex items-center gap-2 text-sm text-gray-950">
                             <div class="flex p-2 justify-center items-center">
-                                <RadioButton v-model="form.action" inputId="rebate_out" :name="$t('public.rebate_out')" value="rebate_out" />
+                                <RadioButton v-model="form.action" inputId="rebate_out" :name="$t('public.rebate_out')" value="rebate_out" class="w-4 h-4" />
                             </div>
                             <label for="rebate_out">{{ $t('public.rebate_out') }}</label>
                         </div>

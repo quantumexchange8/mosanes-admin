@@ -29,6 +29,7 @@ const requireConfirmation = (id) => {
         group: 'headless-error',
         header: trans('public.delete_group_header'),
         message: trans('public.delete_group_caption'),
+        cancelButton: trans('public.cancel'),
         acceptButton: trans('public.delete_confirm'),
         accept: () => {
             router.visit(route('group.delete', id), {method: 'delete'})

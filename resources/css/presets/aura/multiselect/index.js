@@ -41,8 +41,10 @@ export default {
     },
     label: ({ props }) => ({
         class: [
+            'w-full',
             'leading-none',
             'block',
+            'ml-3',
 
             // Spacing
             {
@@ -51,7 +53,7 @@ export default {
             },
 
             // Color
-            { 'text-surface-800': props.modelValue?.length, 'text-surface-400': !props.modelValue?.length },
+            { 'text-gray-950': props.modelValue?.length, 'text-gray-400': !props.modelValue?.length },
             'placeholder:text-surface-400',
 
             // Transitions
@@ -435,7 +437,7 @@ export default {
 
             // Colors
             {
-                'text-surface-700': !context.focused && !context.selected,
+                'text-gray-950': !context.focused && !context.selected,
                 'bg-surface-200': context.focused && !context.selected,
                 'text-surface-700': context.focused && !context.selected,
 

@@ -75,6 +75,19 @@ export function transactionFormat() {
         return `${year}/${month}/${day}`;
     }
 
+    function formatMonthDate(date) {
+        const formattedDate = new Date(date);
+    
+        // Create an Intl.DateTimeFormat instance for formatting the month
+        const monthFormatter = new Intl.DateTimeFormat('en-US', { month: 'long' });
+        const day = formattedDate.getDate().toString().padStart(2, '0');
+    
+        // Format the month and year
+        const month = monthFormatter.format(formattedDate);
+    
+        return `${month} ${day}`;
+    }
+    
     function formatTime(date) {
         const options = {
             hour12: false, // Disable AM/PM indicator
@@ -103,6 +116,7 @@ export function transactionFormat() {
     return {
         formatDateTime,
         formatDate,
+        formatMonthDate,
         formatAmount,
         formatType,
         formatTime

@@ -85,17 +85,17 @@ export default {
     }),
     footer: {
         class: [
-            'font-bold',
+            'font-semibold',
 
             // Shape
-            'border-t-0 border-b border-x-0',
+            // 'border-y border-gray-200 border-x-0',
 
             // Spacing
-            'p-4',
+            // 'py-2 px-3',
 
             // Color
             'bg-white',
-            'border-surface-200 dark:border-surface-700',
+            'border-gray-200',
             'text-gray-950'
         ]
     },

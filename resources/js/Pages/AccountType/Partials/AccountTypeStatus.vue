@@ -15,7 +15,8 @@ const checked = ref();
 const group = ref()
 const header = ref()
 const content = ref()
-const btnContent = ref()
+const cancelbtn = ref()
+const acceptbtn = ref()
 const confirm = useConfirm();
 
 const getData = async () => {
@@ -36,13 +37,15 @@ watch((checked), (newValue) => {
     if (newValue) {
         group.value = 'headless-gray'
         header.value = trans('public.deactivate_header');
-        content.value = trans('public.deactivate_content');
-        btnContent.value = trans('public.deactivate');
+        content.value = trans('public.activate_content');
+        cancelbtn.value = trans('public.cancel');
+        acceptbtn.value = trans('public.deactivate');
     } else {
         group.value = 'headless-primary'
         header.value = trans('public.activate_header');
         content.value = trans('public.activate_content');
-        btnContent.value = trans('public.confirm');
+        cancelbtn.value = trans('public.cancel');
+        acceptbtn.value = trans('public.confirm');
     }
 })
 
@@ -51,7 +54,8 @@ const requireConfirmation = () => {
         group: group.value,
         header: header.value,
         message: content.value,
-        acceptButton: btnContent.value,
+        cancelButton: cancelbtn.value,
+        acceptButton: acceptbtn.value,
         accept: () => {
             router.visit(route('accountType.updateStatus', props.accountTypeId), {method: 'patch'})
         },

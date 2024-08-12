@@ -63,7 +63,7 @@ export default {
             'px-3',
 
             // Color
-            'text-gray-950',
+            // 'text-gray-950',
 
             // Font
             'text-sm',

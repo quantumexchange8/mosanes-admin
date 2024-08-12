@@ -281,7 +281,8 @@ class MemberController extends Controller
             'upline_profile_photo' => $user->upline ? $user->upline->getFirstMediaUrl('profile_photo') : null,
             'total_direct_member' => $user->directChildren->where('role', 'member')->count(),
             'total_direct_agent' => $user->directChildren->where('role', 'agent')->count(),
-            'kyc_verification' => $user->getMedia('kyc_verification'),
+            'kyc_verification' => $user->getFirstMedia('kyc_verification'),
+            'kyc_approved_at' => $user->kyc_approved_at,
         ];
 
         $paymentAccounts = $user->paymentAccounts()
@@ -401,7 +402,15 @@ class MemberController extends Controller
 
     public function updateKYCStatus(Request $request)
     {
-        dd($request->all());
+        $user = User::find($request->id);
+
+        $user->kyc_approved_at = null;
+        $user->save();
+
+        return redirect()->back()->with('toast', [
+            'title' => trans('public.toast_kyc_upload_request'),
+            'type' => 'success'
+        ]);
     }
 
     public function getFinancialInfoData(Request $request)
@@ -506,5 +515,43 @@ class MemberController extends Controller
     public function uploadKyc(Request $request)
     {
         dd($request->all());
+    }
+
+    public function deleteMember(Request $request)
+    {
+        $user = User::find($request->id);
+
+        $relatedUsers = User::where('hierarchyList', 'like', '%-' . $user->id . '-%')->get();
+
+        foreach ($relatedUsers as $relatedUser) {
+            $updatedHierarchyList = str_replace('-' . $user->id . '-', '-', $relatedUser->hierarchyList);
+
+            $relatedUser->hierarchyList = $updatedHierarchyList;
+
+            // Split the updated hierarchyList to find the new upline
+            $hierarchyArray = array_filter(explode('-', $updatedHierarchyList));
+
+            // Since the last element is the `upline_id`, find the new upline
+            if (!empty($hierarchyArray)) {
+                // Get the last element in the array, which is the new upline_id
+                $newUplineId = end($hierarchyArray);
+                $relatedUser->upline_id = $newUplineId;
+            } else {
+                $relatedUser->upline_id = null;
+            }
+            $relatedUser->save();
+        }
+
+        $user->transactions()->delete();
+        $user->tradingAccounts()->delete();
+        $user->tradingUsers()->delete();
+        $user->paymentAccounts()->delete();
+        $user->rebateAllocations()->delete();
+        $user->delete();
+
+        return redirect()->back()->with('toast', [
+            'title' => trans('public.toast_delete_member_success'),
+            'type' => 'success'
+        ]);
     }
 }

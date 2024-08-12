@@ -1,7 +1,14 @@
 <script setup>
 import ConfirmDialog from 'primevue/confirmdialog';
 import Button from "@/Components/Button.vue";
-import { SecurityIcon, BulbIcon, DeleteIcon, DisbandIcon, HideAssetMasterIcon, ShowAssetMasterIcon } from "@/Components/Icons/brand.jsx";
+import {
+    SecurityIcon,
+    BulbIcon,
+    DeleteIcon,
+    DisbandIcon,
+    HideAssetMasterIcon,
+    ShowAssetMasterIcon
+} from "@/Components/Icons/brand.jsx";
 </script>
 
 <template>
@@ -24,11 +31,10 @@ import { SecurityIcon, BulbIcon, DeleteIcon, DisbandIcon, HideAssetMasterIcon, S
                 <div class="pt-2 md:pt-3 pb-6 px-4 md:px-6 w-full flex flex-col items-center gap-5 self-stretch">
                     <div class="flex flex-col gap-1 items-center self-stretch text-center">
                         <span class="text-gray-950 text-sm md:text-base font-semibold">{{ message.header }}</span>
-                        <span class="text-gray-700 text-xs md:text-sm">{{ message.message }}</span>
                         <span class="text-gray-700 text-xs md:text-sm">
-                            {{ message.text }}
-                            <span class="text-gray-950 font-semibold">{{ message.dynamicText }}</span>
-                            {{ message.suffix }}
+                            {{ message.message.text }}
+                            <span class="text-gray-950 font-semibold">{{ message.message.dynamicText }}</span>
+                            {{ message.message.suffix }}
                         </span>
                     </div>
                     <div class="flex items-center gap-4 md:gap-5 self-stretch">
@@ -64,22 +70,17 @@ import { SecurityIcon, BulbIcon, DeleteIcon, DisbandIcon, HideAssetMasterIcon, S
                         class="rounded-tl-3xl rounded-tr-3xl flex w-full p-1 justify-center [clip-path:polygon(0%_0%,_100%_0%,_100%_78%,_50%_100%,_0_78%)] bg-gray-900"
                     >
                         <div class="p-5 flex items-center justify-center">
-                            <!-- Conditionally render the icon based on actionType -->
-                            <SecurityIcon v-if="message.actionType === 'deactivate_member'" class="w-16 h-16 md:w-full md:h-auto" />
-                            <HideAssetMasterIcon v-if="message.actionType === 'hide_asset_master'" class="w-16 h-16 md:w-full md:h-auto" />
-                            <!-- Default icon if actionType is not specified -->
-                            <SecurityIcon v-if="!message.actionType" class="w-16 h-16 md:w-full md:h-auto" />
+                            <SecurityIcon class="w-16 h-16 md:w-full md:h-auto" />
                         </div>
                     </div>
                 </div>
                 <div class="pt-2 md:pt-3 pb-6 px-4 md:px-6 w-full flex flex-col items-center gap-5 self-stretch">
                     <div class="flex flex-col gap-1 items-center self-stretch text-center">
                         <span class="text-gray-950 text-sm md:text-base font-semibold">{{ message.header }}</span>
-                        <span class="text-gray-700 text-xs md:text-sm">{{ message.message }}</span>
                         <span class="text-gray-700 text-xs md:text-sm">
-                            {{ message.text }}
-                            <span class="text-gray-950 font-semibold">{{ message.dynamicText }}</span>
-                            {{ message.suffix }}
+                            {{ message.message.text }}
+                            <span class="text-gray-950 font-semibold">{{ message.message.dynamicText }}</span>
+                            {{ message.message.suffix }}
                         </span>
                     </div>
                     <div class="flex items-center gap-4 md:gap-5 self-stretch">
@@ -126,11 +127,10 @@ import { SecurityIcon, BulbIcon, DeleteIcon, DisbandIcon, HideAssetMasterIcon, S
                 <div class="pt-2 md:pt-3 pb-6 px-4 md:px-6 w-full flex flex-col items-center gap-5 self-stretch">
                     <div class="flex flex-col gap-1 items-center self-stretch text-center">
                         <span class="text-gray-950 text-sm md:text-base font-semibold">{{ message.header }}</span>
-                        <span class="text-gray-700 text-xs md:text-sm">{{ message.message }}</span>
                         <span class="text-gray-700 text-xs md:text-sm">
-                            {{ message.text }}
-                            <span class="text-gray-950 font-semibold">{{ message.dynamicText }}</span>
-                            {{ message.suffix }}
+                            {{ message.message.text }}
+                            <span class="text-gray-950 font-semibold">{{ message.message.dynamicText }}</span>
+                            {{ message.message.suffix }}
                         </span>
                     </div>
                     <div class="flex items-center gap-4 md:gap-5 self-stretch">

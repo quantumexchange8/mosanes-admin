@@ -78,16 +78,16 @@ const submitForm = () => {
     <div class="bg-white w-full xl:min-w-[540px] flex flex-col gap-6 md:gap-5 xl:gap-8 p-4 md:py-6 md:px-8 rounded-2xl shadow-toast self-stretch">
         <div class="flex flex-col pb-6 md:pb-5 xl:pb-8 items-start gap-4 self-stretch border-b border-gray-200">
             <div class="flex justify-between items-start self-stretch">
-                <div class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden bg-primary-100 p-2">
+                <div class="w-20 h-20 grow-0 shrink-0 rounded-full overflow-hidden bg-primary-100">
                     <div v-if="userDetail">
                         <div v-if="userDetail.profile_photo">
-                            <img :src="userDetail.profile_photo" alt="Profile Photo" />
+                            <img :src="userDetail.profile_photo" alt="Profile Photo" class="w-full object-cover" />
                         </div>
-                        <div v-else>
+                        <div v-else class="p-2">
                             <DefaultProfilePhoto />
                         </div>
                     </div>
-                    <div v-else class="animate-pulse">
+                    <div v-else class="animate-pulse p-2">
                         <DefaultProfilePhoto />
                     </div>
                 </div>

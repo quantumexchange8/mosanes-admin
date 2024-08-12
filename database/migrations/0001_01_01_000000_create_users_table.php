@@ -40,6 +40,7 @@ return new class extends Migration
             $table->string('role')->default('member');
             $table->string('status')->default('active');
             $table->string('remarks')->nullable();
+            $table->double('rebate_amount')->nullable();
             $table->rememberToken();
             $table->timestamps();
             $table->softDeletes();

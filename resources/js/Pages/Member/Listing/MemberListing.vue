@@ -29,6 +29,7 @@ import Vue3Autocounter from 'vue3-autocounter';
 import MemberTableActions from "@/Pages/Member/Listing/Partials/MemberTableActions.vue";
 import { trans, wTrans } from "laravel-vue-i18n";
 import {generalFormat} from "@/Composables/index.js";
+import StatusBadge from "@/Components/StatusBadge.vue";
 
 const total_members = ref(999);
 const total_agents = ref(999);
@@ -268,20 +269,12 @@ const paginator_caption = wTrans('public.paginator_caption');
                             <span class="text-sm text-gray-700">{{ $t('public.loading_users_caption') }}</span>
                         </div>
                     </template>
-                    <Column field="id_number" sortable style="width: 25%" headerClass="hidden md:table-cell">
+                    <Column field="id_number" sortable style="width: 15%" headerClass="hidden md:table-cell">
                         <template #header>
                             <span class="hidden md:block">id</span>
                         </template>
                         <template #body="slotProps">
                             {{ slotProps.data.id_number }}
-                        </template>
-                    </Column>
-                    <Column field="role" sortable style="width: 25%" headerClass="hidden md:table-cell">
-                        <template #header>
-                            <span class="hidden md:block">{{ $t('public.role') }}</span>
-                        </template>
-                        <template #body="slotProps">
-                            {{ slotProps.data.role }}
                         </template>
                     </Column>
                     <Column field="name" sortable :header="$t('public.name')" style="width: 35%" headerClass="hidden md:table-cell">
@@ -301,7 +294,17 @@ const paginator_caption = wTrans('public.paginator_caption');
                             </div>
                         </template>
                     </Column>
-                    <Column field="group" style="width: 15%" headerClass="hidden md:table-cell">
+                    <Column field="role" style="width: 15%" headerClass="hidden md:table-cell">
+                        <template #header>
+                            <span class="hidden md:block items-center justify-center w-full text-center">{{ $t('public.role') }}</span>
+                        </template>
+                        <template #body="slotProps">
+                            <div class="flex items-center justify-center">
+                                <StatusBadge :value="slotProps.data.role">{{ $t(`public.${slotProps.data.role}`) }}</StatusBadge>
+                            </div>
+                        </template>
+                    </Column>
+                    <Column field="group" style="width: 20%" headerClass="hidden md:table-cell">
                         <template #header>
                             <span class="hidden md:block items-center justify-center w-full text-center">{{ $t('public.group') }}</span>
                         </template>
@@ -329,7 +332,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                             </div>
                         </template>
                     </Column>
-                    <Column field="representative.name" header="" style="width: 10%" headerClass="hidden md:table-cell">
+                    <Column field="action" header="" style="width: 15%" headerClass="hidden md:table-cell">
                         <template #body="slotProps">
                             <MemberTableActions
                                 :member="slotProps.data"
@@ -457,7 +460,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                     filter
                     :filterFields="['name']"
                     optionLabel="name"
-                    :placeholder="upline_placeholder"
+                    :placeholder="$t('public.select_upline')"
                     class="w-full"
                     scroll-height="236px"
                 >

@@ -56,9 +56,9 @@ Route::middleware('auth')->group(function () {
         Route::post('/addNewMember', [MemberController::class, 'addNewMember'])->name('member.addNewMember');
         Route::post('/updateMemberStatus', [MemberController::class, 'updateMemberStatus'])->name('member.updateMemberStatus');
         Route::post('/upgradeAgent', [MemberController::class, 'upgradeAgent'])->name('member.upgradeAgent');
-
         Route::post('/uploadKyc', [MemberController::class, 'uploadKyc'])->name('member.uploadKyc');
 
+        Route::delete('/deleteMember', [MemberController::class, 'deleteMember'])->name('member.deleteMember');
         // details
         Route::get('/detail/{id_number}', [MemberController::class, 'detail'])->name('member.detail');
         Route::get('/getUserData', [MemberController::class, 'getUserData'])->name('member.getUserData');
@@ -105,7 +105,7 @@ Route::middleware('auth')->group(function () {
         Route::get('/getMetrics', [PammController::class, 'getMetrics'])->name('pamm_allocate.getMetrics');
         Route::get('/getOptions', [PammController::class, 'getOptions'])->name('pamm_allocate.getOptions');
         Route::get('/getProfitLoss', [PammController::class, 'getProfitLoss'])->name('pamm_allocate.getProfitLoss');
-        
+
         Route::post('/upload_image', [PammController::class, 'upload_image'])->name('pamm_allocate.upload_image');
         Route::post('/validateStep', [PammController::class, 'validateStep'])->name('pamm_allocate.validateStep');
         Route::post('/create_asset_master', [PammController::class, 'create_asset_master'])->name('pamm_allocate.create_asset_master');

@@ -5,7 +5,6 @@ import {computed, h, ref, watchEffect} from "vue";
 import Empty from '@/Components/Empty.vue';
 import WalletAdjustment from '@/Pages/Member/Listing/Partials/WalletAdjustment.vue'
 import {wTrans} from "laravel-vue-i18n";
-import Vue3Autocounter from "vue3-autocounter";
 import {transactionFormat} from "@/Composables/index.js";
 import {usePage} from "@inertiajs/vue3";
 
@@ -13,11 +12,10 @@ const props = defineProps({
     user_id: Number
 })
 
-const totalDeposit = ref(999999);
-const totalWithdrawal = ref(999999);
+const totalDeposit = ref(0);
+const totalWithdrawal = ref(0);
 const transactionHistory = ref([]);
 const rebateWallet = ref(null);
-const counterDuration = ref(10);
 const { formatAmount, formatDateTime } = transactionFormat();
 
 const getFinancialData = async () => {
@@ -28,8 +26,6 @@ const getFinancialData = async () => {
         totalWithdrawal.value = response.data.totalWithdrawal;
         transactionHistory.value = response.data.transactionHistory;
         rebateWallet.value = response.data.rebateWallet;
-
-        counterDuration.value = 1;
     } catch (error) {
         console.error('Error get info:', error);
     }
@@ -70,7 +66,7 @@ watchEffect(() => {
                     <div class="flex flex-col items-start gap-1 self-stretch">
                         <div class="text-gray-500 text-xs max-w-[90px] md:max-w-full truncate">{{ overview.label }}</div>
                         <div class="md:text-lg text-gray-950 font-semibold truncate">
-                            $ <vue3-autocounter ref="counter" :startAmount="0" :endAmount="overview.value" :duration="counterDuration" separator="," decimalSeparator="." :autoinit="true" />
+                            $ {{ formatAmount(overview.value) }}
                         </div>
                     </div>
                 </div>

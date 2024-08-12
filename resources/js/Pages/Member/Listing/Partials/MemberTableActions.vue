@@ -3,12 +3,13 @@ import {
     IconDotsVertical,
     IconId,
     IconUserUp,
+    IconTrash
 } from "@tabler/icons-vue";
 import Button from "@/Components/Button.vue";
-import {computed, h, ref} from "vue";
+import {computed, h, ref, watch} from "vue";
 import TieredMenu from "primevue/tieredmenu";
 import InputSwitch from "primevue/inputswitch";
-import {Link, useForm} from "@inertiajs/vue3";
+import {router} from "@inertiajs/vue3";
 import {useConfirm} from "primevue/useconfirm";
 import {trans} from "laravel-vue-i18n";
 import Dialog from "primevue/dialog";
@@ -24,14 +25,14 @@ const dialogType = ref('')
 
 const items = ref([
     {
-        label: trans('public.member_details'),
+        label: 'member_details',
         icon: h(IconId),
         command: () => {
             window.location.href = `/member/detail/${props.member.id_number}`;
         },
     },
     {
-        label: trans('public.upgrade_to_agent'),
+        label: 'upgrade_to_agent',
         icon: h(IconUserUp),
         command: () => {
             visible.value = true;
@@ -39,9 +40,16 @@ const items = ref([
         },
         role: 'member', // Add a custom property to check the role
     },
-    // {
-    //     separator: true,
-    // },
+    {
+        separator: true,
+    },
+    {
+        label: 'delete_member',
+        icon: h(IconTrash),
+        command: () => {
+            requireConfirmation('delete_member')
+        },
+    },
 ]);
 
 const filteredItems = computed(() => {
@@ -52,32 +60,94 @@ const filteredItems = computed(() => {
 });
 
 const checked = ref(props.member.status === 'active')
+
+watch(() => props.member.status, (newStatus) => {
+    checked.value = newStatus === 'active';
+});
+
 const confirm = useConfirm();
 
-const form = useForm({
-    id: props.member.id
-})
+const requireConfirmation = (action_type) => {
+    const messages = {
+        activate_member: {
+            group: 'headless-gray',
+            header: trans('public.deactivate_member'),
+            text: trans('public.deactivate_member_caption'),
+            cancelButton: trans('public.cancel'),
+            acceptButton: trans('public.confirm'),
+            action: () => {
+                router.visit(route('member.updateMemberStatus', props.member.id), {
+                    method: 'post',
+                    data: {
+                        id: props.member.id,
+                    },
+                })
 
-const requireConfirmation = () => {
-    confirm.require({
-        group: props.member.status === 'active' ? 'headless-gray' : 'headless-primary',
-        header: props.member.status === 'active' ? trans('public.deactivate_member') : trans('public.activate_member'),
-        message: props.member.status === 'active' ? trans('public.deactivate_member_caption') : trans('public.activate_member_caption'),
-        cancelButton: trans('public.cancel'),
-        acceptButton: props.member.status === 'active' ? trans('public.deactivate') : trans('public.confirm'),
-        accept: () => {
-            form.post(route('member.updateMemberStatus'), {
-                onSuccess: () => {
-                    checked.value = !checked.value;
-                }
-            })
+                checked.value = !checked.value;
+            }
         },
+        deactivate_member: {
+            group: 'headless-primary',
+            header: trans('public.activate_member'),
+            text: trans('public.activate_member_caption'),
+            cancelButton: trans('public.cancel'),
+            acceptButton: trans('public.confirm'),
+            action: () => {
+                router.visit(route('member.updateMemberStatus', props.member.id), {
+                    method: 'post',
+                    data: {
+                        id: props.member.id,
+                    },
+                })
+
+                checked.value = !checked.value;
+            }
+        },
+        delete_member: {
+            group: 'headless-error',
+            header: trans('public.delete_member'),
+            text: trans('public.delete_member_desc'),
+            cancelButton: trans('public.cancel'),
+            acceptButton: trans('public.delete_confirm'),
+            action: () => {
+                router.visit(route('member.deleteMember'), {
+                    method: 'delete',
+                    data: {
+                        id: props.member.id,
+                    },
+                })
+            }
+        },
+    };
+
+    const { group, header, text, dynamicText, suffix, actionType, cancelButton, acceptButton, action } = messages[action_type];
+
+    confirm.require({
+        group,
+        header,
+        actionType,
+        message: {
+            text,
+            dynamicText,
+            suffix
+        },
+        cancelButton,
+        acceptButton,
+        accept: action
     });
 };
 
 const toggle = (event) => {
     menu.value.toggle(event);
 };
+
+const handleMemberStatus = () => {
+    if (props.member.status === 'active') {
+        requireConfirmation('activate_member')
+    } else {
+        requireConfirmation('deactivate_member')
+    }
+}
 </script>
 
 <template>
@@ -85,8 +155,7 @@ const toggle = (event) => {
         <InputSwitch
             v-model="checked"
             readonly
-            :disabled="form.processing"
-            @click="requireConfirmation"
+            @click="handleMemberStatus"
         />
         <Button
             variant="gray-text"
@@ -106,8 +175,8 @@ const toggle = (event) => {
                     class="flex items-center gap-3 self-stretch"
                     v-bind="props.action"
                 >
-                    <component :is="item.icon" size="20" stroke-width="1.25" color="#667085" />
-                    <span class="font-medium">{{ item.label }}</span>
+                    <component :is="item.icon" size="20" stroke-width="1.25" :color="item.label === 'delete_member' ? '#F04438' : '#667085'" />
+                    <span class="font-medium" :class="{'text-error-500': item.label === 'delete_member'}">{{ $t(`public.${item.label}`) }}</span>
                 </div>
             </template>
         </TieredMenu>

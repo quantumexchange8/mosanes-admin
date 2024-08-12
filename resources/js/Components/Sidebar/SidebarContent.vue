@@ -80,7 +80,7 @@ watchEffect(() => {
             <SidebarCollapsibleItem
                 :title="$t('public.member_listing')"
                 :href="route('member.listing')"
-                :active="route().current('member.listing')"
+                :active="route().current('member.listing') || route().current('member.detail')"
             />
 
             <SidebarCollapsibleItem

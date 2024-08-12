@@ -2,6 +2,8 @@
 import {ref, watch} from "vue";
 import Dialog from "primevue/dialog";
 import Button from "@/Components/Button.vue";
+import dayjs from "dayjs";
+import {useForm} from "@inertiajs/vue3";
 
 const props = defineProps({
     userDetail: Object
@@ -17,6 +19,22 @@ watch(() => props.userDetail, () => {
 const openDialog = () => {
     visible.value = true
 }
+
+const form = useForm({
+    id: '',
+})
+
+const submitForm = () => {
+    if (props.userDetail) {
+        form.id = props.userDetail.id
+
+        form.post(route('member.updateKYCStatus'), {
+            onSuccess: () => {
+                visible.value = false;
+            }
+        })
+    }
+}
 </script>
 
 <template>
@@ -30,12 +48,12 @@ const openDialog = () => {
             @click="openDialog"
         >
             <img
-                :src="kycVerification.url || '/img/member/kyc_example_preview.svg'"
+                :src="kycVerification ? kycVerification.original_url : '/img/member/kyc_example_preview.svg'"
                 class="w-12 h-9"
                 alt="kyc_verification"
             />
             <div class="truncate text-gray-950 font-medium w-full">
-                {{ kycVerification.name ? kycVerification.name : $t('public.image') + '.jpg' }}
+                {{ kycVerification ? kycVerification.file_name : $t('public.image') + '.jpg' }}
             </div>
         </div>
 
@@ -53,10 +71,10 @@ const openDialog = () => {
                 <div class="h-2.5 bg-gray-300 rounded-full w-48"></div>
             </div>
         </div>
-        <div v-if="userDetail && kycVerification.length > 0" class="flex items-center gap-3">
-            <span class="text-gray-500 text-xs">{{ $t('public.uploaded') }} {{ kycVerification.created_at }}</span>
+        <div v-if="userDetail && kycVerification" class="flex items-center gap-3">
+            <span class="text-gray-500 text-xs">{{ $t('public.uploaded') }} {{ dayjs(kycVerification.created_at).format('YYYY/MM/DD HH:mm:ss')  }}</span>
             <span class="bg-gray-500 w-1 h-1 rounded-full grow-0 shrink-0"></span>
-            <span class="text-gray-500 text-xs">{{ kycVerification.size }}MB</span>
+            <span class="text-gray-500 text-xs">{{ (kycVerification.size / 1000000 ).toFixed(2) }}MB</span>
         </div>
     </div>
 
@@ -66,8 +84,8 @@ const openDialog = () => {
         :header="$t('public.kyc_verification')"
         class="dialog-xs md:dialog-lg"
     >
-        <div v-if="kycVerification.length > 0">
-            <img :src="kycVerification.url" alt="kyc_verification">
+        <div v-if="kycVerification" class="flex justify-center">
+            <img :src="kycVerification.original_url" alt="kyc_verification">
         </div>
         <div v-else>
             <img src="/img/member/kyc_example.svg" alt="kyc_verification">
@@ -82,6 +100,8 @@ const openDialog = () => {
             <Button
                 type="button"
                 variant="primary-flat"
+                @click="submitForm"
+                :disabled="userDetail.kyc_approved_at === null"
             >
                 {{ $t('public.ask_to_submit_again') }}
             </Button>

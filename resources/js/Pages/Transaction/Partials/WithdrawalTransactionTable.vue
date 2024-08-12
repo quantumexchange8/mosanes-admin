@@ -61,10 +61,10 @@ const getResults = async (type, selectedMonths = []) => {
         response = await axios.get(url);
         transactions.value = response.data.transactions;
         
-        totalTransaction.value = transactions.value?.filter(item => item.transaction_amount != null && !isNaN(parseFloat(item.transaction_amount))).length;
-        totalTransactionAmount.value = transactions.value.filter(item => ['success', 'approved'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
-        maxFilterAmount.value = transactions.value?.length ? Math.max(...transactions.value.map(item => parseFloat(item.transaction_amount || 0))) : 0;
+        totalTransaction.value = transactions.value?.length;
+        totalTransactionAmount.value = transactions.value.filter(item => ['successful'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
         maxAmount.value = transactions.value?.length ? Math.max(...transactions.value.map(item => parseFloat(item.transaction_amount || 0))) : 0;
+        maxFilterAmount.value = maxAmount.value;
 
     } catch (error) {
         console.error('Error fetching transactions:', error);
@@ -96,39 +96,51 @@ const toggle = (event) => {
 
 // Watch minFilterAmount and maxFilterAmount to update the amount filter
 watch([minFilterAmount, maxFilterAmount], ([newMin, newMax]) => {
-    filters.value.amount.value = [newMin, newMax];
+    // Convert 0 to null for the amount filter
+    filters.value.amount.value = [
+        newMin === 0 ? null : newMin,
+        newMax
+    ];
 });
+
+// Watch the amount filter to update minFilterAmount
+watch(() => filters.value.amount.value[0], (newMin) => {
+    // Update minFilterAmount based on the first value of the amount filter
+    filters.value.amount.value[0] = newMin === 0 ? null : newMin;
+}, { immediate: true });
 
 const recalculateTotals = () => {
     const filtered = transactions.value.filter(transaction => {
         return (
             (!filters.value.name?.value || transaction.name.startsWith(filters.value.name.value)) &&
             (!filters.value.role?.value || transaction.role === filters.value.role.value) &&
-            (!filters.value.amount?.value || (transaction.transaction_amount >= filters.value.amount.value[0] && transaction.transaction_amount <= filters.value.amount.value[1])) &&
+            (!filters.value.amount?.value[0] || !filters.value.amount?.value[1] || (transaction.transaction_amount >= filters.value.amount.value[0] && transaction.transaction_amount <= filters.value.amount.value[1])) &&
             (!filters.value.category?.value || transaction.category === filters.value.category.value) &&
             (!filters.value.status?.value || transaction.status === filters.value.status.value)
         );
     });
-    totalTransaction.value = filtered.filter(transaction => transaction.transaction_amount != null && !isNaN(parseFloat(transaction.transaction_amount))).length;
-    totalTransactionAmount.value = filtered.filter(item => ['success', 'approved'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
-    maxAmount.value = filtered?.length ? Math.max(...filtered.map(item => parseFloat(item.transaction_amount || 0))) : 0;
+    totalTransaction.value = filtered.length;
+    totalTransactionAmount.value = filtered.filter(item => ['successful'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
+    maxAmount.value = filtered.length ? Math.max(...filtered.map(item => parseFloat(item.transaction_amount || 0))) : 0;
 
 };
 
 watch(filters, () => {
     recalculateTotals();
 
-    // Check if amount filter covers the entire range (considering full range as minFilterAmount and maxFilterAmount)
-    const amountFilterIsActive = filters.value.amount.value[0] !== minFilterAmount.value || filters.value.amount.value[1] !== maxFilterAmount.value;
+    // Check if the amount filter is active by comparing against initial values
+    const isAmountFilterActive = (filters.value.amount.value[0] !== null && filters.value.amount.value[0] !== minFilterAmount.value) ||
+                                 (filters.value.amount.value[1] !== null && filters.value.amount.value[1] !== maxFilterAmount.value);
 
     // Count active filters
-    filterCount.value = Object.entries(filters.value).filter(([key, filter]) => {
-        // Exclude amount filter if it covers the entire range
+    filterCount.value = Object.entries(filters.value).reduce((count, [key, filter]) => {
         if (filter === filters.value.amount) {
-            return amountFilterIsActive;
+            // The amount filter is considered active if it's not covering the full range
+            return isAmountFilterActive ? count + 1 : count;
         }
-        return filter.value !== null;
-    }).length;
+        // Consider a filter active if its value is not null or empty
+        return (filter.value !== null && filter.value !== '' && filter.value != []) ? count + 1 : count;
+    }, 0);
 }, { deep: true });
 
 const clearFilter = () => {
@@ -136,7 +148,7 @@ const clearFilter = () => {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
         role: { value: null, matchMode: FilterMatchMode.EQUALS },
-        amount: { value: [minFilterAmount.value, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
+        amount: { value: [null, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
         category: { value: null, matchMode: FilterMatchMode.EQUALS },
         status: { value: null, matchMode: FilterMatchMode.EQUALS },
     };
@@ -292,7 +304,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         <Column 
             field="amount" 
             sortable 
-            :header="$t('public.amount_header')" 
+            :header="$t('public.amount') + '&nbsp;($)'" 
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
@@ -306,7 +318,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         >
             <template #body="slotProps">
                 <StatusBadge :value="slotProps.data.status">
-                    {{ $t('public.' + slotProps.data.status) }}
+                    {{ $t('public.' + (slotProps.data.status === 'rejected' ? 'failed' : slotProps.data.status)) }}
                 </StatusBadge>
             </template>
         </Column>
@@ -318,7 +330,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                             <DefaultProfilePhoto />
                         </div>
                         <div class="flex flex-col items-start">
-                            <div class="text-xs font-medium">
+                            <div class="text-sm font-semibold">
                                 {{ slotProps.data.name }}
                             </div>
                             <div class="text-gray-500 text-xs">
@@ -327,7 +339,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                         </div>
                     </div>
                     <div class="overflow-hidden text-right text-ellipsis font-semibold">
-                        {{ formatAmount(selectedType === 'payout' ? slotProps.data.payout : slotProps.data.transaction_amount) }}
+                        $&nbsp;{{ formatAmount(slotProps.data.transaction_amount) }}
                     </div>
                 </div>
             </template>
@@ -343,11 +355,11 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 </div>
                 <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['role'].value" inputId="role_member" value="member" />
+                        <RadioButton v-model="filters['role'].value" inputId="role_member" value="member" class="w-4 h-4" />
                         <label for="role_member">{{ $t('public.member') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['role'].value" inputId="role_agent" value="agent" />
+                        <RadioButton v-model="filters['role'].value" inputId="role_agent" value="agent" class="w-4 h-4" />
                         <label for="role_agent">{{ $t('public.agent') }}</label>
                     </div>
                 </div>
@@ -376,11 +388,11 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 </div>
                 <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['category'].value" inputId="withdrawal_rebate" value="wallet" />
+                        <RadioButton v-model="filters['category'].value" inputId="withdrawal_rebate" value="rebate_wallet" class="w-4 h-4" />
                         <label for="withdrawal_rebate">{{ $t('public.rebate') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['category'].value" inputId="withdrawal_account" value="trading_account" />
+                        <RadioButton v-model="filters['category'].value" inputId="withdrawal_account" value="trading_account" class="w-4 h-4" />
                         <label for="withdrawal_account">{{ $t('public.accounts') }}</label>
                     </div>
                 </div>
@@ -393,11 +405,11 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 </div>
                 <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_approved" value="approved" />
+                        <RadioButton v-model="filters['status'].value" inputId="status_approved" value="successful" class="w-4 h-4" />
                         <label for="status_approved">{{ $t('public.approved') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_rejected" value="rejected" />
+                        <RadioButton v-model="filters['status'].value" inputId="status_rejected" value="rejected" class="w-4 h-4" />
                         <label for="status_rejected">{{ $t('public.rejected') }}</label>
                     </div>
                 </div>
@@ -452,7 +464,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
             </div>
             <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                 <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.status') }}</span>
-                <StatusBadge :value="data.status">{{ $t('public.' + data.status) }}</StatusBadge>
+                <StatusBadge :value="data.status">{{ $t('public.' + (data.status === 'rejected' ? 'failed' : data.status)) }}</StatusBadge>
             </div>
         </div>
 

@@ -51,7 +51,7 @@ const getResults = async (type, selectedMonths = [], selectedDate = []) => {
         // Add selectedDate parameter if type is 'payout'
         if (selectedDate) {
             const [startDate, endDate] = selectedDate;
-            url += `&startDate=${startDate}&endDate=${endDate}`;
+            url += `&startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
         }
 
         response = await axios.get(url);
@@ -243,7 +243,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                             dateFormat="dd/mm/yy"
                             showIcon
                             iconDisplay="input"
-                            :placeholder="$t('public.date_placeholder')"
+                            placeholder="yyyy/mm/dd - yyyy/mm/dd"
                             class="w-full md:w-[272px]"
                         />
                         <div
@@ -308,7 +308,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         <Column
             field="volume"
             sortable
-            :header="$t('public.volume_header')"
+            :header="`${$t('public.volume')}&nbsp;(Ł) `"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
@@ -318,11 +318,11 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         <Column
             field="payout"
             sortable
-            :header="$t('public.payout_header')"
+            :header="`${$t('public.payout')}&nbsp;($)`"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
-                {{ formatAmount(slotProps.data.payout) }}
+                {{ formatAmount(slotProps.data.rebate) }}
             </template>
         </Column>
         <Column class="md:hidden">
@@ -333,7 +333,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                             <DefaultProfilePhoto />
                         </div>
                         <div class="flex flex-col items-start">
-                            <div class="text-xs font-medium">
+                            <div class="text-sm font-semibold">
                                 {{ slotProps.data.name }}
                             </div>
                             <div class="text-gray-500 text-xs">
@@ -342,7 +342,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                         </div>
                     </div>
                     <div class="overflow-hidden text-right text-ellipsis font-semibold">
-                        {{ formatAmount(slotProps.data.payout) }}
+                        $&nbsp;{{ formatAmount(slotProps.data.rebate) }}
                     </div>
                 </div>
             </template>
@@ -352,7 +352,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
     <Dialog v-model:visible="visible" modal :header="$t('public.payout_details')" class="dialog-xs md:dialog-md">
         <div class="flex flex-col justify-center items-start pb-4 gap-3 self-stretch border-b border-gray-200 md:flex-row md:pt-4 md:justify-between">
             <!-- below md -->
-            <span class="md:hidden self-stretch text-gray-950 text-xl font-semibold">{{ data.transaction_amount }}</span>
+            <span class="md:hidden self-stretch text-gray-950 text-xl font-semibold">$&nbsp;{{ data.rebate }}</span>
             <div class="flex items-center gap-3 self-stretch">
                 <div class="w-9 h-9 rounded-full overflow-hidden grow-0 shrink-0">
                     <DefaultProfilePhoto />
@@ -363,74 +363,66 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 </div>
             </div>
             <!-- above md -->
-            <span class="hidden md:block w-[180px] text-gray-950 text-right text-xl font-semibold">{{ data.transaction_amount }}</span>
+            <span class="hidden md:block w-[180px] text-gray-950 text-right text-xl font-semibold">$&nbsp;{{ data.rebate }}</span>
         </div>
 
         <div class="flex justify-center items-center py-4 gap-3 self-stretch border-b border-gray-200 md:flex-col md:border-none">
             <div class="min-w-[100px] flex flex-col items-start gap-1 flex-grow md:flex-row md:items-center md:self-stretch">
                 <span class="self-stretch text-gray-500 text-xs font-medium md:w-[140px]">{{ $t('public.payout_date') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium md:flex-grow">2024/06/25</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium md:flex-grow">{{ formatDate(data.created_at) }}</span>
             </div>
             <div class="min-w-[100px] flex flex-col items-start gap-1 flex-grow md:flex-row md:items-center md:self-stretch">
                 <span class="self-stretch text-gray-500 text-xs font-medium md:w-[140px]">{{ $t('public.total_trade_volume') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium md:flex-grow">22.92 Lot(s)</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium md:flex-grow">{{ data.volume }}&nbsp;Ł</span>
             </div>
         </div>
 
         <div class="flex flex-col items-center pt-4 pb-4 gap-1 self-stretch md:pt-5 md:gap-0">
             <!-- below md -->
             <span class="md:hidden self-stretch text-gray-950 text-xs font-bold">{{ $t('public.products_traded') }}</span>
-            <div class="md:hidden flex flex-col items-center self-stretch" v-for="(product, index) in products" :key="index">
+            <div class="md:hidden flex flex-col items-center self-stretch" v-for="(product, index) in data.details" :key="index" :class="{'border-b border-gray-200': index !== data.details.length - 1}">
                 <div class="flex justify-between items-center py-2 self-stretch">
                     <div class="flex flex-col items-start flex-grow">
-                    <span class="self-stretch overflow-hidden text-gray-950 text-ellipsis text-xs font-semibold">{{ product.name }}</span>
+                    <span class="self-stretch overflow-hidden text-gray-950 text-ellipsis text-xs font-semibold" style="text-transform: capitalize;" >{{ product.symbol_group }}</span>
                     <div class="flex items-center gap-2 self-stretch">
-                        <span class="text-gray-500 text-xs">{{ product.volume }} {{ $t('public.lots') }}</span>
+                        <span class="text-gray-500 text-xs">{{ product.volume }}&nbsp;Ł</span>
                         <span class="text-gray-500 text-xs">•</span>
-                        <span class="text-gray-500 text-xs">$ {{ formatAmount(product.amount) }}</span>
+                        <span class="text-gray-500 text-xs">$&nbsp;{{ formatAmount(product.rebate) }}</span>
                     </div>
                     </div>
-                    <span class="w-[100px] overflow-hidden text-gray-950 text-right text-ellipsis font-semibold"></span>
+                    <span class="w-[100px] overflow-hidden text-gray-950 text-right text-ellipsis font-semibold">$&nbsp;{{ formatAmount(product.rebate * product.volume) }}</span>
                 </div>
             </div>
             <!-- above md -->
-            <div class="hidden md:flex py-2 items-center self-stretch border-b border-gray-200 bg-gray-100 uppercase">
-                <div class="flex items-center px-2 gap-2.5 flex-grow">
-                    <span class="text-gray-950 text-xs font-semibold">
-                        {{ $t('public.product') }}
-                    </span>
+            <div class="w-full hidden md:grid grid-cols-4 gap-2 py-2 items-center border-b border-gray-200 bg-gray-100 uppercase text-gray-950 text-xs font-semibold">
+                <div class="flex items-center px-2">
+                    {{ $t('public.product') }}
                 </div>
-                <div class="flex items-center px-2 gap-2.5 flex-grow">
-                    <span class="text-gray-950 text-xs font-semibold">
-                        {{ $t('public.volume') }} (Ł)
-                    </span>
+                <div class="flex items-center px-2">
+                    {{ $t('public.volume') }} (Ł)
                 </div>
-                <div class="flex items-center px-2 gap-2.5 flex-grow">
-                    <span class="text-gray-950 text-xs font-semibold">
-                        {{ $t('public.rebate') }} / Ł ($)
-                    </span>
+                <div class="flex items-center px-2">
+                    {{ $t('public.rebate') }} / Ł ($)
                 </div>
-                <div class="flex items-center px-2 gap-2.5 flex-grow">
-                    <span class="text-gray-950 text-xs font-semibold">
-                        {{ $t('public.total') }} ($)
-                    </span>
+                <div class="flex items-center px-2">
+                    {{ $t('public.total') }} ($)
                 </div>
             </div>
-            <div v-for="(product, index) in products" :key="index" class="hidden md:flex items-center py-3 self-stretch hover:bg-gray-50" :class="{'border-b border-gray-200': index !== products.length - 1}">
-                <div class="flex items-center px-2 flex-grow">
-                    <span class="flex-grow text-gray-950 text-sm">{{ product.name }}</span>
+
+            <div v-for="(product, index) in data.details" :key="index" class="w-full hidden md:grid grid-cols-4 gap-2 py-3 items-center hover:bg-gray-50" :class="{'border-b border-gray-200': index !== data.details.length - 1}">
+                <div class="flex items-center px-2">
+                    <span class="text-gray-950 text-sm" style="text-transform: capitalize;" >{{ product.symbol_group }}</span>
                 </div>
-                <div class="flex items-center px-2 flex-grow">
-                    <span class="flex-grow text-gray-950 text-sm">{{ product.volume }}</span>
+                <div class="flex items-center px-2">
+                    <span class="text-gray-950 text-sm">{{ product.volume }}</span>
                 </div>
-                <div class="flex items-center px-2 flex-grow">
-                    <span class="flex-grow text-gray-950 text-sm">{{ product.rebate }}</span>
+                <div class="flex items-center px-2">
+                    <span class="text-gray-950 text-sm">{{ product.rebate }}</span>
                 </div>
-                <div class="flex items-center px-2 flex-grow">
-                    <span class="flex-grow text-gray-950 text-sm">{{ formatAmount(product.amount) }}</span>
+                <div class="flex items-center px-2">
+                    <span class="text-gray-950 text-sm">{{ formatAmount(product.rebate * product.volume) }}</span>
                 </div>
             </div>
         </div>
     </Dialog>
-
 </template>

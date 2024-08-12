@@ -60,10 +60,10 @@ const getResults = async (type, selectedMonths = []) => {
         response = await axios.get(url);
         transactions.value = response.data.transactions;
         
-        totalTransaction.value = transactions.value?.filter(item => item.transaction_amount != null && !isNaN(parseFloat(item.transaction_amount))).length;
-        totalTransactionAmount.value = transactions.value.filter(item => ['success', 'approved'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
-        maxFilterAmount.value = transactions.value?.length ? Math.max(...transactions.value.map(item => parseFloat(item.transaction_amount || 0))) : 0;
+        totalTransaction.value = transactions.value?.length;
+        totalTransactionAmount.value = transactions.value.filter(item => ['successful'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
         maxAmount.value = transactions.value?.length ? Math.max(...transactions.value.map(item => parseFloat(item.transaction_amount || 0))) : 0;
+        maxFilterAmount.value = maxAmount.value;
 
     } catch (error) {
         console.error('Error fetching transactions:', error);
@@ -87,8 +87,18 @@ const filters = ref({
 
 // Watch minFilterAmount and maxFilterAmount to update the amount filter
 watch([minFilterAmount, maxFilterAmount], ([newMin, newMax]) => {
-    filters.value.amount.value = [newMin, newMax];
+    // Convert 0 to null for the amount filter
+    filters.value.amount.value = [
+        newMin === 0 ? null : newMin,
+        newMax
+    ];
 });
+
+// Watch the amount filter to update minFilterAmount
+watch(() => filters.value.amount.value[0], (newMin) => {
+    // Update minFilterAmount based on the first value of the amount filter
+    filters.value.amount.value[0] = newMin === 0 ? null : newMin;
+}, { immediate: true });
 
 // overlay panel
 const op = ref();
@@ -103,31 +113,32 @@ const recalculateTotals = () => {
         return (
             (!filters.value.name?.value || transaction.name.startsWith(filters.value.name.value)) &&
             (!filters.value.role?.value || transaction.role === filters.value.role.value) &&
-            (!filters.value.amount?.value || (transaction.transaction_amount >= filters.value.amount.value[0] && transaction.transaction_amount <= filters.value.amount.value[1])) &&
+            (!filters.value.amount?.value[0] || !filters.value.amount?.value[1] || (transaction.transaction_amount >= filters.value.amount.value[0] && transaction.transaction_amount <= filters.value.amount.value[1])) &&
             (!filters.value.transaction_type?.value || transaction.transaction_type === filters.value.transaction_type.value) &&
             (!filters.value.status?.value || transaction.status === filters.value.status.value)
         );
     });
-    totalTransaction.value = filtered.filter(transaction => transaction.transaction_amount != null && !isNaN(parseFloat(transaction.transaction_amount))).length;
-    totalTransactionAmount.value = filtered.filter(item => ['success', 'approved'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
-    maxAmount.value = filtered?.length ? Math.max(...filtered.map(item => parseFloat(item.transaction_amount || 0))) : 0;
-
+    totalTransaction.value = filtered.length;
+    totalTransactionAmount.value = filtered.filter(item => ['successful'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
+    maxAmount.value = filtered.length ? Math.max(...filtered.map(item => parseFloat(item.transaction_amount || 0))) : 0;
 };
 
 watch(filters, () => {
     recalculateTotals();
 
-    // Check if amount filter covers the entire range (considering full range as minFilterAmount and maxFilterAmount)
-    const amountFilterIsActive = filters.value.amount.value[0] !== minFilterAmount.value || filters.value.amount.value[1] !== maxFilterAmount.value;
+    // Check if the amount filter is active by comparing against initial values
+    const isAmountFilterActive = (filters.value.amount.value[0] !== null && filters.value.amount.value[0] !== minFilterAmount.value) ||
+                                 (filters.value.amount.value[1] !== null && filters.value.amount.value[1] !== maxFilterAmount.value);
 
     // Count active filters
-    filterCount.value = Object.entries(filters.value).filter(([key, filter]) => {
-        // Exclude amount filter if it covers the entire range
+    filterCount.value = Object.entries(filters.value).reduce((count, [key, filter]) => {
         if (filter === filters.value.amount) {
-            return amountFilterIsActive;
+            // The amount filter is considered active if it's not covering the full range
+            return isAmountFilterActive ? count + 1 : count;
         }
-        return filter.value !== null;
-    }).length;
+        // Consider a filter active if its value is not null or empty
+        return (filter.value !== null && filter.value !== '' && filter.value != []) ? count + 1 : count;
+    }, 0);
 }, { deep: true });
 
 
@@ -136,7 +147,7 @@ const clearFilter = () => {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
         role: { value: null, matchMode: FilterMatchMode.EQUALS },
-        amount: { value: [minFilterAmount.value, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
+        amount: { value: [null, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
         transaction_type: { value: null, matchMode: FilterMatchMode.EQUALS },
         status: { value: null, matchMode: FilterMatchMode.EQUALS },
     };
@@ -287,7 +298,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
-                {{ slotProps.data.from_meta_login ? slotProps.data.from_meta_login : slotProps.data ? slotProps.data.from_wallet_name : '' }}
+                {{ slotProps.data.transaction_type === 'transfer_to_account'  ? $t('public.rebate')  : slotProps.data.from_meta_login  }}
             </template>
         </Column>
         <Column 
@@ -302,7 +313,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         <Column 
             field="amount" 
             sortable 
-            :header="$t('public.amount_header')" 
+            :header="$t('public.amount') + '&nbsp;($)'" 
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
@@ -317,7 +328,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                             <DefaultProfilePhoto />
                         </div>
                         <div class="flex flex-col items-start">
-                            <div class="text-xs font-medium">
+                            <div class="text-sm font-semibold">
                                 {{ slotProps.data.name }}
                             </div>
                             <div class="text-gray-500 text-xs">
@@ -326,7 +337,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                         </div>
                     </div>
                     <div class="overflow-hidden text-right text-ellipsis font-semibold">
-                        {{ formatAmount(slotProps.data.transaction_amount) }}
+                        $&nbsp;{{ formatAmount(slotProps.data.transaction_amount) }}
                     </div>
                 </div>
             </template>
@@ -342,11 +353,11 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 </div>
                 <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['role'].value" inputId="role_member" value="member" />
+                        <RadioButton v-model="filters['role'].value" inputId="role_member" value="member" class="w-4 h-4" />
                         <label for="role_member">{{ $t('public.member') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['role'].value" inputId="role_agent" value="agent" />
+                        <RadioButton v-model="filters['role'].value" inputId="role_agent" value="agent" class="w-4 h-4" />
                         <label for="role_agent">{{ $t('public.agent') }}</label>
                     </div>
                 </div>
@@ -375,12 +386,12 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 </div>
                 <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['transaction_type'].value" inputId="transfer_acc_to_acc" value="transfer" />
-                        <label for="transfer_acc_to_acc">{{ $t('public.account_to_account') }}</label>
+                        <RadioButton v-model="filters['transaction_type'].value" inputId="transfer_to_account" value="transfer_to_account" class="w-4 h-4" />
+                        <label for="transfer_to_account">{{ $t('public.account_to_account') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['transaction_type'].value" inputId="transfer_rebate_to_acc" value="internal_transfer" />
-                        <label for="transfer_rebate_to_acc">{{ $t('public.rebate_to_account') }}</label>
+                        <RadioButton v-model="filters['transaction_type'].value" inputId="account_to_account" value="account_to_account" class="w-4 h-4" />
+                        <label for="account_to_account">{{ $t('public.rebate_to_account') }}</label>
                     </div>
                 </div>
             </div>
@@ -433,7 +444,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         <div class="flex flex-col items-center py-4 gap-3 self-stretch">
             <div v-if="['transfer'].includes(selectedType)" class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                 <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.from') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.from_wallet_id ? data.from_wallet_name : data.from_meta_login }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.transaction_type === 'transfer_to_account'  ? $t('public.rebate') : data.from_meta_login }}</span>
             </div>
             <div v-if="['transfer'].includes(selectedType)" class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                 <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.to') }}</span>

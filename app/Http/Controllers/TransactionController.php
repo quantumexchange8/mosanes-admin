@@ -2,10 +2,12 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\SymbolGroup;
 use Inertia\Inertia;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Models\TradeRebateSummary;
 use App\Services\DropdownOptionService;
 
 class TransactionController extends Controller
@@ -29,7 +31,6 @@ class TransactionController extends Controller
             'user_id',
             'category',
             'transaction_type',
-            'transaction_type',
             'transaction_number',
             'amount',
             'transaction_charges',
@@ -47,8 +48,8 @@ class TransactionController extends Controller
         }
     
         if ($type === 'payout') {
-            $query = Transaction::with('user', 'from_wallet', 'to_wallet');
-    
+            $query = TradeRebateSummary::with('user');
+
             // Apply monthly filters
             $query->where(function ($query) use ($selectedMonthsArray) {
                 foreach ($selectedMonthsArray as $range) {
@@ -62,67 +63,111 @@ class TransactionController extends Controller
             // Get startDate and endDate only if type is 'payout'
             $startDate = $request->query('startDate');
             $endDate = $request->query('endDate');
-
-            // Convert date strings to YYYY-MM-DD format directly
-            if ($startDate) {
-                // Extract the date part from the string
-                if (preg_match('/(\w{3} \w{3} \d{2} \d{4})/', $startDate, $matches)) {
-                    $datePart = $matches[1]; // e.g., "Jul 10 2024"
-                    $startDate = (new \DateTime($datePart))->format('Y-m-d');
-                } else {
-                    $startDate = null; // Handle error or invalid format
-                }
-            }
-
-            if ($endDate) {
-                // Extract the date part from the string
-                if (preg_match('/(\w{3} \w{3} \d{2} \d{4})/', $endDate, $matches)) {
-                    $datePart = $matches[1]; // e.g., "Jul 10 2024"
-                    $endDate = (new \DateTime($datePart))->format('Y-m-d');
-                } else {
-                    $endDate = null; // Handle error or invalid format
-                }
-            }
-
+            
             // Apply date filter based on availability of startDate and/or endDate
             if ($startDate && $endDate) {
                 // Both startDate and endDate are provided
                 $query->whereDate('created_at', '>=', $startDate)
                     ->whereDate('created_at', '<=', $endDate);
+            } elseif ($startDate) {
+                // Only startDate is provided
+                $query->whereDate('created_at', '>=', $startDate);
+            } elseif ($endDate) {
+                // Only endDate is provided
+                $query->whereDate('created_at', '<=', $endDate);
             }
-                                    
-            $data = $query->latest()->get()->map(function ($payout) use ($commonFields) {
-                return [
-                    'id' => $payout->id,
-                    'user_id' => $payout->user_id,
-                    'amount' => $payout->amount,
-                    'transaction_amount' => $payout->transaction_amount,
-                    'date' => $payout->date,
-                    'status' => $payout->status,
-                    'name' => $payout->user ? $payout->user->name : null,
-                    'email' => $payout->user ? $payout->user->email : null,
-                    'role' => $payout->user ? $payout->user->role : null,
-                    'created_at' => date_format($payout->created_at, 'Y-m-d'),
-                ];
-            });
+            
+            // Fetch all symbol groups from the database
+            $allSymbolGroups = SymbolGroup::pluck('display', 'id')->toArray();
+
+            // Initialize the final data collection
+            $finalData = collect();
+
+            // Fetch summarized data
+            $summarizedData = TradeRebateSummary::with('user')
+                ->selectRaw('user_id, DATE(created_at) as date, SUM(volume) as volume, SUM(rebate) as rebate')
+                ->groupBy('user_id', 'date')
+                ->latest('date')
+                ->get();
+
+            // Loop through each summarized record to get details and flatten data
+            foreach ($summarizedData as $summary) {
+                // Retrieve detailed records for each user_id, date
+                $details = TradeRebateSummary::where('user_id', $summary->user_id)
+                    ->whereDate('created_at', $summary->date)
+                    ->selectRaw('symbol_group, SUM(volume) as volume, SUM(rebate) as rebate')
+                    ->groupBy('symbol_group')
+                    ->get()
+                    ->keyBy('symbol_group')
+                    ->map(function ($item) {
+                        return [
+                            'id' => $item->symbol_group,
+                            'volume' => $item->volume,
+                            'rebate' => $item->rebate,
+                        ];
+                    });
+
+                // Ensure all symbol groups are included in the details and sort them by the order of $allSymbolGroups
+                $details = collect($allSymbolGroups)->mapWithKeys(function ($name, $id) use ($details) {
+                    return [
+                        $id => $details->get($id, [
+                            'id' => $id,
+                            'volume' => 0,
+                            'rebate' => 0,
+                        ])
+                    ];
+                })->map(function ($item) use ($allSymbolGroups) {
+                    return [
+                        'id' => $item['id'],
+                        'symbol_group' => $allSymbolGroups[$item['id']],
+                        'volume' => $item['volume'],
+                        'rebate' => $item['rebate'],
+                    ];
+                });
+
+                // Add data with details to finalData
+                $finalData->push([
+                    'user_id' => $summary->user_id,
+                    'name' => $summary->user->name,
+                    'email' => $summary->user->email,
+                    'volume' => $summary->volume,
+                    'rebate' => $summary->rebate,
+                    'created_at' => $summary->date,
+                    'details' => $details->sortKeys()->values(),
+                ]);
+            }
+
+            // Assign the finalData to $data
+            $data = $finalData;
     
         } else {
             $query = Transaction::with('user', 'from_wallet', 'to_wallet');
     
             // Apply filtering for each selected month-year pair
-            foreach ($selectedMonthsArray as $range) {
-                [$month, $year] = explode('/', $range);
-                $startDate = "$year-$month-01";
-                $endDate = date("Y-m-t", strtotime($startDate)); // Last day of the month
+            if (!empty($selectedMonthsArray)) {
+                $query->where(function ($q) use ($selectedMonthsArray) {
+                    foreach ($selectedMonthsArray as $range) {
+                        [$month, $year] = explode('/', $range);
+                        $startDate = "$year-$month-01";
+                        $endDate = date("Y-m-t", strtotime($startDate)); // Last day of the month
 
-                // Add a condition to match transactions for this specific month-year
-                $query->orWhereBetween('created_at', [$startDate, $endDate]);
+                        // Add a condition to match transactions for this specific month-year
+                        $q->orWhereBetween('created_at', [$startDate, $endDate]);
+                    }
+                });
             }
     
-            // // Filter by transaction type
-            // if ($type) {
-            //     $query->where('transaction_type', $type);
-            // }
+            // Filter by transaction type
+            if ($type) {
+                if ($type === 'transfer') {
+                    $query->where(function ($q) {
+                        $q->where('transaction_type', 'transfer_to_account')
+                        ->orWhere('transaction_type', 'account_to_account');
+                    });
+                } else {
+                    $query->where('transaction_type', $type);
+                }
+            }
     
             // Fetch data
             $data = $query->latest()->get()->map(function ($transaction) use ($commonFields, $type) {

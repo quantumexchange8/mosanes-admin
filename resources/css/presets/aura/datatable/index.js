@@ -165,8 +165,8 @@ export default {
                 // Spacing
                 { 'py-[0.375rem] px-2': context?.size === 'small' && !state['d_editing'] },
                 { 'py-[0.9375rem] px-5': context?.size === 'large' && !state['d_editing'] },
-                { 'py-2 px-3': context?.size !== 'large' && context?.size !== 'small' && !state['d_editing'] },
-                { 'py-[0.6rem] px-2': state['d_editing'] },
+                { 'p-3': context?.size !== 'large' && context?.size !== 'small' && !state['d_editing'] },
+                { 'p-3': state['d_editing'] },
 
                 // Color
                 'border-gray-200'
@@ -705,12 +705,12 @@ export default {
                 'border-0 rounded-full',
 
                 // Color
-                'text-surface-700 dark:text-white/70',
+                'text-gray-500',
                 'border-transparent',
 
                 // States
                 'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400',
-                'hover:text-surface-700 hover:bg-surface-50 dark:hover:bg-surface-800/50',
+                'hover:text-gray-700 hover:bg-gray-100',
 
                 // Transition
                 'transition duration-200',
@@ -729,18 +729,18 @@ export default {
                 'text-left',
 
                 // Size
-                'w-8 h-8',
+                'w-9 h-9',
 
                 // Shape
                 'border-0 rounded-full',
 
                 // Color
-                'text-surface-700 dark:text-white/70',
+                'text-gray-500',
                 'border-transparent',
 
                 // States
-                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400',
-                'hover:text-surface-700 hover:bg-surface-300/20',
+                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500',
+                'hover:text-gray-700',
 
                 // Transition
                 'transition duration-200',
@@ -765,12 +765,12 @@ export default {
                 'border-0 rounded-full',
 
                 // Color
-                'text-surface-700 dark:text-white/70',
+                'text-gray-500',
                 'border-transparent',
 
                 // States
-                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500 dark:focus:ring-primary-400',
-                'hover:text-surface-700 hover:bg-surface-300/20',
+                'focus:outline-none focus:outline-offset-0 focus:ring-1 focus:ring-primary-500',
+                'hover:text-gray-700',
 
                 // Transition
                 'transition duration-200',

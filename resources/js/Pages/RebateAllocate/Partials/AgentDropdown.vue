@@ -56,7 +56,7 @@ watch(()=>props.agents, () => {
     </Dropdown>
     <div
         v-else
-        class="py-2 px-3 flex items-center gap-3 w-full"
+        class="flex items-center gap-3 w-full"
     >
         <div class="w-5 h-5 rounded-full overflow-hidden">
             <template v-if="agents[0].profile_photo">

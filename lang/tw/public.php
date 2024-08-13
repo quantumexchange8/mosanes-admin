@@ -358,4 +358,5 @@ return [
     "access_denied" => "拒絕訪問",
     "access_denied_desc" => "您似乎沒有訪問此頁面的權限。請檢查您的憑證。",
     "logout" => "登出",
+    "toast_update_rebate_success" => "您已成功更新返傭架構",
 ];

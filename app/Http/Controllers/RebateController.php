@@ -171,7 +171,7 @@ class RebateController extends Controller
 
         // push lvl 1 agent & rebate
         array_push($lv1_data, $lv1_agents, $lv1_rebate);
-        array_push($agents_array, $lv1_data);
+        $agents_array[] = $lv1_data;
 
         // get getDirectAgents of first upline
         $loop_flag = true;
@@ -180,7 +180,7 @@ class RebateController extends Controller
             $next_level = $this->getDirectAgents($current_agent_id, $type_id);
             if ( !empty($next_level) ) {
                 $current_agent_id = $next_level[0][0]['id'];
-                array_push($agents_array, $next_level);
+                $agents_array[] = $next_level;
             } else {
                 $loop_flag = false;
             }
@@ -213,7 +213,7 @@ class RebateController extends Controller
             // reindex
             $agents = array_values($agents);
 
-            // push current level hierarchy agent & rebate into array 
+            // push current level hierarchy agent & rebate into array
             $temp = [];
             $rebate = $this->getRebateAllocate($agents[0]['id'], $type_id);
 
@@ -237,18 +237,42 @@ class RebateController extends Controller
 
     private function getRebateAllocate($user_id, $type_id)
     {
-        $rebate = User::find($user_id)->rebateAllocations()->where('account_type_id', $type_id)->get();
+        $user = User::find($user_id);
+        $rebate = $user->rebateAllocations()->where('account_type_id', $type_id)->get();
+        $upline_rebate = User::find($user->upline_id)->rebateAllocations()->where('account_type_id', $type_id)->get();
 
-        $data = [
+        $rebates = [
             'user_id' => $rebate[0]->user_id,
-            'forex' => $rebate[0]->amount,
-            'stocks' => $rebate[1]->amount,
-            'indices' => $rebate[2]->amount,
-            'commodities' => $rebate[3]->amount,
-            'cryptocurrency' => $rebate[4]->amount,
+            'account_type_id' => $type_id,
+            $rebate[0]->symbol_group_id => floatval($rebate[0]->amount),
+            $rebate[1]->symbol_group_id => floatval($rebate[1]->amount),
+            $rebate[2]->symbol_group_id => floatval($rebate[2]->amount),
+            $rebate[3]->symbol_group_id => floatval($rebate[3]->amount),
+            $rebate[4]->symbol_group_id => floatval($rebate[4]->amount),
+            'upline_forex' => floatval($upline_rebate[0]->amount),
+            'upline_stocks' => floatval($upline_rebate[1]->amount),
+            'upline_indices' => floatval($upline_rebate[2]->amount),
+            'upline_commodities' => floatval($upline_rebate[3]->amount),
+            'upline_cryptocurrency' => floatval($upline_rebate[4]->amount),
         ];
 
-        return $data;
+        $downline = $user->directChildren()->where('role', 'agent')->first();
+
+        if ($downline) {
+            $downline_rebate = User::find($downline->id)->rebateAllocations()->where('account_type_id', $type_id)->get();
+
+            if (!$downline_rebate->isEmpty()) {
+                $rebates += [
+                    'downline_forex' => floatval($downline_rebate[0]->amount),
+                    'downline_stocks' => floatval($downline_rebate[1]->amount),
+                    'downline_indices' => floatval($downline_rebate[2]->amount),
+                    'downline_commodities' => floatval($downline_rebate[3]->amount),
+                    'downline_cryptocurrency' => floatval($downline_rebate[4]->amount),
+                ];
+            }
+        }
+
+        return $rebates;
     }
 
     public function changeAgents(Request $request)
@@ -263,7 +287,7 @@ class RebateController extends Controller
         if ($selected_agent->upline_id !== 2) {
             $split_hierarchy = explode('-2-', $selected_agent->hierarchyList);
             $upline_ids = explode('-', $split_hierarchy[1]);
-            
+
             array_pop($upline_ids);
 
             $uplines = User::whereIn('id', $upline_ids)->get()
@@ -319,7 +343,7 @@ class RebateController extends Controller
         //push selected agent level into array
         $temp = [];
         array_push($temp, $agents, $rebate);
-        array_push($agents_array, $temp);
+        $agents_array[] = $temp;
 
         //pass to getDirectAgents
         $loop_flag = true;
@@ -328,12 +352,33 @@ class RebateController extends Controller
             $next_level = $this->getDirectAgents($current_agent_id, $type_id);
             if ( !empty($next_level) ) {
                 $current_agent_id = $next_level[0][0]['id'];
-                array_push($agents_array, $next_level);
+                $agents_array[] = $next_level;
             } else {
                 $loop_flag = false;
             }
         }
 
         return response()->json($agents_array);
+    }
+
+    public function updateRebateAmount(Request $request)
+    {
+        $data = $request->rebates;
+
+        $rebates = RebateAllocation::where('user_id', $data['user_id'])
+            ->where('account_type_id', $data['account_type_id'])
+            ->get();
+
+        foreach ($rebates as $rebate) {
+            if (isset($data[$rebate->symbol_group_id])) {
+                $rebate->amount = $data[$rebate->symbol_group_id];
+                $rebate->save();
+            }
+        }
+
+        return back()->with('toast', [
+            'title' => trans('public.toast_update_rebate_success'),
+            'type' => 'success',
+        ]);
     }
 }

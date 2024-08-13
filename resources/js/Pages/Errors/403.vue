@@ -34,7 +34,7 @@ const handleLogOut = () => {
 </script>
 
 <template>
-    <Head :title="$t('public.dashboard')" />
+    <Head :title="$t('public.access_denied')" />
     <div
         style="background-image: url('/img/background-login.svg'); background-repeat: repeat-x;"
     >

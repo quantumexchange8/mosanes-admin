@@ -358,4 +358,5 @@ return [
     "access_denied" => "Access Denied",
     "access_denied_desc" => "It looks like you don't have permission to access this page. Please check your credentials.",
     "logout" => "Log Out",
+    "toast_update_rebate_success" => "You’ve successfully updated the rebate details.",
 ];

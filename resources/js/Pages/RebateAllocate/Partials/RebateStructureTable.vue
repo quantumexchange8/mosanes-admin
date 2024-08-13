@@ -2,7 +2,7 @@
 import {ref, watch, watchEffect} from "vue";
 import InputText from 'primevue/inputtext';
 import Button from '@/Components/Button.vue';
-import {usePage} from '@inertiajs/vue3';
+import {useForm, usePage} from '@inertiajs/vue3';
 import OverlayPanel from 'primevue/overlaypanel';
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
@@ -16,15 +16,16 @@ import {
 } from '@tabler/icons-vue';
 import { wTrans } from "laravel-vue-i18n";
 import AgentDropdown from '@/Pages/RebateAllocate/Partials/AgentDropdown.vue';
+import InputNumber from "primevue/inputnumber";
 
 const dropdownOptions = [
     {
         name: wTrans('public.standard_account'),
-        value: '1'
+        value: 1
     },
     {
         name: wTrans('public.premium_account'),
-        value: '2'
+        value: 2
     },
 ]
 
@@ -47,12 +48,6 @@ const getResults = async (type_id = 1) => {
 };
 
 getResults();
-
-watchEffect(() => {
-    if (usePage().props.toast !== null) {
-        getResults();
-    }
-});
 
 watch(accountType, (newValue) => {
     getResults(newValue);
@@ -98,18 +93,34 @@ const clearFilterGlobal = () => {
     filters.value['global'].value = null;
 }
 
+const editingRows = ref([]);
+
+const form = useForm({
+    rebates: null
+});
+const onRowEditSave = (event) => {
+    let { newData, index } = event;
+
+    agents.value[index] = newData;
+
+    form.rebates = agents.value[index][1];
+    form.post(route('rebate_allocate.updateRebateAmount'));
+};
 </script>
 
 <template>
     <div class="p-6 flex flex-col items-center justify-center self-stretch gap-6 border border-gray-200 bg-white shadow-table rounded-2xl">
         <DataTable
-            v-model:filters="filters"
+            v-model:editingRows="editingRows"
             :value="agents"
             tableStyle="min-width: 50rem"
             :globalFilterFields="['name']"
             ref="dt"
             :loading="loading"
             table-style="min-width:fit-content"
+            editMode="row"
+            :dataKey="agents ? agents[0].id : 'id'"
+            @row-edit-save="onRowEditSave"
         >
             <template #header>
                 <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:justify-between">
@@ -157,49 +168,110 @@ const clearFilterGlobal = () => {
                 <template #body="slotProps">
                     <AgentDropdown :agents="slotProps.data[0]" @update:modelValue="changeAgent($event)" class="w-full" />
                 </template>
+                <template #editor="{ data }">
+                    <div class="flex items-center gap-3">
+                        <img :src="data[0][0].profile_photo" class="w-5 h-5 rounded-full grow-0 shrink-0" alt="">
+                        <span>{{ data[0][0].name }}</span>
+                    </div>
+                </template>
             </Column>
-            <Column field="forex" class="hidden md:table-cell" style="width:10%;">
+            <Column field="1" class="hidden md:table-cell" style="width:10%;">
                 <template #header>
                     <span>{{ $t('public.forex') }}</span>
                 </template>
                 <template #body="slotProps">
-                    {{ slotProps.data[1].forex }}
+                    {{ slotProps.data[1]['1'] }}
+                </template>
+                <template #editor="{ data, field }">
+                    <InputNumber
+                        v-model="data[1][field]"
+                        :min="data[1].downline_forex ? data[1].downline_forex : 0"
+                        :max="data[1].upline_forex"
+                        :minFractionDigits="2"
+                        fluid
+                        size="sm"
+                        inputClass="py-2 px-4 w-20"
+                    />
                 </template>
             </Column>
-            <Column field="stocks" class="hidden md:table-cell" style="width:10%;">
+            <Column field="2" class="hidden md:table-cell" style="width:10%;">
                 <template #header>
                     <span>{{ $t('public.stocks') }}</span>
                 </template>
                 <template #body="slotProps">
-                    {{ slotProps.data[1].stocks }}
+                    {{ slotProps.data[1]['2'] }}
+                </template>
+                <template #editor="{ data, field }">
+                    <InputNumber
+                        v-model="data[1][field]"
+                        :min="data[1].downline_forex ? data[1].downline_forex : 0"
+                        :max="data[1].upline_forex"
+                        :minFractionDigits="2"
+                        fluid
+                        size="sm"
+                        inputClass="py-2 px-4 w-20"
+                    />
                 </template>
             </Column>
-            <Column field="indices" class="hidden md:table-cell" style="width:10%;">
+            <Column field="3" class="hidden md:table-cell" style="width:10%;">
                 <template #header>
                     <span>{{ $t('public.indices') }}</span>
                 </template>
                 <template #body="slotProps">
-                    {{ slotProps.data[1].indices }}
+                    {{ slotProps.data[1]['3'] }}
+                </template>
+                <template #editor="{ data, field }">
+                    <InputNumber
+                        v-model="data[1][field]"
+                        :min="data[1].downline_forex ? data[1].downline_forex : 0"
+                        :max="data[1].upline_forex"
+                        :minFractionDigits="2"
+                        fluid
+                        size="sm"
+                        inputClass="py-2 px-4 w-20"
+                    />
                 </template>
             </Column>
-            <Column field="commodities" class="hidden md:table-cell" style="width:10%;">
+            <Column field="4" class="hidden md:table-cell" style="width:10%;">
                 <template #header>
                     <span class="w-12 truncate lg:w-auto">{{ $t('public.commodities') }}</span>
                 </template>
                 <template #body="slotProps">
-                    {{ slotProps.data[1].commodities }}
+                    {{ slotProps.data[1]['4'] }}
+                </template>
+                <template #editor="{ data, field }">
+                    <InputNumber
+                        v-model="data[1][field]"
+                        :min="data[1].downline_forex ? data[1].downline_forex : 0"
+                        :max="data[1].upline_forex"
+                        :minFractionDigits="2"
+                        fluid
+                        size="sm"
+                        inputClass="py-2 px-4 w-20"
+                    />
                 </template>
             </Column>
-            <Column field="cryptocurrency" class="hidden md:table-cell" style="width:10%;">
+            <Column field="5" class="hidden md:table-cell" style="width:10%;">
                 <template #header>
                     <span class="w-12 truncate lg:w-auto">{{ $t('public.cryptocurrency') }}</span>
                 </template>
                 <template #body="slotProps">
-                    {{ slotProps.data[1].cryptocurrency }}
+                    {{ slotProps.data[1]['5'] }}
+                </template>
+                <template #editor="{ data, field }">
+                    <InputNumber
+                        v-model="data[1][field]"
+                        :min="data[1].downline_forex ? data[1].downline_forex : 0"
+                        :max="data[1].upline_forex"
+                        :minFractionDigits="2"
+                        fluid
+                        size="sm"
+                        inputClass="py-2 px-4 w-20"
+                    />
                 </template>
             </Column>
-            <Column field="action" style="width:5%;">
-                <template #body="slotProps">
+            <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center">
+                <template #roweditoriniticon>
                     <Button
                         variant="gray-text"
                         type="button"

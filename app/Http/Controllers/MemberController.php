@@ -7,7 +7,6 @@ use App\Models\AccountType;
 use App\Models\Country;
 use App\Models\PaymentAccount;
 use App\Models\RebateAllocation;
-use App\Models\SymbolGroup;
 use App\Models\Transaction;
 use App\Models\User;
 use App\Models\Wallet;
@@ -105,6 +104,13 @@ class MemberController extends Controller
         }
 
         if ($user->role == 'agent') {
+            Wallet::create([
+                'user_id' => $user->id,
+                'type' => 'rebate_wallet',
+                'address' => str_replace('AID', 'RB', $user->id_number),
+                'balance' => 0
+            ]);
+
             $uplineRebates = RebateAllocation::where('user_id', $user->upline_id)->get();
 
             foreach ($uplineRebates as $uplineRebate) {
@@ -243,6 +249,13 @@ class MemberController extends Controller
         $user->id_number = $request->id_number;
         $user->role = 'agent';
         $user->save();
+
+        Wallet::create([
+            'user_id' => $user->id,
+            'type' => 'rebate_wallet',
+            'address' => str_replace('AID', 'RB', $user->id_number),
+            'balance' => 0
+        ]);
 
         return back()->with('toast', [
             'title' => trans('public.upgrade_to_agent_success_alert'),

@@ -204,8 +204,8 @@ const onRowEditSave = (event) => {
                 <template #editor="{ data, field }">
                     <InputNumber
                         v-model="data[1][field]"
-                        :min="data[1].downline_forex ? data[1].downline_forex : 0"
-                        :max="data[1].upline_forex"
+                        :min="data[1].downline_stocks ? data[1].downline_stocks : 0"
+                        :max="data[1].upline_stocks"
                         :minFractionDigits="2"
                         fluid
                         size="sm"
@@ -223,8 +223,8 @@ const onRowEditSave = (event) => {
                 <template #editor="{ data, field }">
                     <InputNumber
                         v-model="data[1][field]"
-                        :min="data[1].downline_forex ? data[1].downline_forex : 0"
-                        :max="data[1].upline_forex"
+                        :min="data[1].downline_indices ? data[1].downline_indices : 0"
+                        :max="data[1].upline_indices"
                         :minFractionDigits="2"
                         fluid
                         size="sm"
@@ -242,8 +242,8 @@ const onRowEditSave = (event) => {
                 <template #editor="{ data, field }">
                     <InputNumber
                         v-model="data[1][field]"
-                        :min="data[1].downline_forex ? data[1].downline_forex : 0"
-                        :max="data[1].upline_forex"
+                        :min="data[1].downline_commodities ? data[1].downline_commodities : 0"
+                        :max="data[1].upline_commodities"
                         :minFractionDigits="2"
                         fluid
                         size="sm"
@@ -261,8 +261,8 @@ const onRowEditSave = (event) => {
                 <template #editor="{ data, field }">
                     <InputNumber
                         v-model="data[1][field]"
-                        :min="data[1].downline_forex ? data[1].downline_forex : 0"
-                        :max="data[1].upline_forex"
+                        :min="data[1].downline_cryptocurrency ? data[1].downline_cryptocurrency : 0"
+                        :max="data[1].upline_cryptocurrency"
                         :minFractionDigits="2"
                         fluid
                         size="sm"

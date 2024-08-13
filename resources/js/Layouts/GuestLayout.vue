@@ -4,6 +4,7 @@ import {ref} from "vue";
 import {usePage} from "@inertiajs/vue3";
 import {loadLanguageAsync} from "laravel-vue-i18n";
 import OverlayPanel from 'primevue/overlaypanel';
+import dayjs from "dayjs";
 
 const op = ref();
 const toggle = (event) => {
@@ -46,7 +47,7 @@ const changeLanguage = async (langVal) => {
                         <slot />
                     </div>
                 </div>
-                <div class="text-center text-gray-500 text-xs mt-auto">© 2024 mosanes. All rights reserved.</div>
+                <div class="text-center text-gray-500 text-xs mt-auto">© {{ dayjs().year() }} mosanes. All rights reserved.</div>
             </div>
         </div>
     </div>

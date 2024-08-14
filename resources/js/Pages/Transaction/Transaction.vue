@@ -31,6 +31,16 @@ const getTransactionMonths = async () => {
 
 onMounted(() => {
     getTransactionMonths();
+    // Extract the type from the URL directly
+    const queryString = window.location.search;
+    const urlParams = new URLSearchParams(queryString);
+    const type = urlParams.get('type');
+
+    // Check if the type is valid and set selectedType
+    if (type && tabs.value.some(tab => tab.type === type)) {
+        selectedType.value = type;
+    }
+
 })
 
 const tabs = ref([

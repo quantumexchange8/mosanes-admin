@@ -7,14 +7,15 @@ import { transactionFormat } from '@/Composables/index.js';
 import { DepositIcon, WithdrawalIcon, RebateIcon } from '@/Components/Icons/solid';
 import Badge from '@/Components/Badge.vue';
 import Vue3Autocounter from 'vue3-autocounter';
-import { ref } from 'vue';
+import { ref, watch } from 'vue';
 import { usePage } from '@inertiajs/vue3';
+import Dropdown from "primevue/dropdown";
 
 const page = usePage();
 
 const { formatAmount } = transactionFormat();
 
-const counterDuration = ref(0.3);
+const counterDuration = ref(1);
 const balance = ref(0.00)
 const equity = ref(0.00)
 const pendingWithdrawal = ref(0.00)
@@ -27,10 +28,91 @@ const pendingWithdrawalCount = ref(0)
 const counterEquity = ref(null);
 const counterBalance = ref(null);
 
+// Function to get the current month and year as a string
+const getCurrentMonthYear = () => {
+  const date = new Date();
+  const month = String(date.getMonth() + 1).padStart(2, '0'); // Get month (01 to 12)
+  const year = date.getFullYear(); // Get year (e.g., 2024)
+  return `${month}/${year}`; // Format as MM/YYYY
+};
+
+// Reactive variables
+const selectedMonth = ref(getCurrentMonthYear()); // Initialize with current month/year
+const transactionMonth = ref();
+
 const updateBalEquity = () => {
     counterEquity.value.reset();
     counterBalance.value.reset();
+    getAccountData(); 
 }
+
+const getOptions = async () => {
+    try {
+        const response = await axios.get('/getOptions');
+        transactionMonth.value = response.data;
+    } catch (error) {
+        console.error('Error transaction month data:', error);
+    }
+};
+getOptions();
+
+const getAccountData = async () => {
+    try {
+        const response = await axios.get('/getAccountData');
+        balance.value = response.data.totalBalance;
+        equity.value = response.data.totalEquity;
+    } catch (error) {
+        console.error('Error accounts data:', error);
+    }
+};
+getAccountData();
+
+const getPendingData = async () => {
+    try {
+        const response = await axios.get('/getPendingData');
+        pendingWithdrawal.value = parseFloat(response.data.pendingAmount);
+        pendingWithdrawalCount.value = parseFloat(response.data.pendingCounts);
+    } catch (error) {
+        console.error('Error pending data:', error);
+    }
+};
+getPendingData();
+
+const getAssetData = async (selectedMonth) => {
+    try {
+        // Base URL
+        let url = '/getAssetData';
+
+        // Append month query parameter if selectedMonth is provided
+        if (selectedMonth) {
+            url += `?month=${(selectedMonth)}`;
+        }
+
+        // Make the GET request
+        const response = await axios.get(url);
+
+        // Process the response
+        totalDeposit.value = parseFloat(response.data.totalDeposit);
+        totalWithdrawal.value = parseFloat(response.data.totalWithdrawal);
+        totalRebate.value = parseFloat(response.data.totalRebatePayout);
+        netAsset.value = parseFloat(totalDeposit.value - totalWithdrawal.value - totalRebate.value);
+    } catch (error) {
+        console.error('Error fetching asset data:', error);
+    }
+};
+
+getAssetData(selectedMonth.value);
+
+// Watch for changes to selectedMonth
+watch(selectedMonth, (newMonth) => {
+    getAssetData(newMonth);
+});
+
+const goToTransactionPage = (type) => {
+    // Navigate to the transaction page with a query parameter
+    window.location.href = `/transaction?type=${type}`;
+};
+
 </script>
 
 <template>
@@ -137,15 +219,13 @@ const updateBalEquity = () => {
                                 <vue3-autocounter ref="counter" :startAmount="0" :endAmount="netAsset" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
-                        <Button
-                            variant="gray-tonal"
-                            size="sm"
-                            type="button"
-                            v-slot="{ iconSizeClasses }"
-                        >
-                            <div class="pr-2 text-gray-950">06/2024</div>
-                            <IconChevronDown size="16" stroke-width="1.25" color="#667085" />
-                        </Button>
+                        <Dropdown
+                            v-model="selectedMonth"
+                            :options="transactionMonth"
+                            :placeholder="$t('public.select_group_placeholder')"
+                            class="bg-gray-100"
+                            scroll-height="236px"
+                        />
                     </div>
 
                     <div class="flex flex-col justify-center items-center gap-4 self-stretch">
@@ -164,6 +244,7 @@ const updateBalEquity = () => {
                                 variant="gray-outlined"
                                 size="sm"
                                 type="button"
+                                @click="goToTransactionPage('deposit')"
                             >
                                 {{ $t('public.details') }}
                             </Button>
@@ -184,6 +265,7 @@ const updateBalEquity = () => {
                                 variant="gray-outlined"
                                 size="sm"
                                 type="button"
+                                @click="goToTransactionPage('withdrawal')"
                             >
                                 {{ $t('public.details') }}
                             </Button>
@@ -204,6 +286,7 @@ const updateBalEquity = () => {
                                 variant="gray-outlined"
                                 size="sm"
                                 type="button"
+                                @click="goToTransactionPage('payout')"
                             >
                                 {{ $t('public.details') }}
                             </Button>

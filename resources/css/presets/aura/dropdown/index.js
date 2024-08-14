@@ -12,7 +12,7 @@ export default {
             { 'first:ml-0 ml-[-1px]': parent.instance.$name == 'InputGroup' && !props.showButtons },
 
             // Color and Background
-            { 'bg-white': !props.disabled },
+            // { 'bg-white': !props.disabled },
 
             'border',
             { 'border-gray-300': parent.instance.$name != 'InputGroup' },

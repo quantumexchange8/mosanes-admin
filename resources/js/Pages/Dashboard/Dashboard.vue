@@ -223,8 +223,12 @@ const goToTransactionPage = (type) => {
                             v-model="selectedMonth"
                             :options="transactionMonth"
                             :placeholder="$t('public.select_group_placeholder')"
-                            class="bg-gray-100"
                             scroll-height="236px"
+                            :pt="{
+                                root: 'inline-flex items-center justify-center relative rounded-lg bg-gray-100 px-3 py-2 gap-3 cursor-pointer overflow-hidden overflow-ellipsis whitespace-nowrap appearance-none',
+                                input: 'text-sm font-medium block flex-auto relative focus:outline-none',
+                                trigger: 'w-4 h-4 flex items-center justify-center shrink-0',
+                            }"
                         />
                     </div>
 

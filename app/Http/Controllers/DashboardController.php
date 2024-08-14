@@ -42,8 +42,10 @@ class DashboardController extends Controller
         $to = now()->format('Y-m-d\TH:i:s.v');
     
         // Standard Account and Premium Account group IDs
-        $groupIds = AccountType::pluck('account_group_id')->toArray();
-    
+        $groupIds = AccountType::whereNotNull('account_group_id')
+            ->pluck('account_group_id')
+            ->toArray();
+
         // Initialize total balance and equity
         $totalBalance = 0;
         $totalEquity = 0;

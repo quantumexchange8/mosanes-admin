@@ -41,9 +41,10 @@ class DashboardController extends Controller
         $from = '2024-01-01T00:00:00.000';
         $to = now()->format('Y-m-d\TH:i:s.v');
     
-        // Standard Account and Premium Account group id
-        $groupIds = [1047, 1048];
+        // Standard Account and Premium Account group IDs
+        $groupIds = AccountType::pluck('account_group_id')->toArray();
     
+        // Initialize total balance and equity
         $totalBalance = 0;
         $totalEquity = 0;
     
@@ -51,14 +52,30 @@ class DashboardController extends Controller
             // Fetch data for each group ID
             $response = (new CTraderService)->getMultipleTraders($from, $to, $groupId);
     
+            // Find the corresponding AccountType model
+            $accountType = AccountType::where('account_group_id', $groupId)->first();
+    
+            // Initialize or reset group balance and equity
+            $groupBalance = 0;
+            $groupEquity = 0;
+    
             // Assuming the response is an associative array with a 'trader' key
             if (isset($response['trader']) && is_array($response['trader'])) {
                 foreach ($response['trader'] as $trader) {
-                    $totalBalance += $trader['balance'];
-                    $totalEquity += $trader['equity'];
+                    $groupBalance += $trader['balance'];
+                    $groupEquity += $trader['equity'];
                 }
+    
+                // Update account group balance and equity
+                $accountType->account_group_balance = $groupBalance;
+                $accountType->account_group_equity = $groupEquity;
+                $accountType->save();
             }
         }
+    
+        // Recalculate total balance and equity from the updated account types
+        $totalBalance = AccountType::sum('account_group_balance');
+        $totalEquity = AccountType::sum('account_group_equity');
     
         // Return the total balance and total equity as a JSON response
         return response()->json([
@@ -66,7 +83,7 @@ class DashboardController extends Controller
             'totalEquity' => $totalEquity,
         ]);
     }
-                
+                        
     public function getPendingData()
     {
 

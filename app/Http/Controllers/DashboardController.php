@@ -53,28 +53,33 @@ class DashboardController extends Controller
         foreach ($groupIds as $groupId) {
             // Fetch data for each group ID
             $response = (new CTraderService)->getMultipleTraders($from, $to, $groupId);
-    
+        
             // Find the corresponding AccountType model
             $accountType = AccountType::where('account_group_id', $groupId)->first();
-    
+        
             // Initialize or reset group balance and equity
             $groupBalance = 0;
             $groupEquity = 0;
-    
+        
             // Assuming the response is an associative array with a 'trader' key
             if (isset($response['trader']) && is_array($response['trader'])) {
                 foreach ($response['trader'] as $trader) {
-                    $groupBalance += $trader['balance'];
-                    $groupEquity += $trader['equity'];
+                    // Determine the divisor based on moneyDigits
+                    $moneyDigits = isset($trader['moneyDigits']) ? (int)$trader['moneyDigits'] : 0;
+                    $divisor = $moneyDigits > 0 ? pow(10, $moneyDigits) : 1; // 10^moneyDigits
+        
+                    // Adjust balance and equity based on the divisor
+                    $groupBalance += $trader['balance'] / $divisor;
+                    $groupEquity += $trader['equity'] / $divisor;
                 }
-    
+        
                 // Update account group balance and equity
                 $accountType->account_group_balance = $groupBalance;
                 $accountType->account_group_equity = $groupEquity;
                 $accountType->save();
             }
         }
-    
+            
         // Recalculate total balance and equity from the updated account types
         $totalBalance = AccountType::sum('account_group_balance');
         $totalEquity = AccountType::sum('account_group_equity');

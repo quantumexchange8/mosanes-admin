@@ -7,7 +7,7 @@ import { transactionFormat } from '@/Composables/index.js';
 import { DepositIcon, WithdrawalIcon, RebateIcon } from '@/Components/Icons/solid';
 import Badge from '@/Components/Badge.vue';
 import Vue3Autocounter from 'vue3-autocounter';
-import { ref, watch } from 'vue';
+import { ref, watch, onMounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import Dropdown from "primevue/dropdown";
 
@@ -15,14 +15,14 @@ const page = usePage();
 
 const { formatAmount } = transactionFormat();
 
-const counterDuration = ref(1);
-const balance = ref(0.00)
-const equity = ref(0.00)
-const pendingWithdrawal = ref(0.00)
-const netAsset = ref(0.00)
-const totalDeposit = ref(0.00)
-const totalWithdrawal = ref(0.00)
-const totalRebate = ref(0.00)
+const counterDuration = ref(10);
+const balance = ref(99999.00)
+const equity = ref(99999.00)
+const pendingWithdrawal = ref(99999.00)
+const netAsset = ref(99999.00)
+const totalDeposit = ref(99999.00)
+const totalWithdrawal = ref(99999.00)
+const totalRebate = ref(99999.00)
 
 const pendingWithdrawalCount = ref(0)
 const counterEquity = ref(null);
@@ -54,7 +54,6 @@ const getOptions = async () => {
         console.error('Error transaction month data:', error);
     }
 };
-getOptions();
 
 const getAccountData = async () => {
     try {
@@ -65,7 +64,6 @@ const getAccountData = async () => {
         console.error('Error accounts data:', error);
     }
 };
-getAccountData();
 
 const getPendingData = async () => {
     try {
@@ -76,7 +74,6 @@ const getPendingData = async () => {
         console.error('Error pending data:', error);
     }
 };
-getPendingData();
 
 const getAssetData = async (selectedMonth) => {
     try {
@@ -95,17 +92,36 @@ const getAssetData = async (selectedMonth) => {
         totalDeposit.value = parseFloat(response.data.totalDeposit);
         totalWithdrawal.value = parseFloat(response.data.totalWithdrawal);
         totalRebate.value = parseFloat(response.data.totalRebatePayout);
-        netAsset.value = parseFloat(totalDeposit.value - totalWithdrawal.value - totalRebate.value);
+        netAsset.value = parseFloat(totalDeposit.value - totalWithdrawal.value);
     } catch (error) {
         console.error('Error fetching asset data:', error);
     }
 };
 
-getAssetData(selectedMonth.value);
 
 // Watch for changes to selectedMonth
 watch(selectedMonth, (newMonth) => {
     getAssetData(newMonth);
+});
+
+// Fetch all initial data sequentially
+const fetchAllData = async () => {
+    try {
+        // Fetch all data sequentially
+        await getOptions();
+        await getAccountData();
+        await getPendingData();
+        await getAssetData(selectedMonth.value);
+    } catch (error) {
+        console.error('Error fetching all data:', error);
+    } finally {
+        // Reset counter duration back to 10 seconds after fetching is complete
+        counterDuration.value = 1;
+    }
+};
+
+onMounted(() => {
+    fetchAllData();
 });
 
 const goToTransactionPage = (type) => {

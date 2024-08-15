@@ -563,16 +563,16 @@ class MemberController extends Controller
         ]);
     
         try {
-            // Determine adjustment type for CTraderService using match
             $changeType = match($type) {
+                
                 'balance' => match($action) {
-                    'balance_in' => ChangeTraderBalanceType::DEPOSIT,
-                    'balance_out' => ChangeTraderBalanceType::WITHDRAW,
+                    'balance_in' => "DEPOSIT",
+                    'balance_out' => "WITHDRAW",
                     default => throw new \Exception(trans('public.balance_adjustment_action_error')),
                 },
                 'credit' => match($action) {
-                    'credit_in' => ChangeTraderBalanceType::DEPOSIT_NONWITHDRAWABLE_BONUS,
-                    'credit_out' => ChangeTraderBalanceType::WITHDRAW_NONWITHDRAWABLE_BONUS,
+                    'credit_in' => "DEPOSIT_NONWITHDRAWABLE_BONUS",
+                    'credit_out' => "WITHDRAW_NONWITHDRAWABLE_BONUS",
                     default => throw new \Exception(trans('public.credit_adjustment_action_error')),
                 },
                 default => throw new \Exception(trans('public.invalid_type')),
@@ -611,8 +611,7 @@ class MemberController extends Controller
                 'title' => $type === 'balance' ? trans('public.toast_balance_adjustment_success') : trans('public.toast_credit_adjustment_success'),
                 'type' => 'success'
             ]);
-            
-            } catch (\Throwable $e) {
+        } catch (\Throwable $e) {
             // Update transaction status to failed on error
             $transaction->update(['status' => 'failed']);
             

@@ -1,6 +1,6 @@
 <script setup>
 import Button from '@/Components/Button.vue';
-import { IconDots, IconAlertCircle } from '@tabler/icons-vue';
+import { IconDots, IconAlertCircleFilled } from '@tabler/icons-vue';
 import {
     BalanceAdjustmentIcon,
     CreditAdjustmentIcon,
@@ -22,11 +22,21 @@ import StatusBadge from '@/Components/StatusBadge.vue';
 import Empty from '@/Components/Empty.vue';
 import { useConfirm } from 'primevue/useconfirm';
 import InputNumber from 'primevue/inputnumber';
+import { trans } from "laravel-vue-i18n";
+import { generalFormat, transactionFormat } from "@/Composables/index.js";
 
-const hasData = ref(false);
+const props = defineProps({
+    user_id: Number
+})
+
+const { formatAmount } = transactionFormat();
+const { formatRgbaColor } = generalFormat()
+
+const tradingAccounts = ref();
 const form = useForm({
+    id: '',
     action: '',
-    amount: '',
+    amount: 0,
     remarks: '',
     type: '',
 });
@@ -51,7 +61,8 @@ const closeDialog = () => {
 };
 
 const updateDialogData = () => {
-    form.type = dialogs.value.type
+    form.id = dialogs.value.data.id;
+    form.type = dialogs.value.type;
     form.post(route(dialogs.value.updateUrl), {
         onSuccess: () => {
             closeDialog();
@@ -59,66 +70,23 @@ const updateDialogData = () => {
     });
 };
 
-const dialogTitle = computed(() => {
-    return dialogs.value.type === 'balance' ? 'Current Account Balance' : 'Current Account Credit';
-});
-
-const currentAmount = computed(() => {
-    return dialogs.value.data?.amount || '0.00';
-});
-
 const actionLabel = computed(() => {
     return dialogs.value.type === 'balance'
-        ? { in: 'Deposit', out: 'Withdrawal' }
-        : { in: 'Credit In', out: 'Credit Out' };
+        ? { in: 'balance_in', out: 'balance_out' }
+        : { in: 'credit_in', out: 'credit_out' };
 });
 
-const items = ref([
-    {
-        id: '3003923',
-        badgeVariant: 'info',
-        badgeText: 'Demo',
-        data: [
-            { label: 'Balance', value: '$ 10,000.00' },
-            { label: 'Credit', value: '$ 1,000.00' },
-            { label: 'Equity', value: '$ 1,000.00' },
-            { label: 'Since', value: '2024/06/23' }
-        ]
-    },
-    {
-        id: '8000381',
-        badgeVariant: 'success',
-        badgeText: 'Live',
-        data: [
-            { label: 'Balance', value: '$ 1,372.19' },
-            { label: 'Credit', value: '$ 500.00' },
-            { label: 'Equity', value: '$ 1,200.20' },
-            { label: 'Since', value: '2024/03/19' }
-        ]
-    },
-    {
-        id: '8000618',
-        badgeVariant: 'success',
-        badgeText: 'Live',
-        data: [
-            { label: 'Balance', value: '$ 2,372.20' },
-            { label: 'Credit', value: '$ 0.00' },
-            { label: 'Equity', value: '$ 2,299.29' },
-            { label: 'Since', value: '2024/02/24' }
-        ]
-    },
-    {
-        id: '8001827',
-        badgeVariant: 'success',
-        badgeText: 'Live',
-        data: [
-            { label: 'Balance', value: '$ 1,372.19' },
-            { label: 'Credit', value: '$ 0.00' },
-            { label: 'Equity', value: '$ 1,200.20' },
-            { label: 'Since', value: '2024/01/01' }
-        ]
+const getTradingAccounts = async () => {
+    try {
+        const response = await axios.get(`/member/getTradingAccounts?id=${props.user_id}`);
+
+        tradingAccounts.value = response.data.tradingAccounts;
+        // console.log(tradingAccounts);
+    } catch (error) {
+        console.error('Error get trading accounts:', error);
     }
-]);
+};
+getTradingAccounts();
 
 const chips = ref([
     { label: 'Fix account balance' },
@@ -142,19 +110,50 @@ const requireConfirmation = () => {
         },
     });
 };
+
+// Function to check if an account is inactive for 90 days
+function isInactive(date) {
+  const updatedAtDate = new Date(date);
+  const currentDate = new Date();
+
+  // Get only the date part (remove time)
+  const updatedAtDay = new Date(updatedAtDate.getFullYear(), updatedAtDate.getMonth(), updatedAtDate.getDate());
+  const currentDay = new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate());
+
+  // Calculate the difference in days by direct subtraction
+  const diffDays = (currentDay - updatedAtDay) / (1000 * 60 * 60 * 24);
+
+  // Determine if inactive (more than 90 days)
+  return diffDays > 90;
+}
+
 </script>
 
 <template>
-    <div v-if="hasData">
+    <div v-if="tradingAccounts?.length < 0">
         <Empty message="No Trading Account Yet" />
     </div>
     <div v-else class="grid md:grid-cols-2 gap-5">
-        <div class="flex flex-col min-w-[300px] items-center px-5 py-4 gap-3 rounded-2xl bg-white shadow-toast" v-for="item in items" :key="item.id">
+        <div 
+            v-for="tradingAccount in tradingAccounts" :key="tradingAccount.id"
+            class="flex flex-col min-w-[300px] items-center px-5 py-4 gap-3 rounded-2xl border-l-8 bg-white shadow-toast"
+            :style="{'borderColor': `#${tradingAccount.account_type_color}`}"
+        >
             <div class="flex justify-between items-center self-stretch">
                 <div class="flex items-center gap-4">
-                    <div class="text-gray-950 text-lg font-semibold">#{{ item.id }}</div>
-                    <StatusBadge border-radius="20" :value="item.badgeText.toLowerCase()">{{ item.badgeText }}</StatusBadge>
-                    <div class="text-error-500"><IconAlertCircle :size="20" stroke-width="1.25" /></div>
+                    <div class="text-gray-950 text-lg font-semibold">#{{ tradingAccount.meta_login }}</div>
+                    <div
+                        class="flex px-2 py-1 justify-center items-center text-xs font-semibold hover:-translate-y-1 transition-all duration-300 ease-in-out rounded"
+                        :style="{
+                            backgroundColor: formatRgbaColor(tradingAccount.account_type_color, 0.15),
+                            color: `#${tradingAccount.account_type_color}`,
+                        }"
+                    >
+                        {{ tradingAccount.account_type_name }}
+                    </div>
+                    <div v-if="isInactive(tradingAccount.updated_at)" class="text-error-500">
+                        <IconAlertCircleFilled :size="20" stroke-width="1.25" />
+                    </div>
                 </div>
                 <Dropdown align="right">
                     <template #trigger>
@@ -163,11 +162,11 @@ const requireConfirmation = () => {
                         </Button>
                     </template>
                     <template #content>
-                        <DropdownLink class="inline-flex items-center gap-3 cursor-pointer" @click.prevent="openDialog('balance', item)">
+                        <DropdownLink class="inline-flex items-center gap-3 cursor-pointer" @click.prevent="openDialog('balance', tradingAccount)">
                             <BalanceAdjustmentIcon class="w-5 h-5 text-gray-500" />
                             Balance Adjustment
                         </DropdownLink>
-                        <DropdownLink class="inline-flex items-center gap-3 cursor-pointer" @click.prevent="openDialog('credit', item)">
+                        <DropdownLink class="inline-flex items-center gap-3 cursor-pointer" @click.prevent="openDialog('credit', tradingAccount)">
                             <CreditAdjustmentIcon class="w-5 h-5 text-gray-500" />
                             Credit Adjustment
                         </DropdownLink>
@@ -180,23 +179,35 @@ const requireConfirmation = () => {
                 </Dropdown>
             </div>
             <div class="grid grid-cols-2 gap-2 self-stretch">
-                <div class="flex min-w-[100px] items-center gap-1 flex-1" v-for="(data, index) in item.data" :key="index">
-                    <div class="text-gray-500 text-xs">{{ data.label }}:</div>
-                    <div class="text-gray-950 text-xs font-medium">{{ data.value }}</div>
+                <div class="flex min-w-[100px] items-center gap-1 flex-1">
+                    <div class="text-gray-500 text-xs">{{ $t('public.balance') }}:</div>
+                    <div class="text-gray-950 text-xs font-medium">{{ formatAmount(tradingAccount.balance) }}</div>
+                </div>
+                <div class="flex min-w-[100px] items-center gap-1 flex-1">
+                    <div class="text-gray-500 text-xs">{{ $t('public.equity') }}:</div>
+                    <div class="text-gray-950 text-xs font-medium">{{ formatAmount(tradingAccount.credit) }}</div>
+                </div>
+                <div class="flex min-w-[100px] items-center gap-1 flex-1">
+                    <div class="text-gray-500 text-xs">{{ tradingAccount.account_type == 'premium_account' ? $t('public.pamm') : $t('public.credit') }}:</div>
+                    <div class="text-gray-950 text-xs font-medium">{{ tradingAccount.account_type == 'premium_account' ? 'Pamm not put yet' : formatAmount(tradingAccount.equity) }}</div>
+                </div>
+                <div class="flex min-w-[100px] items-center gap-1 flex-1">
+                    <div class="text-gray-500 text-xs">{{ tradingAccount.account_type == 'premium_account' ? $t('public.mature_in') : $t('public.leverage') }}:</div>
+                    <div class="text-gray-950 text-xs font-medium">{{ tradingAccount.account_type == 'premium_account' ? 'So this also not' : `1:${tradingAccount.leverage}` }}</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <Dialog v-model:visible="dialogs.visible" modal :header="dialogTitle" class="dialog-xs md:dialog-sm">
+    <Dialog v-model:visible="dialogs.visible" modal :header="dialogs.type == 'balance' ? $t('public.account_balance_adjustment') : $t('public.account_credit_adjustment')" class="dialog-xs md:dialog-sm">
         <form @submit.prevent="updateDialogData">
             <div class="flex flex-col gap-5">
                 <div class="flex flex-col justify-center items-center px-8 py-4 gap-2 self-stretch bg-gray-200">
                     <div class="text-gray-500 text-center text-xs font-medium">
-                        #{{ dialogs.data?.id }} - {{ dialogTitle }}
+                        #{{ dialogs.data?.meta_login }} - {{ dialogs.type == 'balance' ? $t('public.current_account_balance') : $t('public.current_account_credit') }}
                     </div>
                     <div class="text-gray-950 text-center text-xl font-semibold">
-                        $ {{ currentAmount }}
+                        $ {{ dialogs.type == 'balance' ? dialogs.data?.balance : dialogs.data?.credit }}
                     </div>
                 </div>
                 <div class="flex flex-col items-start gap-1 self-stretch">
@@ -204,21 +215,22 @@ const requireConfirmation = () => {
                     <div class="flex items-center gap-10">
                         <div class="flex items-center gap-2">
                             <div class="flex w-10 h-10 p-2.5 justify-center items-center rounded-[50px]">
-                                <RadioButton v-model="form.action" :inputId="actionLabel.in.toLowerCase()" :name="actionLabel.in" :value="actionLabel.in.toLowerCase()" class="w-4 h-4" />
+                                <RadioButton v-model="form.action" :inputId="actionLabel.in" :name="actionLabel.in" :value="actionLabel.in" class="w-4 h-4" />
                             </div>
                             <div class="text-gray-950 text-sm">
-                                {{ actionLabel.in }}
+                                {{ $t('public.' + actionLabel.in) }}
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
                             <div class="flex w-10 h-10 p-2.5 justify-center items-center rounded-[50px]">
-                                <RadioButton v-model="form.action" :inputId="actionLabel.out.toLowerCase()" :name="actionLabel.out" :value="actionLabel.out.toLowerCase()" class="w-4 h-4" />
+                                <RadioButton v-model="form.action" :inputId="actionLabel.out" :name="actionLabel.out" :value="actionLabel.out" class="w-4 h-4" />
                             </div>
                             <div class="text-gray-950 text-sm">
-                                {{ actionLabel.out }}
+                                {{ $t('public.' + actionLabel.out) }}
                             </div>
                         </div>
                     </div>
+                    <InputError :message="form.errors.action" />
                 </div>
                 <div class="flex flex-col items-start gap-1 self-stretch">
                     <InputLabel for="amount" value="Amount" />
@@ -243,8 +255,10 @@ const requireConfirmation = () => {
                         <div v-for="(chip, index) in chips" :key="index">
                             <Chip
                                 :label="chip.label"
+                                class="hover:bg-gray-50"
                                 :class="{
-                                    'border-primary-300 bg-primary-50 hover:bg-primary-50 text-primary-500': form.remarks === chip.label,
+                                    'border-primary-300 bg-primary-50 hover:bg-primary-25 text-primary-500': form.remarks === chip.label,
+                                    'text-gray-950': form.remarks !== chip.label,
                                 }"
                                 @click="handleChipClick(chip.label)"
                             />
@@ -261,6 +275,7 @@ const requireConfirmation = () => {
                         rows="5"
                         cols="30"
                     />
+                    <InputError :message="form.errors.remarks" />
                 </div>
             </div>
             <div class="flex justify-end items-center pt-10 md:pt-7 gap-3 md:gap-4 self-stretch">

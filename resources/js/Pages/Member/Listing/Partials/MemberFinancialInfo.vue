@@ -102,7 +102,7 @@ watchEffect(() => {
             <div class="flex py-2 items-center self-stretch">
                 <div class="text-gray-950 text-sm font-bold">{{ $t('public.recent_transaction' )}}</div>
             </div>
-            <div v-if="transactionHistory" class="flex flex-col items-center flex-1 self-stretch">
+            <div v-if="!transactionHistory" class="flex flex-col items-center flex-1 self-stretch">
                 <Empty :message="$t('public.no_transaction_yet')" />
             </div>
             <div v-else class="flex flex-col items-center flex-1 self-stretch overflow-auto" style="-ms-overflow-style: none; scrollbar-width: none;">
@@ -110,7 +110,7 @@ watchEffect(() => {
                     v-for="(transaction, index) in transactionHistory"
                     :key="index"
                     class="flex py-2 items-center gap-5 self-stretch border-b border-gray-200"
-                    :class="{ 'border-transparent': index === transactions.length - 1 }"
+                    :class="{ 'border-transparent': index === transactionHistory.length - 1 }"
                 >
                     <div class="flex flex-col items-start justify-center gap-1 w-full">
                         <span class="text-gray-950 text-sm font-semibold">{{ transaction.transaction_type === 'deposit' ? transaction.to_meta_login : transaction.from_meta_login }}</span>

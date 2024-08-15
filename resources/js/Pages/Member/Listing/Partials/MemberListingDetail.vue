@@ -47,7 +47,7 @@ const tabs = ref([
       },
       {
           title: wTrans('public.trading_accounts'),
-          component: h(MemberTradingAccounts),
+          component: h(MemberTradingAccounts, {user_id: props.user.id}),
       },
       {
           title: wTrans('public.adjustment_history'),

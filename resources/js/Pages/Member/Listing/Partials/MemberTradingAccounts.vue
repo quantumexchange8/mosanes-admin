@@ -6,7 +6,7 @@ import {
     CreditAdjustmentIcon,
     DeleteIcon,
 } from '@/Components/Icons/outline';
-import { ref, computed } from 'vue';
+import { ref, computed, watchEffect } from 'vue';
 import Dialog from 'primevue/dialog';
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
@@ -126,6 +126,12 @@ function isInactive(date) {
   // Determine if inactive (more than 90 days)
   return diffDays > 90;
 }
+
+watchEffect(() => {
+    if (usePage().props.toast !== null) {
+        getTradingAccounts();
+    }
+});
 
 </script>
 

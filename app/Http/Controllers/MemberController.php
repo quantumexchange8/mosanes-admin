@@ -515,7 +515,6 @@ class MemberController extends Controller
                     'id' => $trading_account->id,
                     'meta_login' => $trading_account->meta_login,
                     'account_type' => $trading_account->accountType->slug,
-                    'account_type_name' => $trading_account->accountType->name,
                     'balance' => $trading_account->balance,
                     'credit' => $trading_account->credit,
                     'equity' => $trading_account->equity,

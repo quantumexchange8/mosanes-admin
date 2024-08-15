@@ -149,7 +149,7 @@ function isInactive(date) {
                             color: `#${tradingAccount.account_type_color}`,
                         }"
                     >
-                        {{ tradingAccount.account_type_name }}
+                        {{ $t('public.' + tradingAccount.account_type) }}
                     </div>
                     <div v-if="isInactive(tradingAccount.updated_at)" class="text-error-500">
                         <IconAlertCircleFilled :size="20" stroke-width="1.25" />

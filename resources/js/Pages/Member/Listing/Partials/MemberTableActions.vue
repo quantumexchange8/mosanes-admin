@@ -126,11 +126,9 @@ const requireConfirmation = (action_type) => {
         group,
         header,
         actionType,
-        message: {
-            text,
-            dynamicText,
-            suffix
-        },
+        text,
+        dynamicText,
+        suffix,
         cancelButton,
         acceptButton,
         accept: action

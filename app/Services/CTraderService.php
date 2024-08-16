@@ -139,13 +139,13 @@ class CTraderService
 
     public function deleteTrader($meta_login): void
     {
-        Http::delete($this->baseURL . "/v2/webserv/traders/$meta_login");
+        Http::delete($this->baseURL . "/v2/webserv/traders/$meta_login?token=$this->token");
     }
 
     public function getMultipleTraders($from, $to, $groupId )
     {
         $response = Http::acceptJson()->get($this->baseURL . "/v2/webserv/traders/?from=$from&to=$to&groupId=$groupId&token=$this->token");
-        
+
         Log::debug($response);
         return $response;
     }

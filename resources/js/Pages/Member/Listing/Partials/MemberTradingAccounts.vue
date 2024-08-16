@@ -141,7 +141,7 @@ watchEffect(() => {
         <Empty message="No Trading Account Yet" />
     </div>
     <div v-else class="grid md:grid-cols-2 gap-5">
-        <div 
+        <div
             v-for="tradingAccount in tradingAccounts" :key="tradingAccount.id"
             class="flex flex-col min-w-[300px] items-center px-5 py-4 gap-3 rounded-2xl border-l-8 bg-white shadow-toast"
             :style="{'borderColor': `#${tradingAccount.account_type_color}`}"
@@ -195,26 +195,26 @@ watchEffect(() => {
                     <div class="text-gray-950 text-xs font-medium">{{ formatAmount(tradingAccount.credit) }}</div>
                 </div>
                 <div class="flex min-w-[100px] items-center gap-1 flex-1">
-                    <div class="text-gray-500 text-xs">{{ tradingAccount.account_type == 'premium_account' ? $t('public.pamm') : $t('public.credit') }}:</div>
-                    <div class="text-gray-950 text-xs font-medium">{{ tradingAccount.account_type == 'premium_account' ? 'Pamm not put yet' : formatAmount(tradingAccount.equity) }}</div>
+                    <div class="text-gray-500 text-xs">{{ tradingAccount.account_type === 'premium_account' ? $t('public.pamm') : $t('public.credit') }}:</div>
+                    <div class="text-gray-950 text-xs font-medium">{{ tradingAccount.account_type === 'premium_account' ? '-' : formatAmount(tradingAccount.equity) }}</div>
                 </div>
                 <div class="flex min-w-[100px] items-center gap-1 flex-1">
-                    <div class="text-gray-500 text-xs">{{ tradingAccount.account_type == 'premium_account' ? $t('public.mature_in') : $t('public.leverage') }}:</div>
-                    <div class="text-gray-950 text-xs font-medium">{{ tradingAccount.account_type == 'premium_account' ? 'So this also not' : `1:${tradingAccount.leverage}` }}</div>
+                    <div class="text-gray-500 text-xs">{{ tradingAccount.account_type === 'premium_account' ? $t('public.mature_in') : $t('public.leverage') }}:</div>
+                    <div class="text-gray-950 text-xs font-medium">{{ tradingAccount.account_type === 'premium_account' ? '-' : `1:${tradingAccount.leverage}` }}</div>
                 </div>
             </div>
         </div>
     </div>
 
-    <Dialog v-model:visible="dialogs.visible" modal :header="dialogs.type == 'balance' ? $t('public.account_balance_adjustment') : $t('public.account_credit_adjustment')" class="dialog-xs md:dialog-sm">
+    <Dialog v-model:visible="dialogs.visible" modal :header="dialogs.type === 'balance' ? $t('public.account_balance_adjustment') : $t('public.account_credit_adjustment')" class="dialog-xs md:dialog-sm">
         <form @submit.prevent="updateDialogData">
             <div class="flex flex-col gap-5">
                 <div class="flex flex-col justify-center items-center px-8 py-4 gap-2 self-stretch bg-gray-200">
                     <div class="text-gray-500 text-center text-xs font-medium">
-                        #{{ dialogs.data?.meta_login }} - {{ dialogs.type == 'balance' ? $t('public.current_account_balance') : $t('public.current_account_credit') }}
+                        #{{ dialogs.data?.meta_login }} - {{ dialogs.type === 'balance' ? $t('public.current_account_balance') : $t('public.current_account_credit') }}
                     </div>
                     <div class="text-gray-950 text-center text-xl font-semibold">
-                        $ {{ dialogs.type == 'balance' ? dialogs.data?.balance : dialogs.data?.credit }}
+                        $ {{ dialogs.type === 'balance' ? dialogs.data?.balance : dialogs.data?.credit }}
                     </div>
                 </div>
                 <div class="flex flex-col items-start gap-1 self-stretch">

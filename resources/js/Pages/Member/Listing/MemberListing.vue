@@ -496,7 +496,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                 </Dropdown>
             </div>
 
-            <!-- Filter Statys-->
+            <!-- Filter Status-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
                     {{ $t('public.filter_status') }}

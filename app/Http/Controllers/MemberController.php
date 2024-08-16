@@ -2,24 +2,29 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\AddMemberRequest;
-use App\Models\AccountType;
-use App\Models\Country;
-use App\Models\PaymentAccount;
-use App\Models\RebateAllocation;
-use App\Models\Transaction;
 use App\Models\User;
-use App\Models\Wallet;
-use App\Services\DropdownOptionService;
-use App\Services\RunningNumberService;
-use Auth;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Support\Str;
-use Illuminate\Validation\Rule;
-use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use App\Models\Wallet;
+use App\Models\Country;
+use App\Models\AccountType;
+use App\Models\TradingUser;
+use App\Models\Transaction;
+use Illuminate\Support\Str;
 use Illuminate\Http\Request;
+use App\Models\PaymentAccount;
+use App\Models\TradingAccount;
+use Illuminate\Validation\Rule;
+use App\Models\RebateAllocation;
+use App\Services\CTraderService;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Services\RunningNumberService;
+use App\Http\Requests\AddMemberRequest;
+use App\Services\DropdownOptionService;
+use App\Services\ChangeTraderBalanceType;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 
 class MemberController extends Controller
 {
@@ -499,15 +504,135 @@ class MemberController extends Controller
         ]);
     }
 
+    public function getTradingAccounts(Request $request)
+    {
+        // Fetch trading accounts based on user ID
+        $tradingAccounts = TradingAccount::query()
+            ->where('user_id', $request->id)
+            ->get() // Fetch the results from the database
+            ->map(function($trading_account) {
+                return [
+                    'id' => $trading_account->id,
+                    'meta_login' => $trading_account->meta_login,
+                    'account_type' => $trading_account->accountType->slug,
+                    'balance' => $trading_account->balance,
+                    'credit' => $trading_account->credit,
+                    'equity' => $trading_account->equity,
+                    'leverage' => $trading_account->margin_leverage,
+                    'account_type_color' => $trading_account->accountType->color,
+                    'updated_at' => $trading_account->updated_at,
+                ];
+            });
+    
+        // Return the response as JSON
+        return response()->json([
+            'tradingAccounts' => $tradingAccounts,
+        ]);
+    }
+    
     public function accountAdjustment(Request $request)
     {
-        dd($request->all());
+        // Validate the incoming request data
+        $request->validate([
+            'id' => 'required|exists:trading_accounts,id',
+            'action' => 'required|string',
+            'amount' => 'required|numeric|gt:0',
+            'remarks' => 'nullable|string',
+            'type' => 'required|in:balance,credit',
+        ]);
+    
+        // Find the trading account by id
+        $tradingAccount = TradingAccount::find($request->input('id'));
+        $action = $request->input('action');
+        $amount = $request->input('amount');
+        $type = $request->input('type');
+    
+        // Record the adjustment
+        $transaction = Transaction::create([
+            'user_id' => $tradingAccount->user_id,
+            'category' => 'trading_account',
+            'transaction_type' => $action,
+            'from_meta_login' => ($action === 'balance_out' || $action === 'credit_out') ? $tradingAccount->meta_login : null,
+            'to_meta_login' => ($action === 'balance_in' || $action === 'credit_in') ? $tradingAccount->meta_login : null,
+            'transaction_number' => RunningNumberService::getID('transaction'),
+            'amount' => $amount,
+            'transaction_amount' => $amount,
+            'status' => 'processing',
+            'remarks' => $request->input('remarks'),
+            'handle_by' => Auth::id(),
+        ]);
+    
+        try {
+            $changeType = match($type) {
+                
+                'balance' => match($action) {
+                    'balance_in' => "DEPOSIT",
+                    'balance_out' => "WITHDRAW",
+                    default => throw new \Exception(trans('public.balance_adjustment_action_error')),
+                },
+                'credit' => match($action) {
+                    'credit_in' => "DEPOSIT_NONWITHDRAWABLE_BONUS",
+                    'credit_out' => "WITHDRAW_NONWITHDRAWABLE_BONUS",
+                    default => throw new \Exception(trans('public.credit_adjustment_action_error')),
+                },
+                default => throw new \Exception(trans('public.invalid_type')),
+            };
+    
+            // Validate sufficient funds for 'balance_out' and 'credit_out'
+            if ($type === 'balance' && $action === 'balance_out' && $tradingAccount->balance < $amount) {
+                throw ValidationException::withMessages(['amount' => trans('public.insufficient_balance')]);
+            }
+    
+            if ($type === 'credit' && $action === 'credit_out' && $tradingAccount->credit < $amount) {
+                throw ValidationException::withMessages(['amount' => trans('public.insufficient_credit')]);
+            }
+    
+            // Apply adjustments to the trading account
+            if ($type === 'balance') {
+                $tradingAccount->balance += $action === 'balance_in' ? $amount : -$amount;
+            } elseif ($type === 'credit') {
+                $tradingAccount->credit += $action === 'credit_in' ? $amount : -$amount;
+            }
+    
+            // Perform the trade
+            $trade = (new CTraderService)->createTrade( $tradingAccount->meta_login, $amount, $request->input('remarks'), $changeType);
+    
+            // Update the transaction with the trade ticket
+            $transaction->update([
+                'ticket' => $trade->getTicket(),
+                'status' => 'successful',
+            ]);
+    
+            // Save the updated trading account
+            $tradingAccount->save();
+    
+            // Return success response with a flag for toast
+            return redirect()->back()->with('toast', [
+                'title' => $type === 'balance' ? trans('public.toast_balance_adjustment_success') : trans('public.toast_credit_adjustment_success'),
+                'type' => 'success'
+            ]);
+        } catch (\Throwable $e) {
+            // Update transaction status to failed on error
+            $transaction->update(['status' => 'failed']);
+            
+            // Handle specific error cases
+            if ($e->getMessage() == "Not found") {
+                TradingUser::firstWhere('meta_login', $tradingAccount->meta_login)->update(['acc_status' => 'Inactive']);
+            } else {
+                Log::error($e->getMessage());
+            }
+            
+            return response()->json([
+                'message' => 'Account adjustment failed',
+                'error' => $e->getMessage(),
+            ], 500);
+        }
     }
-
+            
     public function getAdjustmentHistoryData(Request $request)
     {
         $adjustment_history = Transaction::where('user_id', $request->id)
-            ->whereIn('transaction_type', ['rebate_in', 'rebate_out'])
+            ->whereIn('transaction_type', ['rebate_in', 'rebate_out', 'balance_in','balance_out','credit_in','credit_out',])
             ->where('status', 'successful')
             ->latest()
             ->get();

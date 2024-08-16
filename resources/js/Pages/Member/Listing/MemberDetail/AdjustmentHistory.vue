@@ -75,7 +75,7 @@ const rowClicked = (data) => {
                     </div>
                 </template>
             </Column>
-            <Column field="account_no" sortable style="width: 25%" headerClass="hidden md:table-cell">
+            <Column field="account_no" style="width: 25%" headerClass="hidden md:table-cell">
                 <template #header>
                     <span class="hidden md:block">{{ $t('public.account') }}</span>
                 </template>

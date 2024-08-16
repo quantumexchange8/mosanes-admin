@@ -1,17 +1,20 @@
 <script setup>
 import Button from "@/Components/Button.vue";
 import StatusBadge from "@/Components/StatusBadge.vue";
-import {Edit01Icon} from "@/Components/Icons/outline.jsx";
+import { Edit01Icon } from "@/Components/Icons/outline.jsx";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import InputSwitch from "primevue/inputswitch";
-import {ref, watch} from "vue";
+import { ref, watch } from "vue";
 import Dialog from "primevue/dialog";
 import InputLabel from "@/Components/InputLabel.vue";
 import Dropdown from "primevue/dropdown";
 import InputError from "@/Components/InputError.vue";
 import InputText from "primevue/inputtext";
-import {useForm} from "@inertiajs/vue3";
-import {generalFormat} from "@/Composables/index.js";
+import { useForm } from "@inertiajs/vue3";
+import { generalFormat } from "@/Composables/index.js";
+import { useConfirm } from "primevue/useconfirm";
+import { trans } from "laravel-vue-i18n";
+import { router } from "@inertiajs/vue3";
 
 const props = defineProps({
     userDetail: Object,
@@ -72,6 +75,70 @@ const submitForm = () => {
         },
     });
 };
+
+const confirm = useConfirm();
+
+const requireConfirmation = (action_type) => {
+    const messages = {
+        activate_member: {
+            group: 'headless-gray',
+            header: trans('public.deactivate_member'),
+            text: trans('public.deactivate_member_caption'),
+            cancelButton: trans('public.cancel'),
+            acceptButton: trans('public.confirm'),
+            action: () => {
+                router.visit(route('member.updateMemberStatus', props.userDetail.id), {
+                    method: 'post',
+                    data: {
+                        id: props.userDetail.id,
+                    },
+                })
+
+                checked.value = !checked.value;
+            }
+        },
+        deactivate_member: {
+            group: 'headless-primary',
+            header: trans('public.activate_member'),
+            text: trans('public.activate_member_caption'),
+            cancelButton: trans('public.cancel'),
+            acceptButton: trans('public.confirm'),
+            action: () => {
+                router.visit(route('member.updateMemberStatus', props.userDetail.id), {
+                    method: 'post',
+                    data: {
+                        id: props.userDetail.id,
+                    },
+                })
+
+                checked.value = !checked.value;
+            }
+        },
+    };
+
+    const { group, header, text, dynamicText, suffix, actionType, cancelButton, acceptButton, action } = messages[action_type];
+
+    confirm.require({
+        group,
+        header,
+        actionType,
+        text,
+        dynamicText,
+        suffix,
+        cancelButton,
+        acceptButton,
+        accept: action
+    });
+};
+
+const handleMemberStatus = () => {
+    if (props.userDetail.status === 'active') {
+        requireConfirmation('activate_member')
+    } else {
+        requireConfirmation('deactivate_member')
+    }
+}
+
 </script>
 
 <template>
@@ -93,7 +160,11 @@ const submitForm = () => {
                 </div>
                 <div class="flex gap-2 items-center">
                     <div class="p-2.5 flex items-center hover:bg-gray-100 rounded-full">
-                        <InputSwitch v-model="checked" />
+                        <InputSwitch
+                            v-model="checked"
+                            readonly
+                            @click="handleMemberStatus"
+                        />
                     </div>
                     <Button
                         type="button"

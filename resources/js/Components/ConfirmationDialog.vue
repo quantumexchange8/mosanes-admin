@@ -31,10 +31,11 @@ import {
                 <div class="pt-2 md:pt-3 pb-6 px-4 md:px-6 w-full flex flex-col items-center gap-5 self-stretch">
                     <div class="flex flex-col gap-1 items-center self-stretch text-center">
                         <span class="text-gray-950 text-sm md:text-base font-semibold">{{ message.header }}</span>
+                        <span class="text-gray-700 text-xs md:text-sm">{{ message.message }}</span>
                         <span class="text-gray-700 text-xs md:text-sm">
-                            {{ message.message.text }}
-                            <span class="text-gray-950 font-semibold">{{ message.message.dynamicText }}</span>
-                            {{ message.message.suffix }}
+                            {{ message.text }}
+                            <span class="text-gray-950 font-semibold">{{ message.dynamicText }}</span>
+                            {{ message.suffix }}
                         </span>
                     </div>
                     <div class="flex items-center gap-4 md:gap-5 self-stretch">
@@ -77,10 +78,11 @@ import {
                 <div class="pt-2 md:pt-3 pb-6 px-4 md:px-6 w-full flex flex-col items-center gap-5 self-stretch">
                     <div class="flex flex-col gap-1 items-center self-stretch text-center">
                         <span class="text-gray-950 text-sm md:text-base font-semibold">{{ message.header }}</span>
+                        <span class="text-gray-700 text-xs md:text-sm">{{ message.message }}</span>
                         <span class="text-gray-700 text-xs md:text-sm">
-                            {{ message.message.text }}
-                            <span class="text-gray-950 font-semibold">{{ message.message.dynamicText }}</span>
-                            {{ message.message.suffix }}
+                            {{ message.text }}
+                            <span class="text-gray-950 font-semibold">{{ message.dynamicText }}</span>
+                            {{ message.suffix }}
                         </span>
                     </div>
                     <div class="flex items-center gap-4 md:gap-5 self-stretch">
@@ -127,10 +129,11 @@ import {
                 <div class="pt-2 md:pt-3 pb-6 px-4 md:px-6 w-full flex flex-col items-center gap-5 self-stretch">
                     <div class="flex flex-col gap-1 items-center self-stretch text-center">
                         <span class="text-gray-950 text-sm md:text-base font-semibold">{{ message.header }}</span>
+                        <span class="text-gray-700 text-xs md:text-sm">{{ message.message }}</span>
                         <span class="text-gray-700 text-xs md:text-sm">
-                            {{ message.message.text }}
-                            <span class="text-gray-950 font-semibold">{{ message.message.dynamicText }}</span>
-                            {{ message.message.suffix }}
+                            {{ message.text }}
+                            <span class="text-gray-950 font-semibold">{{ message.dynamicText }}</span>
+                            {{ message.suffix }}
                         </span>
                     </div>
                     <div class="flex items-center gap-4 md:gap-5 self-stretch">

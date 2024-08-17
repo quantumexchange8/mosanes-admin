@@ -14,6 +14,8 @@ import IconField from 'primevue/iconfield';
 import FileUpload from 'primevue/fileupload';
 import RadioButton from 'primevue/radiobutton';
 import InputNumber from 'primevue/inputnumber';
+import Checkbox from 'primevue/checkbox';
+import ProfitDisplaySetting from "@/Pages/PammAllocate/Partials/ProfitDisplaySetting.vue";
 
 const props = defineProps({
     groupsOptions: Array,
@@ -21,9 +23,11 @@ const props = defineProps({
 const visible = ref(false);
 const selectedDate = ref();
 const selectedGroups = ref([]);
-const selectedMode = ref('auto');
+const selectedMode = ref('automatic');
 const checked = ref(false);
 const groupsOptions = ref(props.groupsOptions);
+const expectedGain = ref();
+const dailyProfits = ref();
 
 // Watch for changes in the props.groupsOptions
 watch(() => props.groupsOptions, (newValue) => {
@@ -46,8 +50,9 @@ const initialFormState = {
     total_gain: '',
     monthly_gain: '',
     latest: '',
-    generation_mode: '',
+    profit_generation_mode: '',
     expected_gain: '',
+    daily_profits: '',
 };
 
 // Initialize form with the initial state
@@ -70,8 +75,8 @@ watch(selectedMode, (newValue, oldValue) => {
 
 
 const nextStep = () => {
+    form.started_at = selectedDate.value;
     form.groups = selectedGroups.value.map(item => item.value);
-    form.generation_mode = selectedMode.value
     form.post(route('pamm_allocate.validateStep'), {
         onSuccess: () => {
             form.step += 1;
@@ -80,6 +85,8 @@ const nextStep = () => {
 };
 
 const createAssetMaster = () => {
+    form.daily_profits = dailyProfits.value;
+    form.profit_generation_mode = selectedMode.value;
     form.post(route('pamm_allocate.create_asset_master'), {
         onSuccess: () => {
             resetForm();
@@ -119,7 +126,7 @@ function isPublicChecked() {
 // Handle checkbox change and div click
 function togglePublicSelection() {
   const isCurrentlyChecked = isPublicChecked();
-  
+
   if (isCurrentlyChecked) {
     // Remove 'Public' from selection if it's currently selected
     selectedGroups.value = selectedGroups.value.filter(item => item.value !== PUBLIC_OPTION.value);
@@ -127,7 +134,7 @@ function togglePublicSelection() {
     // Add 'Public' to selection and remove all other selections
     selectedGroups.value = [PUBLIC_OPTION];
   }
-  
+
   // Update `checked` state based on the new state
   checked.value = !isCurrentlyChecked;
 }
@@ -143,10 +150,21 @@ watch(selectedGroups, (newValue) => {
   checked.value = isPublicChecked();
 }, { deep: true });
 
+const proceedRegenerate = ref(false);
+
+const handleRegenerate = () => {
+    proceedRegenerate.value = true;
+}
 </script>
 
 <template>
-    <Button type="button" variant="primary-flat" size="base" class='w-full md:w-auto' @click="visible = true">
+    <Button
+        type="button"
+        variant="primary-flat"
+        size="base"
+        lass='w-full md:w-auto'
+        @click="visible = true"
+    >
         <IconPlus size="20" color="#ffffff" stroke-width="1.25" />
         {{ $t('public.new_asset_master') }}
     </Button>
@@ -171,6 +189,8 @@ watch(selectedGroups, (newValue) => {
                     </template>
                 </div>
             </div>
+
+            <!-- Step 1 -->
             <div v-if="form.step === 1" class="flex flex-col items-center gap-8 self-stretch">
                 <!-- Basic Information -->
                 <div class="flex flex-col items-center gap-3 self-stretch">
@@ -209,12 +229,12 @@ watch(selectedGroups, (newValue) => {
                                     v-model="selectedDate"
                                     selectionMode="single"
                                     :manualInput="false"
-                                    dateFormat="dd/mm/yy"
+                                    dateFormat="yy/mm/dd"
                                     showIcon
                                     iconDisplay="input"
-                                    placeholder="yyyy/mm/dd - yyyy/mm/dd"
+                                    placeholder="yyyy/mm/dd"
                                     class="w-full"
-                                    :invalid="form.errors.started_at"
+                                    :invalid="!!form.errors.started_at"
                                 />
                                 <div
                                     v-if="selectedDate"
@@ -228,12 +248,12 @@ watch(selectedGroups, (newValue) => {
                         </div>
                         <div class="flex flex-col items-start gap-1 self-stretch md:flex-grow">
                             <InputLabel for="visible_to" :value="$t('public.visible_to')" />
-                            <MultiSelect 
+                            <MultiSelect
                                 v-model="selectedGroups"
                                 :showToggleAll="false"
                                 :options="groupsOptions"
                                 class="w-full h-full"
-                                :invalid="form.errors.groups"
+                                :invalid="!!form.errors.groups"
                             >
                                 <template #value="slotProps">
                                     <!-- Check if slotProps.value is an array and display names, otherwise show placeholder -->
@@ -245,25 +265,21 @@ watch(selectedGroups, (newValue) => {
                                     </span>
                                 </template>
                                 <template #option="slotProps">
-                                    <span v-for="slotProp in slotProps" class="px-2 py-1 rounded text-gray-950">
-                                    {{ slotProp.name }} 
+                                    <span v-for="slotProp in slotProps">
+                                    {{ slotProp.name }}
                                     </span>
                                 </template>
                                 <template #header>
-                                    <div class="flex items-center p-1 border-b rounded-tl-md rounded-tr-md  text-surface-700 bg-surface-0 border-gray-200">
-                                        <div 
-                                            class="w-full flex items-center py-2 px-3 gap-2 rounded-l-md rounded-r-md  cursor-pointer"
+                                    <div class="flex items-center border-b rounded-tl-lg rounded-tr-lg text-gray-950 bg-white border-gray-200">
+                                        <div
+                                            class="w-full flex items-center p-3 gap-2 rounded-tl-md rounded-tr-md cursor-pointer"
                                             :class="{
-                                                'hover:bg-surface-200': !checked,
-                                                'hover:bg-primary-highlight-hover': checked
+                                                'hover:bg-gray-100': !checked,
+                                                'hover:bg-gray-50': checked
                                             }"
                                             @click="togglePublicSelection"
                                         >
-                                            <input
-                                                type="checkbox"
-                                                :checked="checked"
-                                                class="w-5 h-5 rounded-full border-gray-300 ring-transparent focus:ring-0 focus:ring-offset-0"
-                                            />
+                                            <Checkbox v-model="checked" :binary="true" />
                                             <span class="text-gray-950">{{ $t('public.public') }}</span>
                                         </div>
                                     </div>
@@ -332,6 +348,8 @@ watch(selectedGroups, (newValue) => {
                     </div>
                 </div>
             </div>
+
+            <!-- Step 2 -->
             <div v-if="form.step === 2" class="flex flex-col items-center gap-8 self-stretch">
                 <div class="flex flex-col items-center gap-3 self-stretch">
                     <span class="self-stretch text-gray-950 text-sm font-bold">{{ $t('public.joining_conditions') }}</span>
@@ -355,15 +373,15 @@ watch(selectedGroups, (newValue) => {
                         </div>
                         <div class="flex flex-col items-start gap-1 self-stretch md:flex-grow">
                             <InputLabel for="min_investment_period" :value="$t('public.min_investment_period')" />
-                            <Dropdown 
-                                v-model="form.min_investment_period" 
-                                :options="investmentPeriodOptions" 
-                                optionLabel="name" 
+                            <Dropdown
+                                v-model="form.min_investment_period"
+                                :options="investmentPeriodOptions"
+                                optionLabel="name"
                                 optionValue="value"
-                                :placeholder="$t('public.min_investment_period_placeholder')" 
+                                :placeholder="$t('public.min_investment_period_placeholder')"
                                 class="w-full"
                                 scroll-height="236px"
-                                :invalid="form.errors.min_investment_period"
+                                :invalid="!!form.errors.min_investment_period"
                             />
                             <InputError :message="form.errors.min_investment_period" />
                         </div>
@@ -427,6 +445,8 @@ watch(selectedGroups, (newValue) => {
                     </div>
                 </div>
             </div>
+
+            <!-- Step 3 -->
             <div v-if="form.step === 3" class="flex flex-col items-center gap-8 self-stretch">
                 <div class="flex flex-col items-center gap-3 self-stretch md:pb-5 md:gap-5">
                     <div class="flex flex-col justify-center items-start gap-1 self-stretch">
@@ -434,56 +454,76 @@ watch(selectedGroups, (newValue) => {
                         <span class="text-gray-500 text-xs">{{ $t('public.profit_display_setting_message') }}</span>
                     </div>
                     <div class="flex flex-col items-center gap-3 self-stretch md:gap-2">
-                        <div class="w-full grid grid-cols-1 gap-3 md:grid-cols-2">
-                            <div class="flex flex-col items-start gap-1 self-stretch">
+                        <div class="flex flex-col md:flex-row gap-5 self-stretch items-start">
+                            <div class="flex flex-col items-start gap-1 self-stretch w-full">
                                 <InputLabel for="generate_mode" :value="$t('public.generate_mode')" />
-                                <div class="w-full grid grid-cols-2 gap-5">
-                                    <div class="flex items-center gap-2 text-sm text-gray-950">
-                                        <RadioButton v-model="selectedMode" inputId="auto" value="auto" class="w-5 h-5" />
+                                <div class="w-full flex gap-5 items-center self-stretch py-0.5">
+                                    <div class="flex items-center gap-2 text-sm text-gray-950 w-full">
+                                        <div class="flex items-center justify-center w-10 h-10 rounded-full grow-0 shrink-0 hover:bg-gray-100">
+                                            <RadioButton
+                                                v-model="selectedMode"
+                                                inputId="auto"
+                                                value="automatic"
+                                                class="w-5 h-5"
+                                            />
+                                        </div>
                                         <label for="auto">{{ $t('public.automatic') }}</label>
                                     </div>
-                                    <div class="flex items-center gap-2 text-sm text-gray-950">
-                                        <RadioButton v-model="selectedMode" inputId="manual" value="manual" class="w-5 h-5" />
+                                    <div class="flex items-center gap-2 text-sm text-gray-950 w-full">
+                                        <div class="flex items-center justify-center w-10 h-10 rounded-full grow-0 shrink-0 hover:bg-gray-100">
+                                            <RadioButton
+                                                v-model="selectedMode"
+                                                inputId="manual"
+                                                value="manual"
+                                                class="w-5 h-5"
+                                            />
+                                        </div>
                                         <label for="manual">{{ $t('public.custom') }}</label>
                                     </div>
                                 </div>
                             </div>
-                            <div class="min-w-[200px] flex flex-col items-start gap-1 self-stretch md:min-w-60 md:flex-grow">
+
+                            <div class="flex flex-col items-start gap-1 self-stretch md:min-w-60 md:flex-grow w-full">
                                 <InputLabel for="expected_gain" :value="$t('public.expected_gain')" />
                                 <InputText
                                     id="expected_gain"
                                     type="number"
                                     class="block w-full"
-                                    v-model="form.expected_gain"
+                                    v-model="expectedGain"
                                     :invalid="!!form.errors.expected_gain"
                                     placeholder="0.00%"
-                                    :disabled="selectedMode == 'custom'"
+                                    :disabled="selectedMode === 'custom'"
                                 />
                                 <InputError :message="form.errors.expected_gain" />
                             </div>
                         </div>
-                        <div v-if="selectedMode == 'automatic'" class="w-full flex justify-center items-end md:justify-end">
-                            <Button type="button" variant="primary-text" size="sm" :disabled="!form.expected_gain || form.processing">
+
+                        <div v-if="selectedMode === 'automatic'" class="w-full flex justify-center items-end md:justify-end">
+                            <Button
+                                type="button"
+                                variant="primary-text"
+                                size="sm"
+                                :disabled="!expectedGain || form.processing"
+                                @click="handleRegenerate"
+                            >
                                 <IconRefresh size="20" stroke-width="1.25" />
                                 {{ $t('public.generate_again') }}
                             </Button>
                         </div>
-                        <div class="flex flex-col items-center gap-3 self-stretch md:min-w-[500px]">
-                            <div class="flex justify-between items-center py-2 self-stretch border-b border-gray-200 bg-gray-100">
-                                <div class="flex items-center px-2 flex-grow">
-                                    <span class="flex-grow text-gray-950 text-xs font-semibold uppercase">{{ $t('public.date') }}</span>
-                                </div>
-                                <div class="flex items-center px-2 flex-grow">
-                                    <span class="flex-grow text-gray-950 text-xs font-semibold uppercase">{{ $t('public.daily_profit') }}</span>
-                                </div>
-                            </div>
-                        </div>
+
+                        <!-- Allocate Table -->
+                        <ProfitDisplaySetting
+                            :expectedGain="expectedGain"
+                            :proceedRegenerate="proceedRegenerate"
+                            @update:proceedRegenerate="proceedRegenerate = $event"
+                            @get:daily_profits="dailyProfits = $event"
+                        />
                     </div>
                 </div>
-            </div>  
+            </div>
         </div>
-        <div class="flex pt-5 self-stretch md:pt-7" 
-            :class="{ 
+        <div class="flex pt-5 self-stretch md:pt-7"
+            :class="{
                 'flex-col items-end': form.step === 1,
                 'justify-between items-center': form.step !== 1,
             }"

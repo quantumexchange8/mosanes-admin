@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class AssetMaster extends Model
@@ -26,6 +27,8 @@ class AssetMaster extends Model
         'profit_generation_mode',
         'expected_gain_profit',
         'edited_by',
+        'status',
+        'total_likes_count',
     ];
 
     /**
@@ -38,5 +41,20 @@ class AssetMaster extends Model
         return [
             'started_at' => 'datetime',
         ];
+    }
+
+    public function visible_to_groups(): HasMany
+    {
+        return $this->hasMany(AssetMasterToGroup::class, 'asset_master_id', 'id');
+    }
+
+    public function asset_distributions(): HasMany
+    {
+        return $this->hasMany(AssetMasterProfitDistribution::class, 'asset_master_id', 'id');
+    }
+
+    public function asset_subscriptions(): HasMany
+    {
+        return $this->hasMany(AssetSubscription::class, 'asset_master_id', 'id');
     }
 }

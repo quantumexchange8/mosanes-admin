@@ -111,7 +111,7 @@ const requireConfirmation = (type) => {
             group: props.master.status === 'active' ? 'headless-gray' : 'headless-primary',
             actionType: props.master.status === 'active' ? 'hide_asset_master' : 'show_asset_master',
             header: props.master.status === 'active' ? trans('public.hide_asset_master_header') : trans('public.show_asset_master_header'),
-            message: props.master.status === 'active' ? trans('public.hide_asset_master_message') : trans('public.show_asset_master_message'),
+            text: props.master.status === 'active' ? trans('public.hide_asset_master_message') : trans('public.show_asset_master_message'),
             cancelButton: props.master.status === 'active' ? trans('public.cancel') : trans('public.cancel'),
             acceptButton: props.master.status === 'active' ? trans('public.hide') : trans('public.confirm'),
             action: () => {

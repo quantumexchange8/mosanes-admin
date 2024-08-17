@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssetMasterProfitDistribution;
+use App\Models\AssetMasterToGroup;
+use App\Models\AssetSubscription;
 use Inertia\Inertia;
 use App\Models\Group;
 use App\Models\AssetMaster;
@@ -23,7 +26,7 @@ class PammController extends Controller
     {
         // fetch limit with default
         $limit = $request->input('limit', 12);
-        
+
         // Fetch parameter from request
         $search = $request->input('search', '');
         $sortType = $request->input('sortType', '');
@@ -34,7 +37,7 @@ class PammController extends Controller
 
         // Fetch paginated masters
         $mastersQuery = AssetMaster::query();
-        
+
         // Apply search parameter to multiple fields
         if (!empty($search)) {
             $mastersQuery->where(function($query) use ($search) {
@@ -68,26 +71,38 @@ class PammController extends Controller
         // if (!empty($tag)) {
         //     dd($request->all());
         // }
-        
+
         // Apply status filter
         if (!empty($status)) {
             $mastersQuery->where('status', $status);
         }
-        
+
         // Get total count of masters
         $totalRecords = $mastersQuery->count();
-        
+
         // Fetch paginated results
         $masters = $mastersQuery->paginate($limit);
-    
+
         // Format masters
         $formattedMasters = $masters->map(function($master) {
+
+            $group_names = null;
+            $group_ids = $master->visible_to_groups()
+                ->pluck('group_id')
+                ->toArray();
+
+            if ($master->type == 'private') {
+                $groups = Group::whereIn('id', $group_ids)->get();
+
+                $group_names = $groups->pluck('name')->implode(', ');
+            }
+
             return [
                 'id' => $master->id,
                 'asset_name' => $master->asset_name,
                 'trader_name' => $master->trader_name,
-                'total_investors' => $master->total_investors,
-                'total_fund' => $master->total_fund,
+                'total_investors' => $master->asset_subscriptions()->where('status', 'ongoing')->count(),
+                'total_fund' => $master ->asset_subscriptions()->where('status', 'ongoing')->sum('investment_amount'),
                 'minimum_investment' => $master->minimum_investment,
                 'minimum_investment_period' => $master->minimum_investment_period,
                 'performance_fee' => $master->performance_fee,
@@ -97,72 +112,94 @@ class PammController extends Controller
                 'status' => $master->status,
                 'created_at' => $master->created_at,
                 'visible_to' => $master->type,
+                'group_names' => $group_names,
+                'asset_distribution_counts' => $master->asset_distributions()->count(),
+                'total_likes_count' => $master->total_likes_count,
             ];
         });
-        
+
         return response()->json([
             'masters' => $formattedMasters,
             'totalRecords' => $totalRecords,
             'currentPage' => $masters->currentPage(),
         ]);
     }
-        
+
     public function getMetrics()
     {
-        // Fetch all active masters
-        $masters = AssetMaster::where('status', 'active')->get();
+        // current month
+        $endOfMonth = Carbon::now()->endOfMonth();
 
-        // Calculate totals for the current period
-        $totalAsset = $masters->sum('total_fund');
-        $totalInvestors = $masters->sum('total_investors');
-
-        // Define date range for last month
-        $startOfLastMonth = Carbon::now()->subMonth()->startOfMonth();
+        // last month
         $endOfLastMonth = Carbon::now()->subMonth()->endOfMonth();
 
-        // Filter masters created in the last month
-        $lastMonthMasters = $masters->filter(function ($master) use ($startOfLastMonth, $endOfLastMonth) {
-            return $master->created_at->between($startOfLastMonth, $endOfLastMonth);
-        });
+        $asset_subscription_query = AssetSubscription::where('status', 'ongoing');
 
-        // Calculate totals for last month
-        $lastMonthTotalAsset = $lastMonthMasters->sum('total_fund');
-        $lastMonthTotalInvestors = $lastMonthMasters->sum('total_investors');
+        // current month assets
+        $current_month_assets = (clone $asset_subscription_query)
+            ->where('status', 'ongoing')
+            ->whereDate('created_at', '<=', $endOfMonth)
+            ->sum('investment_amount');
 
-        // Calculate comparisons
-        $totalAssetComparison = $lastMonthTotalAsset > 0
-            ? (($totalAsset - $lastMonthTotalAsset) / $lastMonthTotalAsset) * 100
-            : ($totalAsset > 0 ? 100 : 0);
+        // current month investors
+        $current_month_investors = (clone $asset_subscription_query)
+            ->where('status', 'ongoing')
+            ->whereDate('created_at', '<=', $endOfMonth)
+            ->count();
 
-        $investorComparison = $lastMonthTotalInvestors > 0
-            ? (($totalInvestors - $lastMonthTotalInvestors) / $lastMonthTotalInvestors) * 100
-            : ($totalInvestors > 0 ? 100 : 0);
+        // last month assets
+        $last_month_assets = (clone $asset_subscription_query)
+            ->where('status', 'ongoing')
+            ->whereDate('created_at', '<=', $endOfLastMonth)
+            ->sum('investment_amount');
+
+        // last month investors
+        $last_month_investors = (clone $asset_subscription_query)
+            ->where('status', 'ongoing')
+            ->whereDate('created_at', '<=', $endOfLastMonth)
+            ->count();
+
+        // comparison % of assets vs last month
+        $last_month_asset_comparison = $last_month_assets > 0
+            ? (($current_month_assets - $last_month_assets) / $last_month_assets) * 100
+            : ($current_month_assets > 0 ? 100 : 0);
+
+        // comparison % of investors vs last month
+        $last_month_investor_comparison = $current_month_investors - $last_month_investors;
 
         // Get and format top 3 masters by total fund
-        $topThreeMasters = $masters->sortByDesc('total_fund')->take(3)->map(function($master) {
-            return [
-                'id' => $master->id,
-                'asset_name' => $master->asset_name,
-                'trader_name' => $master->trader_name,
-                'total_investors' => $master->total_investors,
-                'total_fund' => $master->total_fund,
-                'minimum_investment' => $master->minimum_investment,
-                'minimum_investment_period' => $master->minimum_investment_period,
-                'performance_fee' => $master->performance_fee,
-                'total_gain' => $master->total_gain,
-                'monthly_gain' => $master->monthly_gain,
-                'latest_profit' => $master->latest_profit,
-                'status' => $master->status,
-                'created_at' => $master->created_at,
-                'visible_to' => $master->type,
-            ];
-        });
+        $topThreeMasters = AssetMaster::get()
+            ->map(function ($master) use ($endOfMonth) {
+                $asset_subscriptions_fund = AssetSubscription::where('status', 'ongoing')
+                    ->where('asset_master_id', $master->id)
+                    ->whereDate('created_at', '<=', $endOfMonth)
+                    ->sum('investment_amount');
+
+                return [
+                    'id' => $master->id,
+                    'asset_name' => $master->asset_name,
+                    'trader_name' => $master->trader_name,
+                    'total_fund' => $asset_subscriptions_fund,
+                    'minimum_investment' => $master->minimum_investment,
+                    'minimum_investment_period' => $master->minimum_investment_period,
+                    'performance_fee' => $master->performance_fee,
+                    'total_gain' => $master->total_gain,
+                    'monthly_gain' => $master->monthly_gain,
+                    'latest_profit' => $master->latest_profit,
+                    'status' => $master->status,
+                    'created_at' => $master->created_at,
+                    'visible_to' => $master->type,
+                ];
+            })
+            ->sortByDesc('total_fund')
+            ->take(3)
+            ->values();
 
         return response()->json([
-            'totalAsset' => $totalAsset,
-            'totalAssetComparison' => $totalAssetComparison,
-            'currentInvestor' => $totalInvestors,
-            'investorComparision' => $investorComparison,
+            'currentAssets' => $current_month_assets,
+            'lastMonthAssetComparison' => $last_month_asset_comparison,
+            'currentInvestors' => $current_month_investors,
+            'lastMonthInvestorComparison' => $last_month_investor_comparison,
             'topThreeMasters' => $topThreeMasters,
         ]);
     }
@@ -188,7 +225,7 @@ class PammController extends Controller
         $rules = [
             'pamm_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
             'trader_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
-            'created_date' => ['required'],
+            'started_at' => ['required'],
             'groups' => ['required'],
             'total_investors' => ['required', 'integer'],
             'total_fund' => ['required', 'numeric'],
@@ -197,7 +234,7 @@ class PammController extends Controller
         $attributes = [
             'pamm_name'=> trans('public.pamm_name'),
             'trader_name'=> trans('public.trader_name'),
-            'created_date'=> trans('public.created_date'),
+            'started_at'=> trans('public.created_date'),
             'groups'=> trans('public.group'),
             'total_investors'=> trans('public.total_investors'),
             'total_fund'=> trans('public.total_fund'),
@@ -207,15 +244,15 @@ class PammController extends Controller
         $validator->setAttributeNames($attributes);
 
         if ($request->step == 1) {
-            // $validator->validate();
+             $validator->validate();
         } elseif ($request->step == 2) {
             $additionalRules = [
-                'min_investment' => ['required', 'numeric'],
-                'min_investment_period' => ['required', 'integer'],
-                'performance_fee' => ['required', 'numeric'],
-                'total_gain' => ['required', 'numeric'],
-                'monthly_gain' => ['required', 'numeric'],
-                'latest' => ['required', 'numeric'],
+                'min_investment' => ['required'],
+                'min_investment_period' => ['required'],
+                'performance_fee' => ['required'],
+                'total_gain' => ['required'],
+                'monthly_gain' => ['required'],
+                'latest' => ['required'],
             ];
             $rules = array_merge($rules, $additionalRules);
 
@@ -231,7 +268,7 @@ class PammController extends Controller
 
             $validator = Validator::make($request->all(), $rules);
             $validator->setAttributeNames($attributes);
-            // $validator->validate();
+            $validator->validate();
         }
 
         return back();
@@ -241,75 +278,103 @@ class PammController extends Controller
     {
         // Define validation rules and attributes
         $rules = [
-            'pamm_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
-            'trader_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
-            'created_date' => ['required', 'date'],
-            'groups' => ['required'],
-            'total_investors' => ['required', 'integer'],
-            'total_fund' => ['required', 'numeric'],
-            'min_investment' => ['required', 'numeric'],
-            'min_investment_period' => ['required', 'integer'],
-            'performance_fee' => ['required', 'numeric'],
-            'total_gain' => ['required', 'numeric'],
-            'monthly_gain' => ['required', 'numeric'],
-            'latest' => ['required', 'numeric'],
-            'expected_gain' => ['required', 'numeric'],
+//            'pamm_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
+//            'trader_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
+//            'created_date' => ['required', 'date'],
+//            'groups' => ['required'],
+//            'total_investors' => ['required', 'integer'],
+//            'total_fund' => ['required', 'numeric'],
+//            'min_investment' => ['required', 'numeric'],
+//            'min_investment_period' => ['required', 'integer'],
+//            'performance_fee' => ['required', 'numeric'],
+//            'total_gain' => ['required', 'numeric'],
+//            'monthly_gain' => ['required', 'numeric'],
+//            'latest' => ['required', 'numeric'],
+            'expected_gain' => ['nullable', 'numeric'],
         ];
 
         $attributes = [
-            'pamm_name' => trans('public.pamm_name'),
-            'trader_name' => trans('public.trader_name'),
-            'created_date' => trans('public.created_date'),
-            'groups' => trans('public.group'),
-            'total_investors' => trans('public.total_investors'),
-            'total_fund' => trans('public.total_fund'),
-            'min_investment' => trans('public.min_investment'),
-            'min_investment_period' => trans('public.min_investment_period'),
-            'performance_fee' => trans('public.performance_fee'),
-            'total_gain' => trans('public.total_gain'),
-            'monthly_gain' => trans('public.monthly_gain'),
-            'latest' => trans('public.latest'),
+//            'pamm_name' => trans('public.pamm_name'),
+//            'trader_name' => trans('public.trader_name'),
+//            'created_date' => trans('public.created_date'),
+//            'groups' => trans('public.group'),
+//            'total_investors' => trans('public.total_investors'),
+//            'total_fund' => trans('public.total_fund'),
+//            'min_investment' => trans('public.min_investment'),
+//            'min_investment_period' => trans('public.min_investment_period'),
+//            'performance_fee' => trans('public.performance_fee'),
+//            'total_gain' => trans('public.total_gain'),
+//            'monthly_gain' => trans('public.monthly_gain'),
+//            'latest' => trans('public.latest'),
             'expected_gain'=> trans('public.expected_gain'),
         ];
 
         // Validate the request data
         $validator = Validator::make($request->all(), $rules);
         $validator->setAttributeNames($attributes);
-        // $validator->validate();
+        $validator->validate();
 
         // Determine the value of $visible based on the groups field
         $groups = $request->input('groups');
 
+        $groupsDatas = [];
         if (in_array('public', $groups)) {
             $visible = 'public';
         } else {
+            $visible = 'private';
             // Ensure $groups is an array
             $groupArray = is_array($groups) ? $groups : [];
-            
+
             // Fetch groups with IDs in the $groupArray
-            $groupsData = Group::whereIn('id', $groupArray)->get();
+            $groupsDatas = Group::whereIn('id', $groupArray)->get();
         }
-        
+
         try {
-            // AssetMaster::create([
-            //     'asset_name' => $request->pamm_name,
-            //     'trader_name' => $request->trader_name,
-            //     'category' => 'pamm',
-            //     'type' => $visible == 'public' ? 'public' : null,
-            //     'started_at' => $request->started_at,
-            //     'total_investors' => $request->total_investors,
-            //     'total_fund' => $request->total_fund,
-            //     'min_investment' => $request->min_investment,
-            //     'min_investment_period' => $request->min_investment_period,
-            //     'performance_fee' => $request->performance_fee,
-            //     'total_gain' => $request->total_gain,
-            //     'monthly_gain' => $request->monthly_gain,
-            //     'latest' => $request->latest,
-            //     'profit_generation_mode' => $request->profit_generation_mode,
-            //     'expected_gain_profit' => $request->expected_gain,
-            //     'status' => 'active',
-            //     'edited_by' => Auth::id(),
-            // ]);
+             $asset_master = AssetMaster::create([
+                 'asset_name' => $request->pamm_name,
+                 'trader_name' => $request->trader_name,
+                 'category' => 'pamm',
+                 'type' => $visible,
+                 'started_at' => $request->started_at,
+                 'total_investors' => $request->total_investors,
+                 'total_fund' => $request->total_fund,
+                 'minimum_investment' => $request->min_investment,
+                 'minimum_investment_period' => $request->min_investment_period,
+                 'performance_fee' => $request->performance_fee,
+                 'total_gain' => $request->total_gain,
+                 'monthly_gain' => $request->monthly_gain,
+                 'latest_profit' => $request->latest,
+                 'profit_generation_mode' => $request->profit_generation_mode,
+                 'expected_gain_profit' => $request->expected_gain,
+                 'status' => 'active',
+                 'edited_by' => Auth::id(),
+             ]);
+
+             if ($asset_master->type == 'private') {
+                 foreach ($groupsDatas as $group) {
+                     AssetMasterToGroup::create([
+                         'asset_master_id' => $asset_master->id,
+                         'group_id' => $group->id,
+                     ]);
+                 }
+             }
+
+             $daily_profits = $request->daily_profits;
+             if ($daily_profits) {
+                 foreach ($daily_profits as $daily_profit) {
+                     $date = \DateTime::createFromFormat('d/m', $daily_profit['date']);
+
+                     if ($date) {
+                         $date->setDate(date('Y'), $date->format('m'), $date->format('d'));
+
+                         AssetMasterProfitDistribution::create([
+                             'asset_master_id' => $asset_master->id,
+                             'profit_distribution_date' => $date->format('Y-m-d'),
+                             'profit_distribution_percent' => $daily_profit['daily_profit'],
+                         ]);
+                     }
+                 }
+             }
 
             // Redirect with success message
             return redirect()->back()->with('toast', [
@@ -368,7 +433,7 @@ class PammController extends Controller
             $visible = null;
             // Ensure $groups is an array
             $groupArray = is_array($groups) ? $groups : [];
-            
+
             // Fetch groups with IDs in the $groupArray
             $groupsData = Group::whereIn('id', $groupArray)->get();
         }
@@ -435,4 +500,58 @@ class PammController extends Controller
         ]);
     }
 
+    public function updateLikeCounts(Request $request)
+    {
+        $assetMaster = AssetMaster::find($request->master_id);
+
+        $assetMaster->total_likes_count += $request->likeCounts;
+        $assetMaster->save();
+
+        return back();
+    }
+
+    public function getJoiningPammAccountsData(Request $request)
+    {
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+
+        $query = AssetSubscription::where('asset_master_id', $request->asset_master_id)
+            ->whereNot('status', 'revoked');
+
+        if ($startDate && $endDate) {
+            $start_date = Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay();
+            $end_date = Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay();
+
+            $query->whereBetween('created_at', [$start_date, $end_date]);
+        }
+
+        $joiningPammAccounts = $query
+            ->get()
+            ->map(function ($item) {
+
+                if ($item->status == 'ongoing') {
+                    $displayStatus = $item->matured_at ? intval(now()->diffInDays($item->matured_at)) : null;
+                } else {
+                    $displayStatus = $item->status;
+                }
+
+                return [
+                    'id' => $item->id,
+                    'user_profile_photo' => $item->user->getFirstMediaUrl('profile_photo'),
+                    'user_name' => $item->user->name,
+                    'user_email' => $item->user->email,
+                    'join_date' => $item->created_at,
+                    'meta_login' => $item->meta_login,
+                    'balance' => $item->investment_amount + $item->top_up_amount,
+                    'status' => $item->status,
+                    'remaining_days' => $displayStatus,
+                    'investment_periods' => $item->investment_periods
+                ];
+            });
+
+        return response()->json([
+            'joiningPammAccounts' => $joiningPammAccounts,
+            'totalInvestmentAmount' => $joiningPammAccounts->sum('balance'),
+        ]);
+    }
 }

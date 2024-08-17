@@ -15,6 +15,10 @@ import Loader from "@/Components/Loader.vue";
 import {FilterMatchMode} from "primevue/api";
 import { IconSearch, IconCircleXFilled, IconX, IconPremiumRights, IconAdjustments, IconScanEye, IconTriangleFilled, IconTriangleInvertedFilled } from '@tabler/icons-vue';
 import Calendar from 'primevue/calendar';
+import {transactionFormat} from "@/Composables/index.js";
+import dayjs from "dayjs";
+import ColumnGroup from "primevue/columngroup";
+import Row from "primevue/row";
 
 const props = defineProps({
     master: Object
@@ -22,40 +26,87 @@ const props = defineProps({
 
 const dt = ref(null);
 const loading = ref(false);
-const transactions = ref();
+const joiningPammAccounts = ref([]);
+const totalInvestmentAmount = ref();
+const {formatDateTime, formatAmount} = transactionFormat();
+
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
 });
+
+const clearFilterGlobal = () => {
+    filters.value['global'].value = null;
+}
 
 // Reactive variable for selected date range
 const selectedDate = ref([]);
 
 // Get current date
 const today = new Date();
-
 const maxDate = ref(today);
 
+const getJoiningPammAccountsData = async (filterDate = null) => {
+    loading.value = true;
+
+    try {
+        let url = `/pamm_allocate/getJoiningPammAccountsData?asset_master_id=${props.master.id}`;
+
+        if (filterDate) {
+            const [startDate, endDate] = filterDate;
+            url += `&startDate=${dayjs(startDate).format('YYYY-MM-DD')}&endDate=${dayjs(endDate).format('YYYY-MM-DD')}`;
+        }
+
+        const response = await axios.get(url);
+        joiningPammAccounts.value = response.data.joiningPammAccounts;
+        totalInvestmentAmount.value = response.data.totalInvestmentAmount;
+
+    } catch (error) {
+        console.error('Error changing locale:', error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+getJoiningPammAccountsData();
+
+watch(selectedDate, (newDateRange) => {
+    if (Array.isArray(newDateRange)) {
+        const [startDate, endDate] = newDateRange;
+
+        if (startDate && endDate) {
+            getJoiningPammAccountsData([startDate, endDate]);
+        } else if (startDate || endDate) {
+            getJoiningPammAccountsData([startDate || endDate, endDate || startDate]);
+        } else {
+            getJoiningPammAccountsData();
+        }
+    } else {
+        console.warn('Invalid date range format:', newDateRange);
+    }
+})
+
+const clearDate = () => {
+    selectedDate.value = [];
+};
 
 </script>
 
 <template>
     <div class="flex flex-col items-center gap-4 flex-grow self-stretch">
         <DataTable
-            :value="transactions"
-            paginator
+            v-model:filters="filters"
+            :value="joiningPammAccounts"
             removableSort
-            :rows="10"
-            :rowsPerPageOptions="[10, 20, 50, 100]"
+            scrollable
+            scrollHeight="400px"
             tableStyle="lg:min-width: 50rem"
-            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
             ref="dt"
-            @row-click="(event) => openDialog(event.data)"
             :loading="loading"
+            :globalFilterFields="['user_name', 'user_email', 'meta_login']"
         >
             <template #header>
-                <div class="flex flex-col lg:flex-row gap-3 items-center self-stretch">
+                <div class="flex flex-col lg:flex-row gap-3 items-center self-stretch md:pb-6">
                     <div class="relative w-full lg:w-60">
                         <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                             <IconSearch size="20" stroke-width="1.25" />
@@ -80,7 +131,7 @@ const maxDate = ref(today);
                                 showIcon
                                 iconDisplay="input"
                                 placeholder="yyyy/mm/dd - yyyy/mm/dd"
-                                class="w-full"
+                                class="w-full font-normal"
                             />
                             <div
                                 v-if="selectedDate && selectedDate.length > 0"
@@ -102,7 +153,7 @@ const maxDate = ref(today);
                     </div>
                     <div class="flex justify-end self-stretch lg:hidden">
                         <span class="text-gray-500 text-right text-sm font-medium">{{ $t('public.total') }}:</span>
-                        <span class="text-gray-950 text-sm font-semibold ml-2">$ {{ props.master.total_gain }}</span>
+                        <span class="text-gray-950 text-sm font-semibold ml-2">$ {{ formatAmount(totalInvestmentAmount)}}</span>
                     </div>
                 </div>
             </template>
@@ -110,30 +161,23 @@ const maxDate = ref(today);
             <template #loading>
                 <div class="flex flex-col gap-2 items-center justify-center">
                     <Loader />
-                    <span class="text-sm text-gray-700">{{ $t('public.loading_transactions_caption') }}</span>
-                </div>
-            </template>
-            <template #footer>
-                <div v-if="transactions" class="hidden lg:flex justify-end items-center py-2 px-3 gap-3 self-stretch border-y">
-                    <span class="flex-grow text-right text-sm">{{ $t('public.total') }}:</span>
-                    <span class="text-sm">{{ 'aetawraw' }}</span>
                 </div>
             </template>
 
-            <Column 
-                field="created_at" 
-                sortable 
-                :header="$t('public.date')" 
+            <Column
+                field="join_date"
+                sortable
+                :header="$t('public.join_date')"
                 class="hidden lg:table-cell"
             >
                 <template #body="slotProps">
-                    {{ formatDateTime(slotProps.data.created_at) }}
+                    {{ dayjs(slotProps.data.join_date).format('YYYY/MM/DD') }}
                 </template>
             </Column>
-            <Column 
-                field="name" 
-                sortable 
-                :header="$t('public.name')" 
+            <Column
+                field="name"
+                sortable
+                :header="$t('public.name')"
                 class="hidden lg:table-cell"
             >
                 <template #body="slotProps">
@@ -143,67 +187,99 @@ const maxDate = ref(today);
                         </div>
                         <div class="flex flex-col items-start">
                             <div class="font-medium">
-                                {{ slotProps.data.name }}
+                                {{ slotProps.data.user_name }}
                             </div>
                             <div class="text-gray-500 text-xs">
-                                {{ slotProps.data.email }}
+                                {{ slotProps.data.user_email }}
                             </div>
                         </div>
                     </div>
                 </template>
             </Column>
-            <Column 
-                field="to_meta_login" 
-                :header="$t('public.account')" 
+            <Column
+                field="meta_login"
+                :header="$t('public.account')"
                 class="hidden lg:table-cell">
                 <template #body="slotProps"
             >
-                    {{ slotProps.data.to_meta_login }}
+                    {{ slotProps.data.meta_login }}
                 </template>
             </Column>
-            <Column 
-                field="transaction_amount" 
-                sortable 
-                :header="$t('public.balance') + '&nbsp;($)'" 
+            <Column
+                field="balance"
+                sortable
+                :header="$t('public.balance') + '&nbsp;($)'"
                 class="hidden lg:table-cell"
             >
                 <template #body="slotProps">
-                    {{ formatAmount(slotProps.data.transaction_amount) }}
+                    {{ formatAmount(slotProps.data.balance) }}
                 </template>
             </Column>
-            <Column 
-                field="status" 
-                :header="$t('public.status')" 
+            <Column
+                v-if="joiningPammAccounts.length > 0 ? (joiningPammAccounts[0].investment_periods > 0 ? $t('public.status') : '') : null"
+                field="investment_periods"
+                :header="$t('public.status')"
                 class="hidden lg:table-cell"
             >
                 <template #body="slotProps">
-                    <StatusBadge :value="slotProps.data.status">
-                        {{ $t('public.' + slotProps.data.status) }}
+                    <StatusBadge
+                        v-if="slotProps.data.investment_periods > 0"
+                        :value="slotProps.data.status"
+                    >
+                        <span v-if="slotProps.data.status === 'ongoing'">{{ slotProps.data.remaining_days }} {{ $t('public.days') }}</span>
+                        <span v-else>{{ $t('public.' + slotProps.data.status) }}</span>
                     </StatusBadge>
                 </template>
             </Column>
-            <Column class="lg:hidden">
+            <Column class="lg:hidden px-0">
                 <template #body="slotProps">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
                                 <DefaultProfilePhoto />
                             </div>
-                            <div class="flex flex-col items-start">
-                                <div class="text-xs font-medium">
-                                    {{ slotProps.data.name }}
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="flex gap-1 items-center self-stretch">
+                                    <div class="text-xs truncate font-medium max-w-[80px]">
+                                        {{ slotProps.data.user_name }}
+                                    </div>
+                                    <div
+                                        v-if="slotProps.data.investment_periods > 0"
+                                        class="py-[1px] px-1 flex justify-center items-center rounded text-xxs font-semibold"
+                                        :class="{
+                                            'bg-warning-50 text-warning-500': slotProps.data.status === 'ongoing',
+                                            'bg-success-50 text-success-500': slotProps.data.status === 'matured',
+                                        }"
+                                    >
+                                        <span v-if="slotProps.data.status === 'ongoing'">{{ slotProps.data.remaining_days }} {{ $t('public.days') }}</span>
+                                        <span v-else>{{ $t('public.' + slotProps.data.status) }}</span>
+                                    </div>
                                 </div>
-                                <div class="text-gray-500 text-xs">
-                                    {{ formatDateTime(slotProps.data.created_at) }}
+
+                                <div class="flex items-center gap-2 text-gray-500 text-xs">
+                                    <div>
+                                        {{ dayjs(slotProps.data.join_date).format('YYYY/MM/DD') }}
+                                    </div>
+                                    <span>|</span>
+                                    <div>
+                                        {{ slotProps.data.meta_login }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="overflow-hidden text-right text-ellipsis font-semibold">
-                            {{ formatAmount(slotProps.data.transaction_amount) }}
+                        <div class="w-full text-right max-w-[100px] truncate font-semibold">
+                            $ {{ formatAmount(slotProps.data.balance) }}
                         </div>
                     </div>
                 </template>
             </Column>
+            <ColumnGroup type="footer">
+                <Row>
+                    <Column class="hidden lg:table-cell" :footer="$t('public.total') + ' ($):'" :colspan="3" footerStyle="text-align:right" />
+                    <Column class="hidden lg:table-cell" :footer="formatAmount(totalInvestmentAmount ? totalInvestmentAmount : 0)" />
+                    <Column class="hidden lg:table-cell" v-if="joiningPammAccounts.length > 0 ? (joiningPammAccounts[0].investment_periods > 0 ? $t('public.status') : '') : null" />
+                </Row>
+            </ColumnGroup>
         </DataTable>
     </div>
 </template>

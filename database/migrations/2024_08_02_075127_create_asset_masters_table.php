@@ -25,6 +25,7 @@ return new class extends Migration {
             $table->string('profit_generation_mode')->nullable();
             $table->double('expected_gain_profit')->nullable();
             $table->string('status', 50)->nullable();
+            $table->integer('total_likes_count')->nullable()->default(0);
             $table->unsignedBigInteger('edited_by')->nullable();
             $table->softDeletes();
             $table->timestamps();

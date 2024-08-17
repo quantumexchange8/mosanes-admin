@@ -4,7 +4,17 @@ import { transactionFormat } from "@/Composables/index.js";
 import { usePage } from "@inertiajs/vue3";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import StatusBadge from "@/Components/StatusBadge.vue";
-import { IconSearch, IconCircleXFilled, IconUserDollar, IconPremiumRights, IconAdjustments, IconScanEye, IconAlertCircleFilled } from '@tabler/icons-vue';
+import {
+    IconSearch,
+    IconCircleXFilled,
+    IconUserDollar,
+    IconPremiumRights,
+    IconAdjustments,
+    IconScanEye,
+    IconAlertCircleFilled,
+    IconHeartFilled,
+    IconHeart,
+} from '@tabler/icons-vue';
 import InputText from 'primevue/inputtext';
 import Button from '@/Components/Button.vue';
 import Badge from '@/Components/Badge.vue';
@@ -16,7 +26,7 @@ import MultiSelect from 'primevue/multiselect';
 import RadioButton from 'primevue/radiobutton';
 import Paginator from 'primevue/paginator';
 import Loader from "@/Components/Loader.vue";
-import debounce from 'lodash/debounce';
+import debounce from "lodash/debounce.js";
 
 const { formatAmount } = transactionFormat();
 
@@ -62,19 +72,19 @@ const getResults = async (page = 1, rowsPerPage = 12) => {
             const groupNames = selectedGroups.value.map(item => item.value).join(',');
             url += `&groups=${groupNames}`;
         }
-        
+
         if (adminUser.value) {
             url += `&adminUser=${adminUser.value}`;
         }
-        
+
         if (tag.value) {
             url += `&tag=${tag.value}`;
         }
-        
+
         if (status.value) {
             url += `&status=${status.value}`;
         }
-        
+
         if (search.value) {
             url += `&search=${search.value}`;
         }
@@ -154,7 +164,7 @@ function isPublicChecked() {
 // Handle checkbox change and div click
 function togglePublicSelection() {
   const isCurrentlyChecked = isPublicChecked();
-  
+
   if (isCurrentlyChecked) {
     // Remove 'Public' from selection if it's currently selected
     selectedGroups.value = selectedGroups.value.filter(item => item.value !== PUBLIC_OPTION.value);
@@ -162,7 +172,7 @@ function togglePublicSelection() {
     // Add 'Public' to selection and remove all other selections
     selectedGroups.value = [PUBLIC_OPTION];
   }
-  
+
   // Update `checked` state based on the new state
   checked.value = !isCurrentlyChecked;
 }
@@ -184,7 +194,38 @@ watchEffect(() => {
     }
 });
 
+const likeCounts = ref({});
+const likeDeltas = ref({});
+
+const handleLikesCount = (masterId) => {
+    if (!likeCounts.value[masterId]) {
+        likeCounts.value[masterId] = 0;
+        likeDeltas.value[masterId] = 0;
+    }
+    likeCounts.value[masterId] += 1;
+    likeDeltas.value[masterId] += 1;
+
+    saveLikesDebounced(masterId);
+};
+
+// Debounced function to save likes
+const saveLikesDebounced = debounce((masterId) => {
+    if (likeDeltas.value[masterId] > 0) {
+        const deltaToSend = likeDeltas.value[masterId];
+
+        likeDeltas.value[masterId] = 0;
+
+        axios.post(route('pamm_allocate.updateLikeCounts'), {
+            master_id: masterId,
+            likeCounts: deltaToSend,
+        }).catch((error) => {
+            likeDeltas.value[masterId] += deltaToSend;
+            console.error('Failed to update likes:', error);
+        });
+    }
+}, 300);
 </script>
+
 <template>
     <!-- toolbar -->
     <div class="flex flex-col md:flex-row gap-3 items-center self-stretch">
@@ -201,7 +242,7 @@ watchEffect(() => {
                 <IconCircleXFilled size="16" />
             </div>
         </div>
-        <div class="w-full grid grid-cols-2 gap-3">
+        <div class="w-full flex justify-between items-center self-stretch gap-3">
             <Button
                 variant="gray-outlined"
                 @click="toggle"
@@ -216,11 +257,11 @@ watchEffect(() => {
                     {{ filterCount }}
                 </Badge>
             </Button>
-            <Dropdown 
-                v-model="sortType" 
-                :options="sortOptions" 
-                optionLabel="name" 
-                class="w-full"
+            <Dropdown
+                v-model="sortType"
+                :options="sortOptions"
+                optionLabel="name"
+                class="w-full md:w-40"
                 scroll-height="236px"
             >
                 <template #value="slotProps">
@@ -246,13 +287,16 @@ watchEffect(() => {
     </div>
     <div v-else class="w-full">
         <div v-if="masters.length > 0">
-            <div class="grid grid-cols-1 md:grid-cols-2 2xl:grid-cols-4 gap-5 self-stretch">
+            <div class="grid grid-cols-1 md:grid-cols-2 3xl:grid-cols-4 gap-5 self-stretch">
                 <div
                     v-for="(master, index) in masters"
                     :key="index"
                     class="w-full relative p-6 flex flex-col items-center gap-4 rounded-2xl bg-white shadow-toast "
                 >
-                    <div class="absolute -top-3 -left-3 text-error-500">
+                    <div
+                        v-if="master.asset_distribution_counts <= 3"
+                        class="absolute -top-3 -left-3 text-error-500 animate-ping"
+                    >
                         <IconAlertCircleFilled size="32" stroke-width="1.25" />
                     </div>
                     <!-- Profile Section -->
@@ -265,7 +309,7 @@ watchEffect(() => {
                                 <DefaultProfilePhoto />
                             </div>
                         </div>
-                        <div class="flex flex-col items-start flex-grow">
+                        <div class="flex flex-col items-start max-w-[100px] xxs:max-w-[124px] xs:max-w-full 3xl:max-w-[134px]">
                             <div class="self-stretch truncate text-gray-950 font-bold">
                                 {{ master.asset_name }}
                             </div>
@@ -273,21 +317,21 @@ watchEffect(() => {
                                 {{ master.trader_name }}
                             </div>
                         </div>
-                        <div class="flex gap-3 items-center">
-                            <Action 
+                        <div class="flex gap-3 items-center w-full justify-end">
+                            <Action
                                 :master="master"
                                 :groupsOptions="groupsOptions"
                             />
                         </div>
                     </div>
-              
+
                     <!-- StatusBadge Section -->
                     <div class="flex items-center gap-2 self-stretch">
                         <StatusBadge value="info">
                             $ {{ formatAmount(master.minimum_investment) }}
                         </StatusBadge>
                         <StatusBadge value="gray">
-                            <div v-if="master.minimum_investment_period != 0">
+                            <div v-if="master.minimum_investment_period !== 0">
                                 {{ master.minimum_investment_period }} {{ $t('public.months') }}
                             </div>
                             <div v-else>
@@ -295,10 +339,10 @@ watchEffect(() => {
                             </div>
                         </StatusBadge>
                         <StatusBadge value="gray">
-                            {{ master.performance_fee || master.performance_fee === 0 ? formatAmount(master.performance_fee, 0) + '%&nbsp;' + $t('public.profit_sharing') : $t('public.zero_fee') }}
+                            {{ master.performance_fee > 0 ? formatAmount(master.performance_fee, 0) + '%&nbsp;' + $t('public.profit_sharing') : $t('public.zero_fee') }}
                         </StatusBadge>
                     </div>
-              
+
                     <!-- Performance Section -->
                     <div class="py-2 flex justify-center items-center gap-2 self-stretch border-y border-solid border-gray-200">
                         <div class="w-full flex flex-col items-center">
@@ -323,7 +367,7 @@ watchEffect(() => {
                                     v-if="master.latest_profit !== 0"
                                     :class="(master.latest_profit < 0) ? 'text-error-500' : 'text-success-500'"
                                 >
-                                    {{ master.latest_profit }}
+                                    {{ master.latest_profit }}%
                                 </div>
                                 <div
                                     v-else
@@ -337,33 +381,39 @@ watchEffect(() => {
                             </div>
                         </div>
                     </div>
-              
+
                     <!-- Details Section -->
-                    <div class="flex items-end gap-5 self-stretch">
-                        <div class="flex flex-col items-center gap-1 self-stretch flex-grow">
+                    <div class="flex items-end justify-between self-stretch">
+                        <div class="flex flex-col items-center gap-1 self-stretch">
                             <div class="py-1 flex items-center gap-3 self-stretch">
                                 <IconUserDollar size="20" stroke-width="1.25" />
                                 <div class="w-full text-gray-950 text-sm font-medium">
-                                    {{ master.total_investors }} {{ $t('public.investors') }}
+                                    {{ master.total_investors }} {{ $t('public.real_investors') }}
                                 </div>
                             </div>
                             <div class="py-1 flex items-center gap-3 self-stretch">
                                 <IconPremiumRights size="20" stroke-width="1.25" />
                                 <div class="w-full text-gray-950 text-sm font-medium">
-                                    {{ $t('public.total_fund_size_caption') }}
+                                    {{ $t('public.real_fund_of') }}
                                     <span class="text-primary-500">$ {{ formatAmount(master.total_fund) }}</span>
                                 </div>
                             </div>
                             <div class="py-1 flex items-center gap-3 self-stretch">
                                 <IconScanEye size="20" stroke-width="1.25" />
-                                <div class="w-full text-gray-950 text-sm font-medium">
-                                    {{ master.visible_to }}
+                                <div class="w-full text-gray-950 text-sm font-medium max-w-[128px] xxs:max-w-[180px] xs:max-w-[220px] sm:max-w-full md:max-w-[180px] xl:max-w-md 3xl:max-w-[180px] truncate">
+                                    {{ master.visible_to === 'public' ? $t(`public.${master.visible_to}`) : master.group_names }}
                                 </div>
                             </div>
                         </div>
                         <div class="flex items-center gap-2">
-
-                            <span class="w-8 text-gray-950 font-medium">128</span>
+                            <div
+                                class="select-none cursor-pointer p-1 transition ease-in-out duration-300 hover:scale-125"
+                                @click="handleLikesCount(master.id)"
+                            >
+                                <IconHeartFilled v-if="likeCounts[master.id] > 0 || master.total_likes_count > 0" size="20" color="#FF2D58" />
+                                <IconHeart v-else size="20" color="#667085" stroke-width="1.25" />
+                            </div>
+                            <span class="max-w-8 text-gray-950 font-medium">{{ likeCounts[master.id] > 0 ? master.total_likes_count + likeCounts[master.id] : master.total_likes_count }}</span>
                         </div>
                     </div>
                 </div>
@@ -379,14 +429,14 @@ watchEffect(() => {
             <NoAssetMaster :title="$t('public.empty_asset_master_title')" :message="$t('public.empty_asset_master_message')" />
         </div>
     </div>
-    
+
     <OverlayPanel ref="op">
         <div class="w-60 flex flex-col items-center">
             <div class="flex flex-col gap-8 w-60 py-5 px-4">
                 <!-- Filter Visible To -->
                 <div class="flex flex-col items-center gap-2 self-stretch">
                     <span class="self-stretch text-gray-950 text-xs font-bold">{{ $t('public.filter_visible_to') }}</span>
-                    <MultiSelect 
+                    <MultiSelect
                         v-model="selectedGroups"
                         :showToggleAll="false"
                         :options="groupsOptions"
@@ -403,12 +453,12 @@ watchEffect(() => {
                         </template>
                         <template #option="slotProps">
                             <span v-for="slotProp in slotProps" class="px-2 py-1 rounded text-gray-950">
-                            {{ slotProp.name }} 
+                            {{ slotProp.name }}
                             </span>
                         </template>
                         <template #header>
                             <div class="flex items-center p-1 border-b rounded-tl-md rounded-tr-md  text-surface-700 bg-surface-0 border-gray-200">
-                                <div 
+                                <div
                                     class="w-full flex items-center py-2 px-3 gap-2 rounded-l-md rounded-r-md  cursor-pointer"
                                     :class="{
                                         'hover:bg-surface-200': !checked,

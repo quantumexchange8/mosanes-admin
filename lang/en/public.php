@@ -254,7 +254,8 @@ return [
     "total_gain" => "Total Gain",
     "monthly_gain" => "Monthly Gain",
     "investors" => "investors",
-    "total_fund_size_caption" => "Total fund size of",
+    "real_investors" => "real investors",
+    "real_fund_of" => "Real fund of",
     "join_pamm" => "Join PAMM",
     "months" => "months",
     "zero" => "zero",
@@ -376,4 +377,6 @@ return [
     "invalid_type" => "Invalid Type",
     "toast_balance_adjustment_success" => "Trading account balance has been adjusted.",
     "toast_credit_adjustment_success" => "Trading account credit has been adjusted.",
+    "join_date" => "Join Date",
+    "days" => "day(s)",
 ];

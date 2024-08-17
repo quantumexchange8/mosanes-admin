@@ -67,39 +67,30 @@ watchEffect(() => {
                 </div>
 
                 <div class="w-full flex flex-col items-center gap-3 self-stretch md:flex-row md:gap-5">
-                    <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch bg-green md:gap-3 md:flex-1">
-                        <div class="self-stretch text-white text-lg font-semibold md:text-xl">
+                    <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch md:gap-3 md:flex-1 border-b-4 border-green bg-gradient-to-t from-[#06d00114] to-[#ffffff14]">
+                        <div class="self-stretch text-gray-950 text-lg font-semibold md:text-xl">
                             <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalDeposit" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                         </div>
-                        <div class="flex items-center gap-2 self-stretch">
-                            <IconWallet size="20" stroke-width="1.25" color="white" class="md:size-4 xl:size-5" />
-                            <div class="text-white text-sm md:text-xs xl:text-sm">
-                                {{ $t('public.total_deposit') }} ($)
-                            </div>
+                        <div class="text-left w-full text-gray-500 text-sm md:text-xs xl:text-sm">
+                            {{ $t('public.total_deposit') }} ($)
                         </div>
                     </div>
 
-                    <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch bg-pink md:gap-3 md:flex-1">
-                        <div class="self-stretch text-white text-lg font-semibold md:text-xl">
+                    <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch md:gap-3 md:flex-1 border-b-4 border-pink bg-gradient-to-t from-[#ff2d5814] to-[#ffffff14]">
+                        <div class="self-stretch text-gray-950 text-lg font-semibold md:text-xl">
                             <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalWithdrawal" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                         </div>
-                        <div class="flex items-center gap-2 self-stretch">
-                            <IconCreditCardPay size="20" stroke-width="1.25" color="white" class="md:size-4 xl:size-5" />
-                            <div class="text-white text-sm md:text-xs xl:text-sm">
-                                {{ $t('public.total_withdrawal') }} ($)
-                            </div>
+                        <div class="text-left w-full text-gray-500 text-sm md:text-xs xl:text-sm">
+                            {{ $t('public.total_withdrawal') }} ($)
                         </div>
                     </div>
 
-                    <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch bg-gray-500 md:gap-3 md:flex-1">
-                        <div class="self-stretch text-white text-lg font-semibold md:text-xl">
+                    <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch md:gap-3 md:flex-1 border-b-4 border-gray-500 bg-gradient-to-t from-[#F2F4F7] to-[#ffffff14]">
+                        <div class="self-stretch text-gray-950 text-lg font-semibold md:text-xl">
                             <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalFeeCharges" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                         </div>
-                        <div class="flex items-center gap-2 self-stretch">
-                            <IconReceiptTax size="20" stroke-width="1.25" color="white" class="md:size-4 xl:size-5" />
-                            <div class="text-white text-sm md:text-xs xl:text-sm">
-                                {{ $t('public.total_fee_charges') }} ($)
-                            </div>
+                        <div class="text-left w-full text-gray-500 text-sm md:text-xs xl:text-sm">
+                            {{ $t('public.total_fee_charges') }} ($)
                         </div>
                     </div>
                 </div>

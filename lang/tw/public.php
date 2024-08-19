@@ -377,4 +377,6 @@ return [
     "invalid_type" => "無效的類型",
     "toast_balance_adjustment_success" => "賬戶餘額已被調整.",
     "toast_credit_adjustment_success" => "賬戶信用已被調整.",
+    "join_date" => "日期",
+    "days" => "天",
 ];

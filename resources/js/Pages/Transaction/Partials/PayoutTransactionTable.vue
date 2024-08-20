@@ -39,6 +39,7 @@ const getResults = async (type, selectedMonths = [], selectedDate = []) => {
 
     try {
         let response;
+        const [startDate, endDate] = selectedDate;
 
         // Fetch data for payout type from a different endpoint or table
         let url = `/transaction/getTransactionListingData?type=${type}`;
@@ -49,16 +50,16 @@ const getResults = async (type, selectedMonths = [], selectedDate = []) => {
         }
 
         // Add selectedDate parameter if type is 'payout'
-        if (selectedDate) {
-            const [startDate, endDate] = selectedDate;
+        // Append date range to the URL if it's not null
+        if (startDate && endDate) {
             url += `&startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
         }
 
         response = await axios.get(url);
         transactions.value = response.data.transactions;
         totalTransaction.value = transactions.value?.length;
-        totalTransactionAmount.value = transactions.value.filter(item => ['success', 'approved'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
-        maxAmount.value = transactions.value?.length ? Math.max(...transactions.value.map(item => parseFloat(item.transaction_amount || 0))) : 0;
+        totalTransactionAmount.value = transactions.value.reduce((acc, item) => acc + parseFloat(item.rebate || 0), 0);
+        maxAmount.value = transactions.value?.length ? Math.max(...transactions.value.map(item => parseFloat(item.rebate) || 0)) : 0;
 
     } catch (error) {
         console.error('Error fetching transactions:', error);
@@ -92,63 +93,42 @@ const clearDate = () => {
     selectedDate.value = [];
 };
 
-watch( () => props.selectedMonths, (newValue) => {
-    // Compute minDate
+watch(() => props.selectedMonths, (newValue) => {
     let computedMinDate = new Date(today.getFullYear(), today.getMonth(), 1); // Default to start of current month
 
     if (newValue.length > 0) {
-        // Convert selectedMonths to start-of-month dates
         const startDates = newValue.map(dateStr => getStartOfMonth(dateStr));
-
-        // Find the earliest date
         const earliestDate = new Date(Math.min(...startDates.map(date => date.getTime())));
-
         computedMinDate = earliestDate;
     }
 
     minDate.value = computedMinDate;
     maxDate.value = today;
-
-    // Update selectedDate
     selectedDate.value = [minDate.value, maxDate.value];
 
-    // Clear date selection if no months are selected
     if (newValue.length === 0) {
         clearDate();
     } else {
-        // Call function to get results
         getResults(props.selectedType, newValue, [minDate.value, maxDate.value]);
     }
-  },
-  { immediate: true } // Run immediately on initial value
-);
+}, { immediate: true });
 
-// Watch for changes in selectedDate
+
 watch(selectedDate, (newDateRange) => {
-    // Implement logic to handle changes in the selected date range
     if (Array.isArray(newDateRange)) {
         const [startDate, endDate] = newDateRange;
 
-        // Check if both dates are valid
         if (startDate && endDate) {
-            // Both dates are valid, call function with the full range
             getResults(props.selectedType, props.selectedMonths, [startDate, endDate]);
         } else if (startDate || endDate) {
-            // Only one date is provided
-            // Use the same date for both start and end if one is null
             getResults(props.selectedType, props.selectedMonths, [startDate || endDate, endDate || startDate]);
-        } else if (!(startDate && endDate)) {
-            getResults(props.selectedType, props.selectedMonths);
+        } else {
+            getResults(props.selectedType, props.selectedMonths, []);
         }
     } else {
-        // Handle unexpected formats or types
         console.warn('Invalid date range format:', newDateRange);
     }
 });
-
-onMounted(() => {
-    getResults(props.selectedType, props.selectedMonths, selectedDate.value);
-})
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -162,13 +142,13 @@ const recalculateTotals = () => {
         );
     });
     totalTransaction.value = filtered.length;
-    totalTransactionAmount.value = filtered.filter(item => ['success', 'approved'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
-    maxAmount.value = filtered?.length ? Math.max(...filtered.map(item => parseFloat(item.transaction_amount || 0))) : 0;
+    totalTransactionAmount.value = filtered.reduce((acc, item) => acc + parseFloat(item.rebate || 0), 0);
+    maxAmount.value = filtered.value?.length ? Math.max(...filtered.value.map(item => parseFloat(item.rebate) || 0)) : 0;
 };
 
 watch(filters, () => {
     recalculateTotals();
-}, { deep: true });
+});
 
 const clearFilterGlobal = () => {
     filters.value['global'].value = null;
@@ -214,6 +194,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         :globalFilterFields="['name']"
         ref="dt"
+        selectionMode="single"
         @row-click="(event) => openDialog(event.data)"
         :loading="loading"
         >
@@ -274,13 +255,13 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
             </div>
         </template>
         <Column
-            field="created_at"
+            field="execute_at"
             sortable
             :header="$t('public.date')"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
-                {{ formatDate(slotProps.data.created_at)}}
+                {{ formatDate(slotProps.data.execute_at)}}
             </template>
         </Column>
         <Column
@@ -303,6 +284,15 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                         </div>
                     </div>
                 </div>
+            </template>
+        </Column>
+        <Column
+            field="account_type"
+            :header="`${$t('public.account')}`"
+            class="hidden md:table-cell"
+        >
+            <template #body="slotProps">
+                {{ $t('public.' + slotProps.data.account_type) }}
             </template>
         </Column>
         <Column
@@ -337,7 +327,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                                 {{ slotProps.data.name }}
                             </div>
                             <div class="text-gray-500 text-xs">
-                                {{ formatDateTime(slotProps.data.created_at) }}
+                                {{ formatDateTime(slotProps.data.execute_at) }}
                             </div>
                         </div>
                     </div>
@@ -367,11 +357,15 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         </div>
 
         <div class="flex justify-center items-center py-4 gap-3 self-stretch border-b border-gray-200 md:flex-col md:border-none">
-            <div class="min-w-[100px] flex flex-col items-start gap-1 flex-grow md:flex-row md:items-center md:self-stretch">
+            <div class="w-full flex flex-col items-start gap-1 flex-grow md:flex-row md:items-center md:self-stretch">
                 <span class="self-stretch text-gray-500 text-xs font-medium md:w-[140px]">{{ $t('public.payout_date') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium md:flex-grow">{{ formatDate(data.created_at) }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium md:flex-grow">{{ formatDate(data.execute_at) }}</span>
             </div>
-            <div class="min-w-[100px] flex flex-col items-start gap-1 flex-grow md:flex-row md:items-center md:self-stretch">
+            <div class="w-full flex flex-col items-start gap-1 flex-grow md:flex-row md:items-center md:self-stretch">
+                <span class="self-stretch text-gray-500 text-xs font-medium md:w-[140px]">{{ $t('public.account') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium md:flex-grow">{{ $t('public.' + data.account_type) }}</span>
+            </div>
+            <div class="w-full flex flex-col items-start gap-1 flex-grow md:flex-row md:items-center md:self-stretch">
                 <span class="self-stretch text-gray-500 text-xs font-medium md:w-[140px]">{{ $t('public.total_trade_volume') }}</span>
                 <span class="self-stretch text-gray-950 text-sm font-medium md:flex-grow">{{ data.volume }}&nbsp;Ł</span>
             </div>
@@ -383,14 +377,12 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
             <div class="md:hidden flex flex-col items-center self-stretch" v-for="(product, index) in data.details" :key="index" :class="{'border-b border-gray-200': index !== data.details.length - 1}">
                 <div class="flex justify-between items-center py-2 self-stretch">
                     <div class="flex flex-col items-start flex-grow">
-                    <span class="self-stretch overflow-hidden text-gray-950 text-ellipsis text-xs font-semibold" style="text-transform: capitalize;" >{{ product.symbol_group }}</span>
-                    <div class="flex items-center gap-2 self-stretch">
-                        <span class="text-gray-500 text-xs">{{ product.volume }}&nbsp;Ł</span>
-                        <span class="text-gray-500 text-xs">•</span>
-                        <span class="text-gray-500 text-xs">$&nbsp;{{ formatAmount(product.rebate) }}</span>
+                        <span class="self-stretch overflow-hidden text-gray-950 text-ellipsis text-xs font-semibold" style="text-transform: capitalize;" >{{ $t('public.' + product.name) }}</span>
+                        <div class="flex items-center gap-2 self-stretch">
+                            <span class="text-gray-500 text-xs">{{ `${product.volume}&nbsp;Ł&nbsp;|&nbsp;$&nbsp;${formatAmount(product.net_rebate)}` }}</span>
+                        </div>
                     </div>
-                    </div>
-                    <span class="w-[100px] overflow-hidden text-gray-950 text-right text-ellipsis font-semibold">$&nbsp;{{ formatAmount(product.rebate * product.volume) }}</span>
+                    <span class="w-[100px] overflow-hidden text-gray-950 text-right text-ellipsis font-semibold">$&nbsp;{{ formatAmount(product.rebate) }}</span>
                 </div>
             </div>
             <!-- above md -->
@@ -411,16 +403,16 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
 
             <div v-for="(product, index) in data.details" :key="index" class="w-full hidden md:grid grid-cols-4 gap-2 py-3 items-center hover:bg-gray-50" :class="{'border-b border-gray-200': index !== data.details.length - 1}">
                 <div class="flex items-center px-2">
-                    <span class="text-gray-950 text-sm" style="text-transform: capitalize;" >{{ product.symbol_group }}</span>
+                    <span class="text-gray-950 text-sm" style="text-transform: capitalize;" >{{ $t('public.' + product.name) }}</span>
                 </div>
                 <div class="flex items-center px-2">
                     <span class="text-gray-950 text-sm">{{ product.volume }}</span>
                 </div>
                 <div class="flex items-center px-2">
-                    <span class="text-gray-950 text-sm">{{ product.rebate }}</span>
+                    <span class="text-gray-950 text-sm">{{ formatAmount(product.net_rebate) }}</span>
                 </div>
                 <div class="flex items-center px-2">
-                    <span class="text-gray-950 text-sm">{{ formatAmount(product.rebate * product.volume) }}</span>
+                    <span class="text-gray-950 text-sm">{{ formatAmount(product.rebate) }}</span>
                 </div>
             </div>
         </div>

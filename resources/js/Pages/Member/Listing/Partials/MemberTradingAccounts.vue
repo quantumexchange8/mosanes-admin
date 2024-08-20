@@ -99,7 +99,8 @@ const handleChipClick = (label) => {
 };
 
 const confirm = useConfirm();
-const requireConfirmation = () => {
+const requireConfirmation = (tradingAccount) => {
+    form.id = tradingAccount.id;
     confirm.require({
         group: 'headless-error',
         header: trans('public.delete_trading_account_header'),
@@ -178,7 +179,7 @@ watchEffect(() => {
                             Credit Adjustment
                         </DropdownLink>
                         <div class="h-1 self-stretch bg-gray-200"></div>
-                        <DropdownLink class="inline-flex items-center gap-3 cursor-pointer" @click.prevent="requireConfirmation()">
+                        <DropdownLink class="inline-flex items-center gap-3 cursor-pointer" @click.prevent="requireConfirmation(tradingAccount)">
                             <DeleteIcon class="w-5 h-5 text-error-500" />
                             Delete Account
                         </DropdownLink>

@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\SymbolGroup;
 use Inertia\Inertia;
+use App\Models\SymbolGroup;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
+use App\Models\RebateAllocation;
 use App\Models\TradeRebateSummary;
 use App\Services\DropdownOptionService;
 
@@ -48,98 +49,104 @@ class TransactionController extends Controller
         }
     
         if ($type === 'payout') {
-            $query = TradeRebateSummary::with('user');
+        // Retrieve query parameters
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
 
-            // Apply monthly filters
-            $query->where(function ($query) use ($selectedMonthsArray) {
-                foreach ($selectedMonthsArray as $range) {
-                    [$month, $year] = explode('/', $range);
-                    $startDate = "$year-$month-01";
-                    $endDate = date("Y-m-t", strtotime($startDate)); // Last day of the month
-                    $query->orWhereBetween('created_at', [$startDate, $endDate]);
+        // Fetch all symbol groups from the database
+        $allSymbolGroups = SymbolGroup::pluck('display', 'id')->toArray();
+
+        // Initialize query for TradeRebateSummary
+        $query = TradeRebateSummary::with('upline_user', 'account_type');
+
+        // Apply monthly filters
+        $query->where(function ($query) use ($selectedMonthsArray) {
+            foreach ($selectedMonthsArray as $range) {
+                [$month, $year] = explode('/', $range);
+                $startDate = "$year-$month-01";
+                $endDate = date("Y-m-t", strtotime($startDate)); // Last day of the month
+                $query->orWhereBetween('created_at', [$startDate, $endDate]);
+            }
+        });
+
+        // Apply date filter based on availability of startDate and/or endDate
+        if ($startDate && $endDate) {
+            // Both startDate and endDate are provided
+            $query->whereDate('execute_at', '>=', $startDate)
+                ->whereDate('execute_at', '<=', $endDate);
+        } else {
+            // Apply default start date if no endDate is provided
+            $query->whereDate('execute_at', '>=', '2024-01-01');
+        }
+
+        // Fetch and map summarized data from TradeRebateSummary
+        $data = $query->get()->map(function ($item) {
+            return [
+                'user_id' => $item->upline_user_id,
+                'name' => $item->upline_user->name,
+                'email' => $item->upline_user->email,
+                'account_type' => $item->account_type->slug ?? null,
+                'execute_at' => Carbon::parse($item->execute_at)->toDateString(),
+                'symbol_group' => $item->symbol_group,
+                'volume' => $item->volume,
+                'net_rebate' => $item->net_rebate,
+                'rebate' => $item->rebate,
+            ];
+        });
+
+        // Generate summary and details
+        $summary = $data->groupBy(function ($item) {
+            return $item['execute_at'] . '-' . $item['user_id'];
+        })->map(function ($group) use ($allSymbolGroups) {
+            $group = collect($group);
+
+            // Generate detailed data for this summary item
+            $symbolGroupDetails = $group->groupBy('symbol_group')->map(function ($symbolGroupItems) use ($allSymbolGroups) {
+                $symbolGroupId = $symbolGroupItems->first()['symbol_group'];
+                
+                return [
+                    'id' => $symbolGroupId,
+                    'name' => $allSymbolGroups[$symbolGroupId] ?? 'Unknown',
+                    'volume' => $symbolGroupItems->sum('volume'),
+                    'net_rebate' => $symbolGroupItems->first()['net_rebate'] ?? 0,
+                    'rebate' => $symbolGroupItems->sum('rebate'),
+                ];
+            })->values();
+
+            // Add missing symbol groups with volume, net_rebate, and rebate as 0
+            foreach ($allSymbolGroups as $symbolGroupId => $symbolGroupName) {
+                if (!$symbolGroupDetails->pluck('id')->contains($symbolGroupId)) {
+                    $symbolGroupDetails->push([
+                        'id' => $symbolGroupId,
+                        'name' => $symbolGroupName,
+                        'volume' => 0,
+                        'net_rebate' => 0,
+                        'rebate' => 0,
+                    ]);
                 }
-            });
-            
-            // Get startDate and endDate only if type is 'payout'
-            $startDate = $request->query('startDate');
-            $endDate = $request->query('endDate');
-            
-            // Apply date filter based on availability of startDate and/or endDate
-            if ($startDate && $endDate) {
-                // Both startDate and endDate are provided
-                $query->whereDate('created_at', '>=', $startDate)
-                    ->whereDate('created_at', '<=', $endDate);
-            } elseif ($startDate) {
-                // Only startDate is provided
-                $query->whereDate('created_at', '>=', $startDate);
-            } elseif ($endDate) {
-                // Only endDate is provided
-                $query->whereDate('created_at', '<=', $endDate);
-            }
-            
-            // Fetch all symbol groups from the database
-            $allSymbolGroups = SymbolGroup::pluck('display', 'id')->toArray();
-
-            // Initialize the final data collection
-            $finalData = collect();
-
-            // Fetch summarized data
-            $summarizedData = TradeRebateSummary::with('user')
-                ->selectRaw('user_id, DATE(created_at) as date, SUM(volume) as volume, SUM(rebate) as rebate')
-                ->groupBy('user_id', 'date')
-                ->latest('date')
-                ->get();
-
-            // Loop through each summarized record to get details and flatten data
-            foreach ($summarizedData as $summary) {
-                // Retrieve detailed records for each user_id, date
-                $details = TradeRebateSummary::where('user_id', $summary->user_id)
-                    ->whereDate('created_at', $summary->date)
-                    ->selectRaw('symbol_group, SUM(volume) as volume, SUM(rebate) as rebate')
-                    ->groupBy('symbol_group')
-                    ->get()
-                    ->keyBy('symbol_group')
-                    ->map(function ($item) {
-                        return [
-                            'id' => $item->symbol_group,
-                            'volume' => $item->volume,
-                            'rebate' => $item->rebate,
-                        ];
-                    });
-
-                // Ensure all symbol groups are included in the details and sort them by the order of $allSymbolGroups
-                $details = collect($allSymbolGroups)->mapWithKeys(function ($name, $id) use ($details) {
-                    return [
-                        $id => $details->get($id, [
-                            'id' => $id,
-                            'volume' => 0,
-                            'rebate' => 0,
-                        ])
-                    ];
-                })->map(function ($item) use ($allSymbolGroups) {
-                    return [
-                        'id' => $item['id'],
-                        'symbol_group' => $allSymbolGroups[$item['id']],
-                        'volume' => $item['volume'],
-                        'rebate' => $item['rebate'],
-                    ];
-                });
-
-                // Add data with details to finalData
-                $finalData->push([
-                    'user_id' => $summary->user_id,
-                    'name' => $summary->user->name,
-                    'email' => $summary->user->email,
-                    'volume' => $summary->volume,
-                    'rebate' => $summary->rebate,
-                    'created_at' => $summary->date,
-                    'details' => $details->sortKeys()->values(),
-                ]);
             }
 
-            // Assign the finalData to $data
-            $data = $finalData;
+            // Sort the symbol group details array to match the order of symbol groups
+            $symbolGroupDetails = $symbolGroupDetails->sortBy('id')->values();
+
+            // Return summary item with details included
+            return [
+                'user_id' => $group->first()['user_id'],
+                'name' => $group->first()['name'],
+                'email' => $group->first()['email'],
+                'account_type' => $group->first()['account_type'],
+                'execute_at' => $group->first()['execute_at'],
+                'volume' => $group->sum('volume'),
+                'rebate' => $group->sum('rebate'),
+                'details' => $symbolGroupDetails,
+            ];
+        })->values();
+
+        // Sort summary by execute_at in descending order to get the latest dates first
+        $summary = $summary->sortByDesc('execute_at');
     
+        $data = $summary;
+
         } else {
             $query = Transaction::with('user', 'from_wallet', 'to_wallet');
     

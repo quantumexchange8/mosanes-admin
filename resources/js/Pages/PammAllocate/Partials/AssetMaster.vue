@@ -21,7 +21,8 @@ import Badge from '@/Components/Badge.vue';
 import Dropdown from "primevue/dropdown";
 import Action from "@/Pages/PammAllocate/Partials/Action.vue";
 import OverlayPanel from 'primevue/overlaypanel';
-import NoAssetMaster from '@/Components/NoAssetMaster.vue';
+import { NoAssetMasterIcon } from '@/Components/Icons/solid';
+import Empty from '@/Components/Empty.vue';
 import MultiSelect from 'primevue/multiselect';
 import RadioButton from 'primevue/radiobutton';
 import Paginator from 'primevue/paginator';
@@ -426,7 +427,11 @@ const saveLikesDebounced = debounce((masterId) => {
             />
         </div>
         <div v-else>
-            <NoAssetMaster :title="$t('public.empty_asset_master_title')" :message="$t('public.empty_asset_master_message')" />
+            <Empty :title="$t('public.empty_asset_master_title')" :message="$t('public.empty_asset_master_message')">
+                <template #image>
+                    <NoAssetMasterIcon class="w-60 h-[180px]" />
+                </template>
+            </Empty>
         </div>
     </div>
 

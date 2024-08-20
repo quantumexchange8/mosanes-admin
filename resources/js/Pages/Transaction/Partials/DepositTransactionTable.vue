@@ -194,6 +194,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
         :globalFilterFields="['name']"
         ref="dt"
+        selectionMode="single"
         @row-click="(event) => openDialog(event.data)"
         :loading="loading"
     >

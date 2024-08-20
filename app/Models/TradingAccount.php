@@ -4,8 +4,9 @@ namespace App\Models;
 
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class TradingAccount extends Model
 {
@@ -33,4 +34,16 @@ class TradingAccount extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+
+    public function transactions(): HasMany
+    {
+        return $this->hasMany(Transaction::class, 'user_id', 'id');
+    }
+
+    public function tradingUsers(): HasMany
+    {
+        return $this->hasMany(TradingUser::class, 'user_id', 'id');
+    }
+
+
 }

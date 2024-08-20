@@ -1,21 +1,21 @@
 <script setup>
 import Button from '@/Components/Button.vue';
 import Dialog from 'primevue/dialog';
-import { ref, watch, watchEffect, onMounted } from "vue";
+import { ref, watch } from "vue";
 import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputText from 'primevue/inputtext';
-import { useForm, usePage } from '@inertiajs/vue3';
+import { useForm } from '@inertiajs/vue3';
 import Dropdown from "primevue/dropdown";
 import { IconPlus, IconX, IconRefresh } from '@tabler/icons-vue';
 import Calendar from 'primevue/calendar';
 import MultiSelect from 'primevue/multiselect';
-import IconField from 'primevue/iconfield';
 import FileUpload from 'primevue/fileupload';
 import RadioButton from 'primevue/radiobutton';
 import InputNumber from 'primevue/inputnumber';
 import Checkbox from 'primevue/checkbox';
 import ProfitDisplaySetting from "@/Pages/PammAllocate/Partials/ProfitDisplaySetting.vue";
+import CustomProfitSetting from "@/Pages/PammAllocate/Partials/CustomProfitSetting.vue";
 
 const props = defineProps({
     groupsOptions: Array,
@@ -453,7 +453,13 @@ const handleRegenerate = () => {
                         <span class="text-gray-950 text-sm font-bold">{{ $t('public.profit_display_setting') }}</span>
                         <span class="text-gray-500 text-xs">{{ $t('public.profit_display_setting_message') }}</span>
                     </div>
-                    <div class="flex flex-col items-center gap-3 self-stretch md:gap-2">
+                    <div
+                        class="flex flex-col items-center gap-3 self-stretch"
+                        :class="{
+                            'md:gap-2': selectedMode === 'automatic',
+                            'md:gap-5': selectedMode === 'custom',
+                        }"
+                    >
                         <div class="flex flex-col md:flex-row gap-5 self-stretch items-start">
                             <div class="flex flex-col items-start gap-1 self-stretch w-full">
                                 <InputLabel for="generate_mode" :value="$t('public.generate_mode')" />
@@ -473,12 +479,12 @@ const handleRegenerate = () => {
                                         <div class="flex items-center justify-center w-10 h-10 rounded-full grow-0 shrink-0 hover:bg-gray-100">
                                             <RadioButton
                                                 v-model="selectedMode"
-                                                inputId="manual"
-                                                value="manual"
+                                                inputId="custom"
+                                                value="custom"
                                                 class="w-5 h-5"
                                             />
                                         </div>
-                                        <label for="manual">{{ $t('public.custom') }}</label>
+                                        <label for="custom">{{ $t('public.custom') }}</label>
                                     </div>
                                 </div>
                             </div>
@@ -513,6 +519,15 @@ const handleRegenerate = () => {
 
                         <!-- Allocate Table -->
                         <ProfitDisplaySetting
+                            v-if="selectedMode === 'automatic'"
+                            :expectedGain="expectedGain"
+                            :proceedRegenerate="proceedRegenerate"
+                            @update:proceedRegenerate="proceedRegenerate = $event"
+                            @get:daily_profits="dailyProfits = $event"
+                        />
+
+                        <CustomProfitSetting
+                            v-if="selectedMode === 'custom'"
                             :expectedGain="expectedGain"
                             :proceedRegenerate="proceedRegenerate"
                             @update:proceedRegenerate="proceedRegenerate = $event"

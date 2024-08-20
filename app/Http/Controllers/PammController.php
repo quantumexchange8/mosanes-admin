@@ -526,6 +526,7 @@ class PammController extends Controller
         }
 
         $joiningPammAccounts = $query
+            ->latest()
             ->get()
             ->map(function ($item) {
 

@@ -379,4 +379,5 @@ return [
     "toast_credit_adjustment_success" => "Trading account credit has been adjusted.",
     "join_date" => "Join Date",
     "days" => "day(s)",
+    "add_another" => "Add Another",
 ];

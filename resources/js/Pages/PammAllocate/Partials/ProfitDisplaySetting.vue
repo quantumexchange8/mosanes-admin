@@ -1,8 +1,5 @@
 <script setup>
-import DataTable from 'primevue/datatable';
-import Column from 'primevue/column';
-import {ref, onMounted, computed, watch} from 'vue';
-import InputNumber from "primevue/inputnumber";
+import {ref, onMounted, watch} from 'vue';
 import dayjs from "dayjs";
 
 const props = defineProps({
@@ -121,7 +118,7 @@ watch(() => props.expectedGain, (newValue) => {
                 {{ $t('public.date') }}
             </div>
             <div class="flex items-center px-2 w-full text-gray-950 text-xs font-semibold uppercase">
-                {{ $t('public.daily_profit') }}
+                {{ $t('public.daily_profit') }} (%)
             </div>
         </div>
 

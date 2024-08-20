@@ -1,6 +1,6 @@
 <?php
 return [
-    "login_header" => "Log in to your account",
+    "login_header" => "Log in to Admin Portal",
     "login_header_caption" => "Welcome back! Please enter your details.",
     "email" => "Email",
     "enter_your_email" => "Enter your email",
@@ -380,4 +380,5 @@ return [
     "join_date" => "Join Date",
     "days" => "day(s)",
     "add_another" => "Add Another",
+    "access_portal" => "Access Portal",
 ];

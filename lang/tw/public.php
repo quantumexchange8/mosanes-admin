@@ -379,4 +379,5 @@ return [
     "toast_credit_adjustment_success" => "賬戶信用已被調整.",
     "join_date" => "日期",
     "days" => "天",
+    "access_portal" => "會員後台通道",
 ];

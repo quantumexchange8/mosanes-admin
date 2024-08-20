@@ -3,7 +3,8 @@ import {
     IconDotsVertical,
     IconId,
     IconUserUp,
-    IconTrash
+    IconTrash,
+    IconDeviceLaptop
 } from "@tabler/icons-vue";
 import Button from "@/Components/Button.vue";
 import {computed, h, ref, watch} from "vue";
@@ -29,6 +30,13 @@ const items = ref([
         icon: h(IconId),
         command: () => {
             window.location.href = `/member/detail/${props.member.id_number}`;
+        },
+    },
+    {
+        label: 'access_portal',
+        icon: h(IconDeviceLaptop),
+        command: () => {
+            window.open(route('member.access_portal', props.member.id), '_blank');
         },
     },
     {

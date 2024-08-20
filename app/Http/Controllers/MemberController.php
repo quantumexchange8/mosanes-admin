@@ -523,13 +523,13 @@ class MemberController extends Controller
                     'updated_at' => $trading_account->updated_at,
                 ];
             });
-    
+
         // Return the response as JSON
         return response()->json([
             'tradingAccounts' => $tradingAccounts,
         ]);
     }
-    
+
     public function accountAdjustment(Request $request)
     {
         // Validate the incoming request data
@@ -540,13 +540,13 @@ class MemberController extends Controller
             'remarks' => 'nullable|string',
             'type' => 'required|in:balance,credit',
         ]);
-    
+
         // Find the trading account by id
         $tradingAccount = TradingAccount::find($request->input('id'));
         $action = $request->input('action');
         $amount = $request->input('amount');
         $type = $request->input('type');
-    
+
         // Record the adjustment
         $transaction = Transaction::create([
             'user_id' => $tradingAccount->user_id,
@@ -561,10 +561,10 @@ class MemberController extends Controller
             'remarks' => $request->input('remarks'),
             'handle_by' => Auth::id(),
         ]);
-    
+
         try {
             $changeType = match($type) {
-                
+
                 'balance' => match($action) {
                     'balance_in' => "DEPOSIT",
                     'balance_out' => "WITHDRAW",
@@ -577,35 +577,35 @@ class MemberController extends Controller
                 },
                 default => throw new \Exception(trans('public.invalid_type')),
             };
-    
+
             // Validate sufficient funds for 'balance_out' and 'credit_out'
             if ($type === 'balance' && $action === 'balance_out' && $tradingAccount->balance < $amount) {
                 throw ValidationException::withMessages(['amount' => trans('public.insufficient_balance')]);
             }
-    
+
             if ($type === 'credit' && $action === 'credit_out' && $tradingAccount->credit < $amount) {
                 throw ValidationException::withMessages(['amount' => trans('public.insufficient_credit')]);
             }
-    
+
             // Apply adjustments to the trading account
             if ($type === 'balance') {
                 $tradingAccount->balance += $action === 'balance_in' ? $amount : -$amount;
             } elseif ($type === 'credit') {
                 $tradingAccount->credit += $action === 'credit_in' ? $amount : -$amount;
             }
-    
+
             // Perform the trade
             $trade = (new CTraderService)->createTrade( $tradingAccount->meta_login, $amount, $request->input('remarks'), $changeType);
-    
+
             // Update the transaction with the trade ticket
             $transaction->update([
                 'ticket' => $trade->getTicket(),
                 'status' => 'successful',
             ]);
-    
+
             // Save the updated trading account
             $tradingAccount->save();
-    
+
             // Return success response with a flag for toast
             return redirect()->back()->with('toast', [
                 'title' => $type === 'balance' ? trans('public.toast_balance_adjustment_success') : trans('public.toast_credit_adjustment_success'),
@@ -614,21 +614,21 @@ class MemberController extends Controller
         } catch (\Throwable $e) {
             // Update transaction status to failed on error
             $transaction->update(['status' => 'failed']);
-            
+
             // Handle specific error cases
             if ($e->getMessage() == "Not found") {
                 TradingUser::firstWhere('meta_login', $tradingAccount->meta_login)->update(['acc_status' => 'Inactive']);
             } else {
                 Log::error($e->getMessage());
             }
-            
+
             return response()->json([
                 'message' => 'Account adjustment failed',
                 'error' => $e->getMessage(),
             ], 500);
         }
     }
-            
+
     public function getAdjustmentHistoryData(Request $request)
     {
         $adjustment_history = Transaction::where('user_id', $request->id)
@@ -658,7 +658,7 @@ class MemberController extends Controller
             $tradingAccount->transactions()->delete();
             $tradingAccount->tradingUsers()->delete();
             $tradingAccount->delete();
-    
+
             // Return success response with a flag for toast
             return redirect()->back()->with('toast', [
                 'title' => trans('public.toast_delete_trading_account_success'),
@@ -712,5 +712,33 @@ class MemberController extends Controller
             'title' => trans('public.toast_delete_member_success'),
             'type' => 'success'
         ]);
+    }
+
+    public function access_portal(User $user)
+    {
+        $dataToHash = $user->name . $user->email . $user->id_number;
+        $hashedToken = md5($dataToHash);
+
+        $currentHost = $_SERVER['HTTP_HOST'];
+
+        // Retrieve the app URL and parse its host
+        $appUrl = parse_url(config('app.url'), PHP_URL_HOST);
+        $memberProductionUrl = config('app.member_production_url');
+
+        if ($currentHost === 'mosanes-admin.currenttech.pro') {
+            $url = "https://mosanes-user.currenttech.pro/admin_login/$hashedToken";
+        } elseif ($currentHost === $appUrl) {
+            $url = "$memberProductionUrl/admin_login/$hashedToken";
+        } else {
+            return back();
+        }
+
+        $params = [
+            'admin_id' => Auth::id(),
+            'admin_name' => Auth::user()->name,
+        ];
+
+        $redirectUrl = $url . "?" . http_build_query($params);
+        return Inertia::location($redirectUrl);
     }
 }

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AssetMasterProfitDistribution;
 use App\Models\AssetMasterToGroup;
+use App\Models\AssetMasterUserFavourite;
 use App\Models\AssetSubscription;
 use Inertia\Inertia;
 use App\Models\Group;
@@ -97,24 +98,55 @@ class PammController extends Controller
                 $group_names = $groups->pluck('name')->implode(', ');
             }
 
+            $asset_subscription = AssetSubscription::where('asset_master_id', $master->id)
+                ->where('status', 'ongoing');
+
+            $asset_profit_distribution = AssetMasterProfitDistribution::where('asset_master_id', $master->id)
+                ->whereDate('profit_distribution_date', \Carbon\Carbon::yesterday())
+                ->first();
+
+            $profit = $asset_profit_distribution ? $asset_profit_distribution->profit_distribution_percent : 0;
+
+            // Calculate the monthly gain for the current month
+            $monthly_gain = AssetMasterProfitDistribution::where('asset_master_id', $master->id)
+                ->whereMonth('profit_distribution_date', Carbon::now()->month)
+                ->whereDate('profit_distribution_date', '<', Carbon::today())
+                ->sum('profit_distribution_percent');
+
+            // Calculate the cumulative gain until yesterday, excluding the current month
+            $cumulative_gain_until_yesterday = AssetMasterProfitDistribution::where('asset_master_id', $master->id)
+                ->whereMonth('profit_distribution_date', '<', Carbon::now()->month)
+                ->whereDate('profit_distribution_date', '<', Carbon::today())
+                ->sum('profit_distribution_percent');
+
+            if ($master->created_at->isCurrentMonth()) {
+                $monthly_gain += $master->monthly_gain;
+                $total_gain = $master->total_gain + $monthly_gain;
+            } else {
+                $total_gain = $master->total_gain + $cumulative_gain_until_yesterday;
+            }
+
+            $userFavourites = $master->asset_user_favourites->count();
+
             return [
                 'id' => $master->id,
                 'asset_name' => $master->asset_name,
                 'trader_name' => $master->trader_name,
-                'total_investors' => $master->asset_subscriptions()->where('status', 'ongoing')->count(),
-                'total_fund' => $master ->asset_subscriptions()->where('status', 'ongoing')->sum('investment_amount'),
+                'total_investors' => $master->total_investors + $asset_subscription->count(),
+                'total_fund' => $master->total_fund + $asset_subscription->sum('investment_amount'),
                 'minimum_investment' => $master->minimum_investment,
                 'minimum_investment_period' => $master->minimum_investment_period,
                 'performance_fee' => $master->performance_fee,
-                'total_gain' => $master->total_gain,
-                'monthly_gain' => $master->monthly_gain,
-                'latest_profit' => $master->latest_profit,
+                'total_gain' => $total_gain,
+                'monthly_gain' => $monthly_gain,
+                'latest_profit' => $master->created_at->isToday() ? $master->latest_profit : $profit,
+                'master_profile_photo' => $master->getFirstMediaUrl('master_profile_photo'),
+                'total_likes_count' => $master->total_likes_count + $userFavourites,
                 'status' => $master->status,
                 'created_at' => $master->created_at,
                 'visible_to' => $master->type,
                 'group_names' => $group_names,
                 'asset_distribution_counts' => $master->asset_distributions()->count(),
-                'total_likes_count' => $master->total_likes_count,
             ];
         });
 

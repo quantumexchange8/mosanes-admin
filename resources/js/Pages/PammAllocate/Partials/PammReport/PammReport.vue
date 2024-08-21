@@ -11,28 +11,21 @@ import RadioButton from 'primevue/radiobutton';
 import { wTrans } from "laravel-vue-i18n";
 import PammReportJoining from "@/Pages/PammAllocate/Partials/PammReport/PammReportJoining.vue";
 import PammReportRevoke from "@/Pages/PammAllocate/Partials/PammReport/PammReportRevoke.vue";
-import { IconCloudDownload } from '@tabler/icons-vue';
 
 const props = defineProps({
     master: Object
 })
 
-const emit = defineEmits(['update:visible'])
-
-const closeDialog = () => {
-    emit('update:visible', false);
-}
-
 const tabs = ref([
-    {   
-        title: wTrans('public.joining'),
-        component: h(PammReportJoining), 
-        type: 'joining' 
+    {
+        component: h(PammReportJoining),
+        type: 'joining',
+        rowCount: 0
     },
-    {   
-        title: wTrans('public.revoke'),
-        component: h(PammReportRevoke), 
-        type: 'revoke' 
+    {
+        component: h(PammReportRevoke),
+        type: 'revoke',
+        rowCount: 0
     },
 ]);
 
@@ -47,6 +40,10 @@ watch(selectedType, (newType) => {
     }
 });
 
+const updateRowCount = (newRowCount) => {
+    tabs.value[activeIndex.value].rowCount = newRowCount;
+};
+
 function updateType(event) {
     const selectedTab = tabs.value[event.index];
     selectedType.value = selectedTab.type;
@@ -57,10 +54,22 @@ function updateType(event) {
 <template>
     <div class="flex flex-col items-center gap-4 flex-grow self-stretch">
         <div class="flex flex-col gap-4 items-center self-stretch lg:flex-row">
-            <TabView class="flex items-center self-stretch" :activeIndex="activeIndex" @tab-change="updateType">
-                <TabPanel v-for="(tab, index) in tabs" :key="index" :header="tab.title" />
+            <TabView
+                class="flex items-center self-stretch"
+                :activeIndex="activeIndex"
+                @tab-change="updateType"
+            >
+                <TabPanel
+                    v-for="(tab, index) in tabs"
+                    :key="index"
+                    :header="$t(`public.${tab.type}`) + ` (${tab.rowCount})`"
+                />
             </TabView>
         </div>
-        <component :is="tabs[activeIndex]?.component" :master="props.master" />
+        <component
+            :is="tabs[activeIndex]?.component"
+            :master="props.master"
+            @update:rowCount="updateRowCount($event)"
+        />
     </div>
 </template>

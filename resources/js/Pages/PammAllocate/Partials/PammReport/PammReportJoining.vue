@@ -25,6 +25,7 @@ const loading = ref(false);
 const joiningPammAccounts = ref([]);
 const totalInvestmentAmount = ref();
 const {formatDateTime, formatAmount} = transactionFormat();
+const emit = defineEmits(['update:rowCount']);
 
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
@@ -56,7 +57,7 @@ const getJoiningPammAccountsData = async (filterDate = null) => {
         const response = await axios.get(url);
         joiningPammAccounts.value = response.data.joiningPammAccounts;
         totalInvestmentAmount.value = response.data.totalInvestmentAmount;
-
+        emit('update:rowCount', joiningPammAccounts.value.length);
     } catch (error) {
         console.error('Error changing locale:', error);
     } finally {

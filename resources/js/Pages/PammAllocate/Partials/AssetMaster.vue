@@ -348,7 +348,7 @@ const saveLikesDebounced = debounce((masterId) => {
                     <div class="py-2 flex justify-center items-center gap-2 self-stretch border-y border-solid border-gray-200">
                         <div class="w-full flex flex-col items-center">
                             <div class="self-stretch text-gray-950 text-center font-semibold">
-                                {{ master.total_gain }}%
+                                {{ formatAmount(master.total_gain) }}%
                             </div>
                             <div class="self-stretch text-gray-500 text-center text-xs">
                                 {{ $t('public.total_gain') }}
@@ -356,7 +356,7 @@ const saveLikesDebounced = debounce((masterId) => {
                         </div>
                         <div class="w-full flex flex-col items-center">
                             <div class="self-stretch text-gray-950 text-center font-semibold">
-                                {{ master.monthly_gain }}%
+                                {{ formatAmount(master.monthly_gain) }}%
                             </div>
                             <div class="self-stretch text-gray-500 text-center text-xs">
                                 {{ $t('public.monthly_gain') }}
@@ -368,7 +368,7 @@ const saveLikesDebounced = debounce((masterId) => {
                                     v-if="master.latest_profit !== 0"
                                     :class="(master.latest_profit < 0) ? 'text-error-500' : 'text-success-500'"
                                 >
-                                    {{ master.latest_profit }}%
+                                    {{ formatAmount(master.latest_profit) }}%
                                 </div>
                                 <div
                                     v-else

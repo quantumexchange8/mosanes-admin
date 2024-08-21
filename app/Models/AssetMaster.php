@@ -5,10 +5,12 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Spatie\MediaLibrary\HasMedia;
+use Spatie\MediaLibrary\InteractsWithMedia;
 
-class AssetMaster extends Model
+class AssetMaster extends Model implements HasMedia
 {
-    use SoftDeletes;
+    use SoftDeletes, InteractsWithMedia;
 
     protected $fillable = [
         'asset_name',
@@ -56,5 +58,10 @@ class AssetMaster extends Model
     public function asset_subscriptions(): HasMany
     {
         return $this->hasMany(AssetSubscription::class, 'asset_master_id', 'id');
+    }
+
+    public function asset_user_favourites(): HasMany
+    {
+        return $this->hasMany(AssetMasterUserFavourite::class, 'asset_master_id', 'id');
     }
 }

@@ -4,10 +4,13 @@ import dayjs from "dayjs";
 
 const props = defineProps({
     expectedGain: String,
-    proceedRegenerate: Boolean
+    proceedRegenerate: Boolean,
+    last_distribution_date: String,
 })
 
-const currentDate = dayjs();
+let currentDate = props.last_distribution_date
+    ? dayjs(props.last_distribution_date)
+    : dayjs();
 
 // Initialize the remainingDays as an empty array
 const remainingDays = ref([]);
@@ -16,9 +19,10 @@ const emit = defineEmits(['update:proceedRegenerate', 'get:daily_profits']);
 // Calculate the remaining days in the current month excluding Saturday, Sunday, 25th Dec, and 1st Jan
 const calculateRemainingDays = () => {
     remainingDays.value = [];
-    const daysInMonth = currentDate.daysInMonth(); // Get the total days in the current month
-    const currentDay = currentDate.date(); // Get the current day
+    let daysInMonth = currentDate.daysInMonth(); // Get the total days in the current month
+    let currentDay = currentDate.date(); // Get the current day
 
+    // Calculate remaining days in the current month
     for (let i = currentDay + 1; i <= daysInMonth; i++) {
         const day = currentDate.date(i);
         const dayOfWeek = day.day(); // 0 is Sunday, 6 is Saturday
@@ -35,6 +39,33 @@ const calculateRemainingDays = () => {
                 date: formattedDate,
                 daily_profit: 0
             });
+        }
+    }
+
+    // If the remainingDays array is empty, move to the next month
+    if (remainingDays.value.length === 0) {
+        // Move to the next month
+        currentDate = currentDate.add(1, 'month').startOf('month');
+        daysInMonth = currentDate.daysInMonth(); // Get total days in the next month
+
+        // Calculate remaining days in the next month
+        for (let i = 1; i <= daysInMonth; i++) {
+            const day = currentDate.date(i);
+            const dayOfWeek = day.day(); // 0 is Sunday, 6 is Saturday
+            const formattedDate = day.format('D/M');
+
+            // Exclude Saturdays, Sundays, 25th Dec, and 1st Jan
+            if (
+                dayOfWeek !== 0 && // Not Sunday
+                dayOfWeek !== 6 && // Not Saturday
+                formattedDate !== '25/12' && // Not 25th December
+                formattedDate !== '1/1' // Not 1st January
+            ) {
+                remainingDays.value.push({
+                    date: formattedDate,
+                    daily_profit: 0
+                });
+            }
         }
     }
 };
@@ -89,6 +120,15 @@ const distributeExpectedGain = (gain) => {
         remainingDays.value[i].daily_profit = parseFloat((remainingDays.value[i].daily_profit + remainderPerDay).toFixed(2));
     }
 
+    // Adjust for rounding errors to ensure total sum is exact
+    let calculatedSum = remainingDays.value.reduce((acc, day) => acc + day.daily_profit, 0);
+    calculatedSum = parseFloat(calculatedSum.toFixed(2));
+
+    if (calculatedSum !== gain) {
+        const difference = gain - calculatedSum;
+        remainingDays.value[0].daily_profit = parseFloat((remainingDays.value[0].daily_profit + difference).toFixed(2));
+    }
+
     emit('get:daily_profits', remainingDays.value);
 };
 
@@ -108,7 +148,6 @@ onMounted(() => {
 watch(() => props.expectedGain, (newValue) => {
     distributeExpectedGain(newValue);
 });
-
 </script>
 
 <template>

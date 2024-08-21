@@ -381,4 +381,7 @@ return [
     "days" => "day(s)",
     "add_another" => "Add Another",
     "access_portal" => "Access Portal",
+    "toast_create_asset_master_success" => "You've successfully created a new asset master!",
+    "toast_create_asset_master_error" => "There was an error creating the asset master.",
+    "toast_allocate_daily_profit_success" => "You’ve successfully allocated daily profit for the asset master!",
 ];

@@ -56,14 +56,14 @@ const items = ref([
             dialogType.value = 'pamm_report';
         },
     },
-    {
-        label: 'pamm_access',
-        icon: h(IconUserShield),
-        command: () => {
-            visible.value = true;
-            dialogType.value = 'pamm_access';
-        },
-    },
+    // {
+    //     label: 'pamm_access',
+    //     icon: h(IconUserShield),
+    //     command: () => {
+    //         visible.value = true;
+    //         dialogType.value = 'pamm_access';
+    //     },
+    // },
     {
         label: 'edit',
         icon: h(IconPencilMinus),

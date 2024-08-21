@@ -9,6 +9,8 @@ import RadioButton from 'primevue/radiobutton';
 import { IconRefresh } from '@tabler/icons-vue';
 import { transactionFormat } from '@/Composables/index.js';
 import InputNumber from "primevue/inputnumber";
+import ProfitDisplaySetting from "@/Pages/PammAllocate/Partials/ProfitDisplaySetting.vue";
+import CustomProfitSetting from "@/Pages/PammAllocate/Partials/CustomProfitSetting.vue";
 
 const { formatDate, formatDateTime, formatAmount } = transactionFormat();
 
@@ -22,104 +24,120 @@ const emit = defineEmits(['update:visible'])
 const form = useForm({
     id: props.master.id,
     expected_gain: '',
-    amount: 0,
+    daily_profits: '',
 });
 
 const closeDialog = () => {
     emit('update:visible', false);
 }
 
-watch(selectedMode, (newValue, oldValue) => {
-    form.expected_gain = '';
+watch(selectedMode, () => {
+    expectedGain.value = null
 });
 
-// Get today's date
-const today = ref(formatDate(new Date()));
+const expectedGain = ref();
+const dailyProfits = ref();
+const proceedRegenerate = ref(false);
 
-// Create a ref to hold the end-of-month date
-const endOfMonth = ref('');
-
-// Function to calculate the end of the month date
-const calculateEndOfMonth = () => {
-    const date = new Date();
-    date.setMonth(date.getMonth() + 1);
-    date.setDate(0);
-    endOfMonth.value = formatDate(date);
+const handleRegenerate = () => {
+    proceedRegenerate.value = true;
 }
 
-// Calculate and assign the end-of-month date
-calculateEndOfMonth();
-
 const submit = () => {
-    form.post(route('pamm_allocate.validateStep'))
+    form.daily_profits = dailyProfits.value;
+    form.profit_generation_mode = selectedMode.value;
+    form.post(route('pamm_allocate.addProfitDistribution'), {
+        onSuccess: () => {
+            closeDialog();
+        }
+    })
 }
 </script>
 
 <template>
     <div class="flex flex-col items-center gap-3 self-stretch md:pb-5 md:gap-5">
-        <div class="flex flex-col items-center gap-3 self-stretch md:gap-2">
-            <div class="w-full grid grid-cols-1 gap-3 md:grid-cols-2">
-                <div class="flex flex-col items-start gap-1 self-stretch">
+        <div
+            class="flex flex-col items-center gap-3 self-stretch"
+            :class="{
+                'md:gap-2': selectedMode === 'automatic',
+                'md:gap-5': selectedMode === 'custom',
+            }"
+        >
+            <div class="flex flex-col md:flex-row gap-5 self-stretch items-start">
+                <div class="flex flex-col items-start gap-1 self-stretch w-full">
                     <InputLabel for="generate_mode" :value="$t('public.generate_mode')" />
-                    <div class="w-full grid grid-cols-2 gap-5">
-                        <div class="flex items-center gap-2 text-sm text-gray-950">
-                            <RadioButton v-model="selectedMode" inputId="automatic" value="automatic" class="w-5 h-5" />
-                            <label for="automatic">{{ $t('public.automatic') }}</label>
+                    <div class="w-full flex gap-5 items-center self-stretch py-0.5">
+                        <div class="flex items-center gap-2 text-sm text-gray-950 w-full">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full grow-0 shrink-0 hover:bg-gray-100">
+                                <RadioButton
+                                    v-model="selectedMode"
+                                    inputId="auto"
+                                    value="automatic"
+                                    class="w-5 h-5"
+                                />
+                            </div>
+                            <label for="auto">{{ $t('public.automatic') }}</label>
                         </div>
-                        <div class="flex items-center gap-2 text-sm text-gray-950">
-                            <RadioButton v-model="selectedMode" inputId="custom" value="custom" class="w-5 h-5" />
+                        <div class="flex items-center gap-2 text-sm text-gray-950 w-full">
+                            <div class="flex items-center justify-center w-10 h-10 rounded-full grow-0 shrink-0 hover:bg-gray-100">
+                                <RadioButton
+                                    v-model="selectedMode"
+                                    inputId="custom"
+                                    value="custom"
+                                    class="w-5 h-5"
+                                />
+                            </div>
                             <label for="custom">{{ $t('public.custom') }}</label>
                         </div>
                     </div>
                 </div>
-                <div class="min-w-[200px] flex flex-col items-start gap-1 self-stretch md:min-w-60 md:flex-grow">
+
+                <div class="flex flex-col items-start gap-1 self-stretch md:min-w-60 md:flex-grow w-full">
                     <InputLabel for="expected_gain" :value="$t('public.expected_gain')" />
                     <InputText
                         id="expected_gain"
                         type="number"
                         class="block w-full"
-                        v-model="form.expected_gain"
+                        v-model="expectedGain"
                         :invalid="!!form.errors.expected_gain"
                         placeholder="0.00%"
-                        :disabled="selectedMode == 'custom'"
+                        :disabled="selectedMode === 'custom'"
                     />
                     <InputError :message="form.errors.expected_gain" />
                 </div>
             </div>
-            <div v-if="selectedMode == 'automatic'" class="w-full flex justify-center items-end md:justify-end">
-                <Button type="button" variant="primary-text" size="sm" :disabled="!form.expected_gain || form.processing">
+
+            <div v-if="selectedMode === 'automatic'" class="w-full flex justify-center items-end md:justify-end">
+                <Button
+                    type="button"
+                    variant="primary-text"
+                    size="sm"
+                    :disabled="!expectedGain || form.processing"
+                    @click="handleRegenerate"
+                >
                     <IconRefresh size="20" stroke-width="1.25" />
                     {{ $t('public.generate_again') }}
                 </Button>
             </div>
-            <div class="flex flex-col items-center gap-3 self-stretch md:min-w-[500px]">
-                <div class="flex justify-between items-center py-2 self-stretch border-b border-gray-200 bg-gray-100">
-                    <div class="flex items-center px-2 w-full">
-                        <span class="w-full text-gray-950 text-xs font-semibold uppercase">{{ $t('public.date') }}</span>
-                    </div>
-                    <div class="flex items-center px-2 w-full">
-                        <span class="w-full text-gray-950 text-xs font-semibold uppercase">{{ $t('public.daily_profit') + ' (%)' }}</span>
-                    </div>
-                </div>
-                <div class="flex flex-col items-center self-stretch">
-                    <div class="flex py-1 items-center self-stretch">
-                        <div class="flex px-2 items-center w-full">
-                            <span class="w-full text-gray-950 text-sm">test</span>
-                        </div>
-                        <div class="flex flex-col px-2 items-start w-full">
-                            <InputNumber
-                                v-model="form.amount"
-                                :min="0"
-                                :minFractionDigits="2"
-                                fluid
-                                :invalid="!!form.errors.amount"
-                                inputClass="py-1.5 px-3 w-full border-none shadow-none"
-                            />
-                            <InputError :message="form.errors.amount" />
-                        </div>
-                    </div>
-                </div>
-            </div>
+
+            <!-- Allocate Table -->
+            <ProfitDisplaySetting
+                v-if="selectedMode === 'automatic'"
+                :expectedGain="expectedGain"
+                :proceedRegenerate="proceedRegenerate"
+                :last_distribution_date="master.last_distribution_date"
+                @update:proceedRegenerate="proceedRegenerate = $event"
+                @get:daily_profits="dailyProfits = $event"
+            />
+
+            <CustomProfitSetting
+                v-if="selectedMode === 'custom'"
+                :expectedGain="expectedGain"
+                :proceedRegenerate="proceedRegenerate"
+                :last_distribution_date="master.last_distribution_date"
+                @update:proceedRegenerate="proceedRegenerate = $event"
+                @get:daily_profits="dailyProfits = $event"
+            />
         </div>
     </div>
     <div class="flex justify-end items-center pt-5 self-stretch md:pt-7">

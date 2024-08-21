@@ -380,4 +380,7 @@ return [
     "join_date" => "日期",
     "days" => "天",
     "access_portal" => "會員後台通道",
+    "toast_create_asset_master_success" => "您已成功創建了一個新的資產大師!",
+    "toast_create_asset_master_error" => "建立資產大師時發生錯誤。",
+    "toast_allocate_daily_profit_success" => "您已成功為資產大師分配每日利潤值!",
 ];

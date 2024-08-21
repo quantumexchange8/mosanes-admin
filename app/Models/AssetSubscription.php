@@ -43,4 +43,9 @@ class AssetSubscription extends Model
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }
+
+    public function trading_account(): BelongsTo
+    {
+        return $this->belongsTo(TradingAccount::class, 'meta_login', 'meta_login');
+    }
 }

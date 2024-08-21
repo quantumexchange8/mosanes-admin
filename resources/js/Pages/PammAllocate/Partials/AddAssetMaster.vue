@@ -69,8 +69,8 @@ const clearDate = () => {
     selectedDate.value = '';
 };
 
-watch(selectedMode, (newValue, oldValue) => {
-    form.expected_gain = '';
+watch(selectedMode, () => {
+    expectedGain.value = null;
 });
 
 
@@ -120,34 +120,34 @@ const PUBLIC_OPTION = { value: 'public', name: 'Public', color: 'ffffff' };
 
 // Check if 'Public' is selected
 function isPublicChecked() {
-  return selectedGroups.value.some(item => item.value === PUBLIC_OPTION.value);
+    return selectedGroups.value.some(item => item.value === PUBLIC_OPTION.value);
 }
 
 // Handle checkbox change and div click
 function togglePublicSelection() {
-  const isCurrentlyChecked = isPublicChecked();
+    const isCurrentlyChecked = isPublicChecked();
 
-  if (isCurrentlyChecked) {
-    // Remove 'Public' from selection if it's currently selected
-    selectedGroups.value = selectedGroups.value.filter(item => item.value !== PUBLIC_OPTION.value);
-  } else {
-    // Add 'Public' to selection and remove all other selections
-    selectedGroups.value = [PUBLIC_OPTION];
-  }
+    if (isCurrentlyChecked) {
+        // Remove 'Public' from selection if it's currently selected
+        selectedGroups.value = selectedGroups.value.filter(item => item.value !== PUBLIC_OPTION.value);
+    } else {
+        // Add 'Public' to selection and remove all other selections
+        selectedGroups.value = [PUBLIC_OPTION];
+    }
 
-  // Update `checked` state based on the new state
-  checked.value = !isCurrentlyChecked;
+    // Update `checked` state based on the new state
+    checked.value = !isCurrentlyChecked;
 }
 
 // Watch for changes in `selectedGroups`
 watch(selectedGroups, (newValue) => {
-  // If another option is selected, remove 'Public'
-  if (newValue.length > 1 && isPublicChecked()) {
-    selectedGroups.value = newValue.filter(item => item.value !== PUBLIC_OPTION.value);
-  }
+    // If another option is selected, remove 'Public'
+    if (newValue.length > 1 && isPublicChecked()) {
+        selectedGroups.value = newValue.filter(item => item.value !== PUBLIC_OPTION.value);
+    }
 
-  // Update `checked` state based on 'Public' selection
-  checked.value = isPublicChecked();
+    // Update `checked` state based on 'Public' selection
+    checked.value = isPublicChecked();
 }, { deep: true });
 
 const proceedRegenerate = ref(false);

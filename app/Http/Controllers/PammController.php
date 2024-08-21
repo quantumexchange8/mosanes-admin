@@ -6,6 +6,7 @@ use App\Models\AssetMasterProfitDistribution;
 use App\Models\AssetMasterToGroup;
 use App\Models\AssetMasterUserFavourite;
 use App\Models\AssetSubscription;
+use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Models\Group;
 use App\Models\AssetMaster;
@@ -147,6 +148,7 @@ class PammController extends Controller
                 'visible_to' => $master->type,
                 'group_names' => $group_names,
                 'asset_distribution_counts' => $master->asset_distributions()->count(),
+                'last_distribution_date' => $master->asset_distributions()->latest('profit_distribution_date')->first()->profit_distribution_date,
             ];
         });
 
@@ -310,34 +312,10 @@ class PammController extends Controller
     {
         // Define validation rules and attributes
         $rules = [
-//            'pamm_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
-//            'trader_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
-//            'created_date' => ['required', 'date'],
-//            'groups' => ['required'],
-//            'total_investors' => ['required', 'integer'],
-//            'total_fund' => ['required', 'numeric'],
-//            'min_investment' => ['required', 'numeric'],
-//            'min_investment_period' => ['required', 'integer'],
-//            'performance_fee' => ['required', 'numeric'],
-//            'total_gain' => ['required', 'numeric'],
-//            'monthly_gain' => ['required', 'numeric'],
-//            'latest' => ['required', 'numeric'],
             'expected_gain' => ['nullable', 'numeric'],
         ];
 
         $attributes = [
-//            'pamm_name' => trans('public.pamm_name'),
-//            'trader_name' => trans('public.trader_name'),
-//            'created_date' => trans('public.created_date'),
-//            'groups' => trans('public.group'),
-//            'total_investors' => trans('public.total_investors'),
-//            'total_fund' => trans('public.total_fund'),
-//            'min_investment' => trans('public.min_investment'),
-//            'min_investment_period' => trans('public.min_investment_period'),
-//            'performance_fee' => trans('public.performance_fee'),
-//            'total_gain' => trans('public.total_gain'),
-//            'monthly_gain' => trans('public.monthly_gain'),
-//            'latest' => trans('public.latest'),
             'expected_gain'=> trans('public.expected_gain'),
         ];
 
@@ -410,7 +388,7 @@ class PammController extends Controller
 
             // Redirect with success message
             return redirect()->back()->with('toast', [
-                "title" => "You've successfully created a new asset master!",
+                "title" => trans('public.toast_create_asset_master_success'),
                 "type" => "success"
             ]);
         } catch (\Exception $e) {
@@ -418,7 +396,7 @@ class PammController extends Controller
             Log::error('Error creating asset master: '.$e->getMessage());
 
             return redirect()->back()->with('toast', [
-                'title' => 'There was an error creating the asset master.',
+                'title' => trans('public.toast_create_asset_master_error'),
                 'type' => 'error'
             ]);
         }
@@ -575,7 +553,7 @@ class PammController extends Controller
                     'user_email' => $item->user->email,
                     'join_date' => $item->created_at,
                     'meta_login' => $item->meta_login,
-                    'balance' => $item->investment_amount + $item->top_up_amount,
+                    'balance' => $item->trading_account->balance,
                     'status' => $item->status,
                     'remaining_days' => $displayStatus,
                     'investment_periods' => $item->investment_periods
@@ -585,6 +563,89 @@ class PammController extends Controller
         return response()->json([
             'joiningPammAccounts' => $joiningPammAccounts,
             'totalInvestmentAmount' => $joiningPammAccounts->sum('balance'),
+        ]);
+    }
+
+    public function addProfitDistribution(Request $request)
+    {
+        $asset_master = AssetMaster::find($request->id);
+
+        $daily_profits = $request->daily_profits;
+        if ($daily_profits) {
+            foreach ($daily_profits as $daily_profit) {
+                $date = \DateTime::createFromFormat('d/m', $daily_profit['date']);
+
+                if ($date) {
+                    $date->setDate(date('Y'), $date->format('m'), $date->format('d'));
+
+                    AssetMasterProfitDistribution::create([
+                        'asset_master_id' => $asset_master->id,
+                        'profit_distribution_date' => $date->format('Y-m-d'),
+                        'profit_distribution_percent' => $daily_profit['daily_profit'],
+                    ]);
+                }
+            }
+        }
+
+        return redirect()->back()->with('toast', [
+            "title" => trans('public.toast_allocate_daily_profit_success'),
+            "type" => "success"
+        ]);
+    }
+
+    public function getMasterMonthlyProfit(Request $request)
+    {
+        $dateParts = explode('/', $request->input('month'));
+        $month = $dateParts[0];
+        $year = $dateParts[1];
+
+        // Apply month and year filtering if provided
+        $filteredQuery = AssetMasterProfitDistribution::where('asset_master_id', $request->master_id)
+            ->when($request->filled('month'), function ($query) use ($month, $year) {
+                $query->whereYear('profit_distribution_date', $year)
+                    ->whereMonth('profit_distribution_date', $month);
+            });
+
+        // Generate chart results using the filtered query
+        $chartResults = $filteredQuery->select(
+            DB::raw('DAY(profit_distribution_date) as day'),
+            DB::raw('SUM(profit_distribution_percent) as pamm_return')
+        )
+            ->groupBy('day')
+            ->get();
+
+        $monthlyGain = $chartResults->sum('pamm_return');
+
+        // Initialize the chart data structure
+        $chartData = [
+            'labels' => array_map(function($day) use ($month, $year) {
+                return sprintf('%02d/%02d', $day, $month);
+            }, range(1, cal_days_in_month(CAL_GREGORIAN, $month, $year))), // Generate an array of labels in 'day/month' format
+            'datasets' => [],
+        ];
+
+        $dataset = [
+            'label' => trans('public.profit'),
+            'data' => array_map(function ($label) use ($chartResults) {
+                // Extract the day part from the label (formatted as 'day/month')
+                $day = (int) explode('/', $label)[0];
+                return $chartResults->firstWhere('day', $day)->pamm_return ?? 0;
+            }, $chartData['labels']),
+            'backgroundColor' => array_map(function ($label) use ($chartResults) {
+                // Extract the day part from the label (formatted as 'day/month')
+                $day = (int) explode('/', $label)[0];
+                $pammReturn = $chartResults->firstWhere('day', $day)->pamm_return ?? 0;
+                return $pammReturn > 0 ? '#06D001' : '#FF2D58';
+            }, $chartData['labels']),
+            'pointStyle' => false,
+            'fill' => true,
+        ];
+
+        $chartData['datasets'][] = $dataset;
+
+        return response()->json([
+            'chartData' => $chartData,
+            'monthlyGain' => number_format($monthlyGain,2 )
         ]);
     }
 }

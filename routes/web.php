@@ -112,6 +112,7 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::get('/getOptions', [PammController::class, 'getOptions'])->name('pamm_allocate.getOptions');
         Route::get('/getProfitLoss', [PammController::class, 'getProfitLoss'])->name('pamm_allocate.getProfitLoss');
         Route::get('/getJoiningPammAccountsData', [PammController::class, 'getJoiningPammAccountsData'])->name('pamm_allocate.getJoiningPammAccountsData');
+        Route::get('/getMasterMonthlyProfit', [PammController::class, 'getMasterMonthlyProfit'])->name('pamm_allocate.getMasterMonthlyProfit');
 
         Route::post('/upload_image', [PammController::class, 'upload_image'])->name('pamm_allocate.upload_image');
         Route::post('/validateStep', [PammController::class, 'validateStep'])->name('pamm_allocate.validateStep');
@@ -120,6 +121,7 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::post('/update_asset_master_status', [PammController::class, 'update_asset_master_status'])->name('pamm_allocate.update_asset_master_status');
         Route::post('/disband', [PammController::class, 'disband'])->name('pamm_allocate.disband');
         Route::post('/updateLikeCounts', [PammController::class, 'updateLikeCounts'])->name('pamm_allocate.updateLikeCounts');
+        Route::post('/addProfitDistribution', [PammController::class, 'addProfitDistribution'])->name('pamm_allocate.addProfitDistribution');
     });
 
     /**

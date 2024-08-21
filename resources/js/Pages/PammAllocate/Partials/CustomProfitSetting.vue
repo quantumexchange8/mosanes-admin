@@ -7,13 +7,16 @@ import {IconPlus, IconCircleX} from "@tabler/icons-vue"
 
 const props = defineProps({
     expectedGain: String,
-    proceedRegenerate: Boolean
+    proceedRegenerate: Boolean,
+    last_distribution_date: String,
 })
 
 // Initialize the remainingDays as an empty array
 const remainingDays = ref([]);
 const emit = defineEmits(['update:proceedRegenerate', 'get:daily_profits']);
-const lastAddedDate = ref(dayjs()); // Initialize with the current date
+const lastAddedDate = ref(
+    props.last_distribution_date ? dayjs(props.last_distribution_date) : dayjs()
+);
 
 const addDividend = () => {
     let nextDay = lastAddedDate.value.add(1, 'day'); // Start from the next day of the last added date

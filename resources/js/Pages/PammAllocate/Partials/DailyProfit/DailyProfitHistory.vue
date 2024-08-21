@@ -3,38 +3,26 @@ import { ref, h, watch, computed, onMounted } from "vue";
 import Button from '@/Components/Button.vue';
 import { useForm, usePage } from '@inertiajs/vue3';
 import Dropdown from "primevue/dropdown";
+import dayjs from "dayjs";
+import DailyProfitChart from "@/Pages/PammAllocate/Partials/DailyProfit/DailyProfitChart.vue";
 
 const props = defineProps({
     master: Object
 })
 
-const form = useForm({
-    id: props.master.id,
-    history_period: '',
-});
+const selectedMonth = ref('');
+const historyPeriodOptions = ref([]);
+const currentYear = dayjs().year();
+const generatedMonthlyGain = ref(0)
 
-// Function to get the current month and year as a string
-const getCurrentMonthYear = () => {
-  const date = new Date();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  const year = date.getFullYear();
-  return `${month}/${year}`;
-};
+// Populate historyPeriodOptions with all months of the current year
+for (let month = 1; month <= 12; month++) {
+    historyPeriodOptions.value.push({
+        value: dayjs().month(month - 1).year(currentYear).format('MM/YYYY')
+    });
+}
 
-// Reactive variables
-const selectedMonths = ref(getCurrentMonthYear());
-
-const historyPerioddOptions = ref([
-    {value: '06/2024'},
-    {value: '07/2024'},
-    {value: '08/2024'},
-])
-
-// watch(() => selectedMonths.value, (newMonth) => {
-//     selectedMonths.value = newMonth;
-//     console.log(selectedMonths);
-// });
-
+selectedMonth.value = dayjs().format('MM/YYYY');
 </script>
 
 <template>
@@ -43,34 +31,37 @@ const historyPerioddOptions = ref([
         <div class="flex flex-col items-start self-stretch md:hidden">
             <span class="h-10 flex flex-col justify-center self-stretch text-gray-950 text-sm font-bold">{{ $t('public.generated_monthly_gain') }}</span>
             <div class="flex items-center gap-5 self-stretch">
-                <span class="flex-grow text-gray-950 text-xl font-semibold">{{  }}</span>
-                <Dropdown 
-                    v-model="form.history_period" 
-                    :options="historyPerioddOptions" 
-                    optionLabel="name" 
+                <span class="flex-grow text-gray-950 text-xl font-semibold">{{ generatedMonthlyGain }}%</span>
+                <Dropdown
+                    v-model="selectedMonth"
+                    :options="historyPeriodOptions"
+                    optionLabel="value"
                     optionValue="value"
-                    class="border-none shadow-none"
+                    class="border-none shadow-none font-medium text-gray-950"
                     scroll-height="236px"
-                    :invalid="form.errors.history_period"
                 />
             </div>
         </div>
         <div class="hidden md:flex flex-col items-start self-stretch">
             <div class="flex justify-between items-center self-stretch">
                 <span class="text-gray-950 text-sm font-bold">{{ $t('public.generated_monthly_gain') }}</span>
-                <Dropdown 
-                    v-model="selectedMonths" 
-                    :options="historyPerioddOptions" 
-                    optionLabel="value" 
+                <Dropdown
+                    v-model="selectedMonth"
+                    :options="historyPeriodOptions"
+                    optionLabel="value"
                     optionValue="value"
-                    class="border-none shadow-none"
+                    class="border-none shadow-none font-medium text-gray-950"
                     scroll-height="236px"
-                    :invalid="form.errors.history_period"
                 />
             </div>
-            <span class="flex-grow text-gray-950 text-xl font-semibold">{{  }}</span>
+            <span class="flex-grow text-gray-950 text-xxl font-semibold">{{ generatedMonthlyGain }}%</span>
         </div>
-        <!-- Graph -->
-        <div class="flex-grow self-stretch"></div>
+
+        <!-- chart -->
+        <DailyProfitChart
+            :selectedMonth="selectedMonth"
+            :masterDetail="master"
+            @update:monthly-gain="generatedMonthlyGain = $event"
+        />
     </div>
 </template>

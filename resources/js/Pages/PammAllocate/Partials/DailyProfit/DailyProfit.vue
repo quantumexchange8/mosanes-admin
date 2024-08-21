@@ -1,13 +1,7 @@
 <script setup>
-import { ref, h, watch, computed, onMounted } from "vue";
-import Button from '@/Components/Button.vue';
+import { ref, h, watch } from "vue";
 import TabView from 'primevue/tabview';
 import TabPanel from 'primevue/tabpanel';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
-import InputText from 'primevue/inputtext';
-import { useForm, usePage } from '@inertiajs/vue3';
-import RadioButton from 'primevue/radiobutton';
 import { wTrans } from "laravel-vue-i18n";
 import DailyProfitAllocation from "@/Pages/PammAllocate/Partials/DailyProfit/DailyProfitAllocation.vue";
 import DailyProfitHistory from "@/Pages/PammAllocate/Partials/DailyProfit/DailyProfitHistory.vue";
@@ -23,15 +17,15 @@ const closeDialog = () => {
 }
 
 const tabs = ref([
-    {   
+    {
         title: wTrans('public.allocation'),
-        component: h(DailyProfitAllocation), 
-        type: 'allocation' 
+        component: h(DailyProfitAllocation),
+        type: 'allocation'
     },
-    {   
+    {
         title: wTrans('public.history'),
-        component: h(DailyProfitHistory), 
-        type: 'history' 
+        component: h(DailyProfitHistory),
+        type: 'history'
     },
 ]);
 
@@ -58,7 +52,10 @@ function updateType(event) {
         <TabView class="flex items-center self-stretch" :activeIndex="activeIndex" @tab-change="updateType">
             <TabPanel v-for="(tab, index) in tabs" :key="index" :header="tab.title" />
         </TabView>
-        <component :is="tabs[activeIndex]?.component" :master="props.master" />
-
+        <component
+            :is="tabs[activeIndex]?.component"
+            :master="props.master"
+            @update:visible="closeDialog()"
+        />
     </div>
 </template>

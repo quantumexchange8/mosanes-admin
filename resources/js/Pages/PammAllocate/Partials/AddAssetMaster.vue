@@ -53,6 +53,7 @@ const initialFormState = {
     profit_generation_mode: '',
     expected_gain: '',
     daily_profits: '',
+    master_profile_photo: null,
 };
 
 // Initialize form with the initial state
@@ -155,6 +156,31 @@ const proceedRegenerate = ref(false);
 const handleRegenerate = () => {
     proceedRegenerate.value = true;
 }
+
+const selectedMasterProfilePhoto = ref(null);
+const selectedMasterProfilePhotoName = ref(null);
+const handleKycVerification = (event) => {
+    const masterProfilePhotoInput = event.target;
+    const file = masterProfilePhotoInput.files[0];
+
+    if (file) {
+        // Display the selected image
+        const reader = new FileReader();
+        reader.onload = () => {
+            selectedMasterProfilePhoto.value = reader.result;
+        };
+        reader.readAsDataURL(file);
+        selectedMasterProfilePhotoName.value = file.name;
+        form.master_profile_photo = event.target.files[0];
+    } else {
+        selectedMasterProfilePhoto.value = null;
+    }
+};
+
+const removeMasterProfilePhoto = () => {
+    selectedMasterProfilePhoto.value = null;
+    form.master_profile_photo = '';
+};
 </script>
 
 <template>
@@ -323,28 +349,44 @@ const handleRegenerate = () => {
                     <span class="self-stretch text-gray-950 text-sm font-bold">{{ $t('public.upload_image') }}</span>
                     <div class="flex flex-col items-start gap-3 self-stretch">
                         <span class="text-xs text-gray-500">{{ $t('public.upload_image_caption') }}</span>
-                        <FileUpload
-                                class="w-full"
-                                name="asset_master"
-                                url="/pamm_allocate/upload_image"
+                        <div class="flex flex-col gap-3">
+                            <input
+                                ref="masterProfilePhotoInput"
+                                id="master_profile_photo"
+                                type="file"
+                                class="hidden"
                                 accept="image/*"
-                                :maxFileSize="10485760"
-                                auto
+                                @change="handleKycVerification"
+                            />
+                            <Button
+                                type="button"
+                                variant="primary-tonal"
+                                @click="$refs.masterProfilePhotoInput.click()"
                             >
-                            <template #header="{ chooseCallback }">
-                                <div class="flex flex-wrap justify-between items-center flex-1 gap-2">
-                                    <div class="flex gap-2">
-                                        <Button
-                                            type="button"
-                                            variant="primary-tonal"
-                                            @click="chooseCallback()"
-                                        >
-                                            {{ $t('public.browse') }}
-                                        </Button>
-                                    </div>
+                                {{ $t('public.browse') }}
+                            </Button>
+                            <InputError :message="form.errors.master_profile_photo" />
+                        </div>
+                        <div
+                            v-if="selectedMasterProfilePhoto"
+                            class="relative w-full py-3 pl-4 flex justify-between rounded-xl bg-gray-50"
+                        >
+                            <div class="inline-flex items-center gap-3">
+                                <img :src="selectedMasterProfilePhoto" alt="Selected Image" class="max-w-full h-9 object-contain rounded" />
+                                <div class="text-sm text-gray-950">
+                                    {{ selectedMasterProfilePhotoName }}
                                 </div>
-                            </template>
-                        </FileUpload>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="gray-text"
+                                @click="removeMasterProfilePhoto"
+                                pill
+                                iconOnly
+                            >
+                                <IconX class="text-gray-700 w-5 h-5" />
+                            </Button>
+                        </div>
                     </div>
                 </div>
             </div>

@@ -304,8 +304,8 @@ const saveLikesDebounced = debounce((masterId) => {
                     <!-- Profile Section -->
                     <div class="w-full flex items-center gap-4 self-stretch">
                         <div class="w-[42px] h-[42px] shrink-0 grow-0 rounded-full overflow-hidden">
-                            <div v-if="master.profile_photo">
-                                <img :src="master.profile_photo" alt="Profile Photo" />
+                            <div v-if="master.master_profile_photo">
+                                <img :src="master.master_profile_photo" alt="Profile Photo" />
                             </div>
                             <div v-else>
                                 <DefaultProfilePhoto />
@@ -390,14 +390,14 @@ const saveLikesDebounced = debounce((masterId) => {
                             <div class="py-1 flex items-center gap-3 self-stretch">
                                 <IconUserDollar size="20" stroke-width="1.25" />
                                 <div class="w-full text-gray-950 text-sm font-medium">
-                                    {{ master.total_investors }} {{ $t('public.real_investors') }}
+                                    {{ master.total_real_investors }} {{ $t('public.real_investors') }}
                                 </div>
                             </div>
                             <div class="py-1 flex items-center gap-3 self-stretch">
                                 <IconPremiumRights size="20" stroke-width="1.25" />
                                 <div class="w-full text-gray-950 text-sm font-medium">
                                     {{ $t('public.real_fund_of') }}
-                                    <span class="text-primary-500">$ {{ formatAmount(master.total_fund) }}</span>
+                                    <span class="text-primary-500">$ {{ formatAmount(master.total_real_fund) }}</span>
                                 </div>
                             </div>
                             <div class="py-1 flex items-center gap-3 self-stretch">

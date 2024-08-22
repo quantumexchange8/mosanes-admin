@@ -192,8 +192,10 @@ class PammController extends Controller
                 'id' => $master->id,
                 'asset_name' => $master->asset_name,
                 'trader_name' => $master->trader_name,
-                'total_investors' => $asset_subscription->count(),
-                'total_fund' => $asset_subscription->sum('investment_amount'),
+                'total_real_investors' => $asset_subscription->count(),
+                'total_investors' => $master->total_investors,
+                'total_real_fund' => $asset_subscription->sum('investment_amount'),
+                'total_fund' => $master->total_fund,
                 'minimum_investment' => $master->minimum_investment,
                 'minimum_investment_period' => $master->minimum_investment_period,
                 'performance_fee' => $master->performance_fee,
@@ -322,6 +324,7 @@ class PammController extends Controller
             'groups' => ['required'],
             'total_investors' => ['required', 'integer'],
             'total_fund' => ['required', 'numeric'],
+            'master_profile_photo' => ['nullable', 'image'],
         ];
 
         $attributes = [
@@ -331,6 +334,7 @@ class PammController extends Controller
             'groups'=> trans('public.group'),
             'total_investors'=> trans('public.total_investors'),
             'total_fund'=> trans('public.total_fund'),
+            'master_profile_photo' => trans('public.image'),
         ];
 
         $validator = Validator::make($request->all(), $rules);
@@ -445,6 +449,11 @@ class PammController extends Controller
                  }
              }
 
+            if ($request->hasFile('master_profile_photo')) {
+                $asset_master->clearMediaCollection('master_profile_photo');
+                $asset_master->addMedia($request->master_profile_photo)->toMediaCollection('master_profile_photo');
+            }
+
             // Redirect with success message
             return redirect()->back()->with('toast', [
                 "title" => trans('public.toast_create_asset_master_success'),
@@ -473,7 +482,8 @@ class PammController extends Controller
             'total_fund' => ['nullable', 'numeric'],
             'min_investment' => ['nullable', 'numeric'],
             'min_investment_period' => ['required', 'integer'],
-            'profit_sharing' => ['nullable', 'numeric'],
+            'performance_fee' => ['nullable', 'numeric'],
+            'master_profile_photo' => ['nullable', 'image'],
         ];
 
         $attributes = [
@@ -485,7 +495,8 @@ class PammController extends Controller
             'total_fund' => trans('public.total_fund'),
             'min_investment' => trans('public.min_investment'),
             'min_investment_period' => trans('public.min_investment_period'),
-            'profit_sharing' => trans('public.profit_sharing'),
+            'performance_fee' => trans('public.profit_sharing'),
+            'master_profile_photo' => trans('public.image'),
         ];
 
         // Validate the request data
@@ -496,15 +507,16 @@ class PammController extends Controller
         // Determine the value of $visible based on the groups field
         $groups = $request->input('groups');
 
+        $groupsDatas = [];
         if (in_array('public', $groups)) {
             $visible = 'public';
         } else {
-            $visible = null;
+            $visible = 'private';
             // Ensure $groups is an array
             $groupArray = is_array($groups) ? $groups : [];
 
             // Fetch groups with IDs in the $groupArray
-            $groupsData = Group::whereIn('id', $groupArray)->get();
+            $groupsDatas = Group::whereIn('id', $groupArray)->get();
         }
 
         try {
@@ -512,17 +524,38 @@ class PammController extends Controller
             $assetMaster = AssetMaster::findOrFail($request->id);
 
             // Update the asset master record
-            // $assetMaster->update([
-            //     'asset_name' => $request->pamm_name,
-            //     'trader_name' => $request->trader_name,
-            //     'type' => $visible,
-            //     'started_at' => $request->started_at,
-            //     'total_investors' => $request->total_investors,
-            //     'total_fund' => $request->total_fund,
-            //     'min_investment' => $request->min_investment,
-            //     'min_investment_period' => $request->min_investment_period,
-            //     'edited_by' => Auth::id(),
-            // ]);
+             $assetMaster->update([
+                 'asset_name' => $request->pamm_name,
+                 'trader_name' => $request->trader_name,
+                 'type' => $visible,
+                 'started_at' => $request->started_at,
+                 'total_investors' => $request->total_investors,
+                 'total_fund' => $request->total_fund,
+                 'min_investment' => $request->min_investment,
+                 'min_investment_period' => $request->min_investment_period,
+                 'performance_fee' => $request->performance_fee,
+                 'edited_by' => Auth::id(),
+             ]);
+
+            if ($assetMaster->type == 'private') {
+
+                $currentVisibleGroups = $assetMaster->visible_to_groups;
+                foreach ($currentVisibleGroups as $currentGroup) {
+                    $currentGroup->delete();
+                }
+
+                foreach ($groupsDatas as $group) {
+                    AssetMasterToGroup::create([
+                        'asset_master_id' => $assetMaster->id,
+                        'group_id' => $group->id,
+                    ]);
+                }
+            }
+
+            if ($request->hasFile('master_profile_photo')) {
+                $assetMaster->clearMediaCollection('master_profile_photo');
+                $assetMaster->addMedia($request->master_profile_photo)->toMediaCollection('master_profile_photo');
+            }
 
             // Redirect with success message
             return redirect()->back()->with('toast', [

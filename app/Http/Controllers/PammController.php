@@ -31,8 +31,8 @@ class PammController extends Controller
 
         // Fetch parameter from request
         $search = $request->input('search', '');
-        $sortType = $request->input('sortType', '');
-        $groups = $request->input('groups', '');
+        $sortType = $request->input('sortType');
+        $groups = $request->input('groups');
         $adminUser = $request->input('adminUser', '');
         $tag = $request->input('tag', '');
         $status = $request->input('status', '');
@@ -55,14 +55,58 @@ class PammController extends Controller
         }
 
         // Apply sorting dynamically
-        if (in_array($sortType, ['created_at', 'total_investors', 'total_fund'])) {
-            $mastersQuery->orderBy($sortType, 'desc');
+        if (in_array($sortType, ['latest', 'popular', 'largest_fund', 'most_investors'])) {
+            switch ($request->sortType) {
+                case 'latest':
+                    $mastersQuery->orderBy('created_at', 'desc');
+                    break;
+
+                case 'popular':
+                    $mastersQuery->leftJoin('asset_master_user_favourites', 'asset_masters.id', '=', 'asset_master_user_favourites.asset_master_id')
+                        ->select('asset_masters.*', DB::raw('COUNT(asset_master_user_favourites.id) as total_like_count'))
+                        ->groupBy('asset_masters.id')
+                        ->orderByDesc('total_likes_count');
+                    break;
+
+                case 'largest_fund':
+                    $mastersQuery->leftJoin('asset_subscriptions', function ($join) {
+                        $join->on('asset_masters.id', '=', 'asset_subscriptions.asset_master_id')
+                            ->where('asset_subscriptions.status', 'ongoing');
+                    })
+                        ->select('asset_masters.*',
+                            DB::raw('total_fund + COALESCE(SUM(asset_subscriptions.investment_amount), 0) AS total_fund_combined')
+                        )
+                        ->groupBy('asset_masters.id', 'total_fund')
+                        ->orderBy(DB::raw('total_fund + COALESCE(SUM(asset_subscriptions.investment_amount), 0)'), 'desc');
+                    break;
+
+                case 'most_investors':
+                    $mastersQuery->leftJoin('asset_subscriptions', function ($join) {
+                        $join->on('asset_masters.id', '=', 'asset_subscriptions.asset_master_id')
+                            ->where('asset_subscriptions.status', 'ongoing');
+                    })
+                        ->select('asset_masters.*',
+                            DB::raw('total_investors + COALESCE(COUNT(asset_subscriptions.id), 0) AS total_investors_combined')
+                        )
+                        ->groupBy('asset_masters.id', 'total_investors')
+                        ->orderBy(DB::raw('total_investors + COALESCE(COUNT(asset_subscriptions.id), 0)'), 'desc');
+                    break;
+
+                default:
+                    return response()->json(['error' => 'Invalid filter'], 400);
+            }
         }
 
         // // Apply groups filter
-        // if (!empty($groups)) {
-        //     dd($request->all());
-        // }
+         if (!empty($groups)) {
+             if ($groups == 'public') {
+                 $mastersQuery->where('type', 'public');
+             } else {
+                 $mastersQuery->whereHas('visible_to_groups', function ($query) use ($groups) {
+                     $query->whereIn('group_id', [$groups]);
+                 });
+             }
+         }
 
         // // Apply adminUser filter
         // if (!empty($adminUser)) {
@@ -70,9 +114,24 @@ class PammController extends Controller
         // }
 
         // // Apply tag filter
-        // if (!empty($tag)) {
-        //     dd($request->all());
-        // }
+         if (!empty($tag)) {
+             switch ($tag) {
+                 case 'no_min_investment':
+                     $mastersQuery->where('minimum_investment', 0);
+                     break;
+
+                 case 'lock_free':
+                     $mastersQuery->where('minimum_investment_period', 0);
+                     break;
+
+                 case 'zero_fee':
+                     $mastersQuery->where('performance_fee', 0);
+                     break;
+
+                 default:
+                     return response()->json(['error' => 'Invalid filter'], 400);
+             }
+         }
 
         // Apply status filter
         if (!empty($status)) {
@@ -133,8 +192,8 @@ class PammController extends Controller
                 'id' => $master->id,
                 'asset_name' => $master->asset_name,
                 'trader_name' => $master->trader_name,
-                'total_investors' => $master->total_investors + $asset_subscription->count(),
-                'total_fund' => $master->total_fund + $asset_subscription->sum('investment_amount'),
+                'total_investors' => $asset_subscription->count(),
+                'total_fund' => $asset_subscription->sum('investment_amount'),
                 'minimum_investment' => $master->minimum_investment,
                 'minimum_investment_period' => $master->minimum_investment_period,
                 'performance_fee' => $master->performance_fee,

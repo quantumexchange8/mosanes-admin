@@ -28,6 +28,7 @@ import RadioButton from 'primevue/radiobutton';
 import Paginator from 'primevue/paginator';
 import Loader from "@/Components/Loader.vue";
 import debounce from "lodash/debounce.js";
+import Checkbox from "primevue/checkbox";
 
 const { formatAmount } = transactionFormat();
 
@@ -49,10 +50,10 @@ const totalRecords = ref(0);
 
 // Define sort options
 const sortOptions = ref([
-    { name: 'latest', value: 'created_at' },
-    { name: 'popular', value: 'total_investors' },
-    { name: 'largest_fund', value: 'total_fund' },
-    { name: 'most_investor', value: 'total_investors' },
+    { name: 'latest', value: 'latest' },
+    { name: 'popular', value: 'popular' },
+    { name: 'largest_fund', value: 'largest_fund' },
+    { name: 'most_investor', value: 'most_investors' },
 ]);
 
 // Initialize sortType with the default value
@@ -159,34 +160,34 @@ const PUBLIC_OPTION = { value: 'public', name: 'Public', color: 'ffffff' };
 
 // Check if 'Public' is selected
 function isPublicChecked() {
-  return selectedGroups.value.some(item => item.value === PUBLIC_OPTION.value);
+    return selectedGroups.value.some(item => item.value === PUBLIC_OPTION.value);
 }
 
 // Handle checkbox change and div click
 function togglePublicSelection() {
-  const isCurrentlyChecked = isPublicChecked();
+    const isCurrentlyChecked = isPublicChecked();
 
-  if (isCurrentlyChecked) {
-    // Remove 'Public' from selection if it's currently selected
-    selectedGroups.value = selectedGroups.value.filter(item => item.value !== PUBLIC_OPTION.value);
-  } else {
-    // Add 'Public' to selection and remove all other selections
-    selectedGroups.value = [PUBLIC_OPTION];
-  }
+    if (isCurrentlyChecked) {
+        // Remove 'Public' from selection if it's currently selected
+        selectedGroups.value = selectedGroups.value.filter(item => item.value !== PUBLIC_OPTION.value);
+    } else {
+        // Add 'Public' to selection and remove all other selections
+        selectedGroups.value = [PUBLIC_OPTION];
+    }
 
-  // Update `checked` state based on the new state
-  checked.value = !isCurrentlyChecked;
+    // Update `checked` state based on the new state
+    checked.value = !isCurrentlyChecked;
 }
 
 // Watch for changes in `selectedGroups`
 watch(selectedGroups, (newValue) => {
-  // If another option is selected, remove 'Public'
-  if (newValue.length > 1 && isPublicChecked()) {
-    selectedGroups.value = newValue.filter(item => item.value !== PUBLIC_OPTION.value);
-  }
+    // If another option is selected, remove 'Public'
+    if (newValue.length > 1 && isPublicChecked()) {
+        selectedGroups.value = newValue.filter(item => item.value !== PUBLIC_OPTION.value);
+    }
 
-  // Update `checked` state based on 'Public' selection
-  checked.value = isPublicChecked();
+    // Update `checked` state based on 'Public' selection
+    checked.value = isPublicChecked();
 }, { deep: true });
 
 watchEffect(() => {
@@ -340,7 +341,7 @@ const saveLikesDebounced = debounce((masterId) => {
                             </div>
                         </StatusBadge>
                         <StatusBadge value="gray">
-                            {{ master.performance_fee > 0 ? formatAmount(master.performance_fee, 0) + '%&nbsp;' + $t('public.profit_sharing') : $t('public.zero_fee') }}
+                            {{ master.performance_fee > 0 ? formatAmount(master.performance_fee, 0) + '%&nbsp;' + $t('public.fee') : $t('public.zero_fee') }}
                         </StatusBadge>
                     </div>
 
@@ -450,32 +451,28 @@ const saveLikesDebounced = debounce((masterId) => {
                         <template #value="slotProps">
                             <!-- Check if slotProps.value is an array and display names, otherwise show placeholder -->
                             <span v-if="slotProps.value.length > 0">
-                                {{ slotProps.value.map(item => item.name).join(', ') }}
-                            </span>
+                                        {{ slotProps.value.map(item => item.name).join(', ') }}
+                                    </span>
                             <span v-else>
-                                {{ $t('public.select_group_placeholder') }}
-                            </span>
+                                        {{ $t('public.select_group_placeholder') }}
+                                    </span>
                         </template>
                         <template #option="slotProps">
-                            <span v-for="slotProp in slotProps" class="px-2 py-1 rounded text-gray-950">
-                            {{ slotProp.name }}
-                            </span>
+                                    <span v-for="slotProp in slotProps">
+                                    {{ slotProp.name }}
+                                    </span>
                         </template>
                         <template #header>
-                            <div class="flex items-center p-1 border-b rounded-tl-md rounded-tr-md  text-surface-700 bg-surface-0 border-gray-200">
+                            <div class="flex items-center border-b rounded-tl-lg rounded-tr-lg text-gray-950 bg-white border-gray-200">
                                 <div
-                                    class="w-full flex items-center py-2 px-3 gap-2 rounded-l-md rounded-r-md  cursor-pointer"
+                                    class="w-full flex items-center p-3 gap-2 rounded-tl-md rounded-tr-md cursor-pointer"
                                     :class="{
-                                        'hover:bg-surface-200': !checked,
-                                        'hover:bg-primary-highlight-hover': checked
-                                    }"
+                                                'hover:bg-gray-100': !checked,
+                                                'hover:bg-gray-50': checked
+                                            }"
                                     @click="togglePublicSelection"
                                 >
-                                    <input
-                                        type="checkbox"
-                                        :checked="checked"
-                                        class="w-5 h-5 rounded-full border-gray-300 ring-transparent focus:ring-0 focus:ring-offset-0"
-                                    />
+                                    <Checkbox v-model="checked" :binary="true" />
                                     <span class="text-gray-950">{{ $t('public.public') }}</span>
                                 </div>
                             </div>

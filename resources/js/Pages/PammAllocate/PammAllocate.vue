@@ -19,6 +19,7 @@ import Action from "@/Pages/PammAllocate/Partials/Action.vue";
 import OverlayPanel from 'primevue/overlaypanel';
 import Calendar from 'primevue/calendar';
 import AssetMaster from '@/Pages/PammAllocate/Partials/AssetMaster.vue';
+import dayjs from "dayjs";
 
 const { formatDate, formatMonthDate, formatAmount } = transactionFormat();
 
@@ -64,7 +65,7 @@ const getOptions = async () => {
 
 const getProfitLoss = async (date) => {
     try {
-        const formattedDate = formatDate(date);
+        const formattedDate = dayjs(date).format('YYYY-MM-DD');
         const response = await axios.get('/pamm_allocate/getProfitLoss', { params: { date: formattedDate } });
         profit.value = response.data.profit;
         loss.value = response.data.loss;
@@ -75,7 +76,7 @@ const getProfitLoss = async (date) => {
 
 getResults();
 getOptions();
-// getProfitLoss(selectedDate);
+getProfitLoss();
 
 function calculatePercentage(fund) {
   if (!currentAssets.value || !fund) {
@@ -84,12 +85,18 @@ function calculatePercentage(fund) {
   return ((fund / currentAssets.value) * 100).toFixed(2);
 }
 
-function calculateProfitLossPercentage(profit, loss) {
-  const total = profit + loss;
-  if (total === 0) {
-    return 0;
-  }
-  return ((profit / total) * 100).toFixed(2);
+function calculateProfitPercentage(profit, total) {
+    if (total === 0) {
+        return 0;
+    }
+    return ((profit / total) * 100).toFixed(2);
+}
+
+function calculateLossPercentage(loss, total) {
+    if (total === 0) {
+        return 0;
+    }
+    return ((loss / total) * 100).toFixed(2);
 }
 
 watch(selectedDate, (newDate) => {
@@ -101,12 +108,12 @@ const toggleCalendar = () => {
 };
 
 const changeDate = (days) => {
-  const newDate = new Date(selectedDate.value);
-  newDate.setDate(newDate.getDate() + days);
+    const newDate = new Date(selectedDate.value);
+    newDate.setDate(newDate.getDate() + days);
 
-  if (newDate <= today) {
-    selectedDate.value = newDate;
-  }
+    if (newDate <= today) {
+        selectedDate.value = newDate;
+    }
 };
 
 const isNextButtonDisabled = computed(() => {
@@ -251,16 +258,19 @@ watchEffect(() => {
                                 <span class="text-gray-500 text-right text-xs">{{ $t('public.loss') }}</span>
                             </div>
                             <!-- bar -->
-                            <div class="w-full h-1 flex-grow rounded-full relative"
-                                :class="{
-                                'bg-pink-500': profit || loss,
-                                'bg-gray-100': !(profit || loss)
-                            }">
-                                <div
-                                    class="absolute top-0 left-0 h-full rounded-full bg-primary-500"
-                                    :style="{ width: `${calculateProfitLossPercentage(profit, loss)}%` }"
-                                />
-                            </div>
+                             <div class="w-full h-1 rounded-full relative bg-gray-100">
+                                 <!-- Profit bar, starting from the left -->
+                                 <div
+                                     class="absolute top-0 left-0 h-full rounded-l-full bg-green"
+                                     :style="{ width: `${calculateProfitPercentage(profit, profit + loss)}%` }"
+                                 ></div>
+
+                                 <!-- Loss bar, starting from the right -->
+                                 <div
+                                     class="absolute top-0 right-0 h-full rounded-r-full bg-pink"
+                                     :style="{ width: `${calculateLossPercentage(loss, profit + loss)}%` }"
+                                 ></div>
+                             </div>
                             <div class="flex justify-between items-center self-stretch">
                                 <span class="text-gray-950 text-sm font-medium">${{ formatAmount(profit) }}</span>
                                 <span class="text-gray-950 text-right text-sm font-medium">${{ formatAmount(loss) }}</span>

@@ -308,11 +308,18 @@ class PammController extends Controller
 
     public function getProfitLoss(Request $request)
     {
-        dd($request->all());
-        // return response()->json([
-        //     'profit' => $profit,
-        //     'loss' => $loss,
-        // ]);
+        $profit = AssetMasterProfitDistribution::whereDate('profit_distribution_date', $request->date)
+            ->where('profit_distribution_percent', '>', 0)
+            ->sum('profit_distribution_percent');
+
+        $loss = AssetMasterProfitDistribution::whereDate('profit_distribution_date', $request->date)
+            ->where('profit_distribution_percent', '<', 0)
+            ->sum('profit_distribution_percent');
+
+         return response()->json([
+             'profit' => $profit,
+             'loss' => abs($loss),
+         ]);
     }
 
     public function validateStep(Request $request)

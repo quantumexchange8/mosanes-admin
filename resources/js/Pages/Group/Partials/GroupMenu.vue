@@ -13,6 +13,7 @@ import { trans } from 'laravel-vue-i18n';
 
 const props = defineProps({
     group: Object,
+    date: Array,
 })
 
 const visible = ref(false);
@@ -105,7 +106,7 @@ const requireConfirmation = (id) => {
         </template>
 
         <template v-if="dialogTitle === 'view_group_transactions'">
-            <GroupTransactions />
+            <GroupTransactions :group="group" :date="date" />
         </template>
     </Dialog>
 </template>

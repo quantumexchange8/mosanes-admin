@@ -138,7 +138,7 @@ watchEffect(() => {
 </script>
 
 <template>
-    <div v-if="tradingAccounts?.length < 0">
+    <div v-if="tradingAccounts?.length <= 0">
         <Empty message="No Trading Account Yet" />
     </div>
     <div v-else class="grid md:grid-cols-2 gap-5">

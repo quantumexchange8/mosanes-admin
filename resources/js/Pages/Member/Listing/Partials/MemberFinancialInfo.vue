@@ -102,7 +102,7 @@ watchEffect(() => {
             <div class="flex py-2 items-center self-stretch">
                 <div class="text-gray-950 text-sm font-bold">{{ $t('public.recent_transaction' )}}</div>
             </div>
-            <div v-if="!transactionHistory" class="flex flex-col items-center flex-1 self-stretch">
+            <div v-if="transactionHistory?.length <= 0" class="flex flex-col items-center flex-1 self-stretch">
                 <Empty :message="$t('public.no_transaction_yet')" />
             </div>
             <div v-else class="flex flex-col items-center flex-1 self-stretch overflow-auto" style="-ms-overflow-style: none; scrollbar-width: none;">

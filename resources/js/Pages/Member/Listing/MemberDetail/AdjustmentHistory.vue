@@ -39,8 +39,12 @@ const rowClicked = (data) => {
 </script>
 
 <template>
+    <div v-if="adjustmentHistories?.length <= 0" class="flex flex-col items-center flex-1 self-stretch">
+        <Empty :message="$t('public.no_history_yet')" />
+    </div>
+
     <!-- data table -->
-    <div class="p-6 flex flex-col items-center justify-center self-stretch gap-6 bg-white shadow-toast rounded-2xl max-h-[360px] md:max-h-[372px]">
+    <div v-else class="p-6 flex flex-col items-center justify-center self-stretch gap-6 bg-white shadow-toast rounded-2xl max-h-[360px] md:max-h-[372px]">
         <DataTable
             :value="adjustmentHistories"
             removableSort
@@ -99,10 +103,7 @@ const rowClicked = (data) => {
             </Column>
         </DataTable>
 
-        <div v-if="adjustmentHistories.length < 0" class="flex flex-col items-center flex-1 self-stretch md:hidden">
-            <Empty :message="$t('public.no_transaction_yet')" />
-        </div>
-        <div v-else class="flex flex-col items-center self-stretch overflow-auto md:hidden" style="-ms-overflow-style: none; scrollbar-width: none;">
+        <div class="flex flex-col items-center self-stretch overflow-auto md:hidden" style="-ms-overflow-style: none; scrollbar-width: none;">
             <div
                 v-for="(history, index) in adjustmentHistories"
                 :key="index"

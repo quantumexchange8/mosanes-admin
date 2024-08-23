@@ -1,8 +1,8 @@
 ;<script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { onMounted, ref, watchEffect } from 'vue';
+import { onMounted, ref, watchEffect, watch } from 'vue';
 import { transactionFormat } from '@/Composables/index.js';
-import { IconWallet, IconCreditCardPay, IconReceiptTax, IconUserFilled, IconRefresh } from '@tabler/icons-vue';
+import { IconX, IconUserFilled, IconRefresh } from '@tabler/icons-vue';
 import Button from '@/Components/Button.vue';
 import Calendar from 'primevue/calendar';
 import DefaultProfilePhoto from '@/Components/DefaultProfilePhoto.vue';
@@ -12,7 +12,7 @@ import Vue3Autocounter from 'vue3-autocounter';
 import Empty from '@/Components/Empty.vue';
 import { usePage } from '@inertiajs/vue3';
 
-const { formatAmount } = transactionFormat();
+const { formatAmount, formatDate } = transactionFormat();
 
 const counterDuration = ref(10);
 const totalNetBalance = ref(0.00);
@@ -22,11 +22,50 @@ const totalFeeCharges = ref(0.00);
 const groups = ref();
 const groupsLength = ref();
 const total = ref();
-const date = ref('');
 
-const getGroups = async () => {
+// Get current date
+const today = new Date();
+
+// Define minDate and maxDate
+const minDate = ref(new Date(today.getFullYear(), today.getMonth(), 1));
+const maxDate = ref(today);
+
+// Reactive variable for selected date range
+const selectedDate = ref([minDate.value, maxDate.value]);
+
+// Clear date selection
+const clearDate = () => {
+    selectedDate.value = [];
+};
+
+watch(selectedDate, (newDateRange) => {
+    if (Array.isArray(newDateRange)) {
+        const [startDate, endDate] = newDateRange;
+
+        if (startDate && endDate) {
+            getGroups([startDate, endDate]);
+        } else if (startDate || endDate) {
+            getGroups([startDate || endDate, endDate || startDate]);
+        } else {
+            getGroups([]);
+        }
+    } else {
+        console.warn('Invalid date range format:', newDateRange);
+    }
+});
+
+const getGroups = async (selectedDate = []) => {
     try {
-        const response = await axios.get('/group/getGroups');
+        let response;
+        const [startDate, endDate] = selectedDate;
+
+        let url = `/group/getGroups`;
+
+        if (startDate && endDate) {
+            url += `?startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
+        }
+
+        response = await axios.get(url);
         groups.value = response.data.groups;
         groupsLength.value = response.data.groups.length;
 
@@ -42,12 +81,12 @@ const getGroups = async () => {
 };
 
 onMounted(() => {
-    getGroups();
+    getGroups(selectedDate.value);
 })
 
 watchEffect(() => {
     if (usePage().props.toast !== null) {
-        getGroups();
+        getGroups(selectedDate.value);
     }
 });
 
@@ -98,13 +137,27 @@ watchEffect(() => {
 
             <div class="w-full py-6 px-4 md:p-6 flex flex-col items-center gap-6 self-stretch rounded-2xl border border-solid border-gray-200 bg-white shadow-table">
                 <div class="flex flex-col items-center gap-3 self-stretch md:flex-row md:justify-between">
-                    <Calendar
-                        v-model="date"
-                        selectionMode="range"
-                        :manualInput="false"
-                        dateFormat="yy/mm/dd"
-                        class="w-full md:w-[272px]"
-                    />
+                    <div class="relative w-full md:w-[272px]">
+                        <Calendar
+                            v-model="selectedDate"
+                            selectionMode="range"
+                            :manualInput="false"
+                            :minDate="minDate"
+                            :maxDate="maxDate"
+                            dateFormat="dd/mm/yy"
+                            showIcon
+                            iconDisplay="input"
+                            placeholder="yyyy/mm/dd - yyyy/mm/dd"
+                            class="w-full md:w-[272px]"
+                        />
+                        <div
+                            v-if="selectedDate && selectedDate.length > 0"
+                            class="absolute top-2/4 -mt-2.5 right-4 text-gray-400 select-none cursor-pointer bg-white"
+                            @click="clearDate"
+                        >
+                            <IconX size="20" />
+                        </div>
+                    </div>
                     <NewGroup />
                 </div>
 
@@ -163,7 +216,7 @@ watchEffect(() => {
                                     >
                                         <IconRefresh size="16" stroke-width="1.25" color="#667085" />
                                     </Button>
-                                    <GroupMenu :group="group" />
+                                    <GroupMenu :group="group" :date="selectedDate" />
                                 </div>
                             </div>
                             <div class="py-3 grid grid-cols-2 items-start content-start gap-y-3 gap-x-5 self-stretch flex-wrap md:grid-cols-3 md:gap-2 xl:grid-cols-6">

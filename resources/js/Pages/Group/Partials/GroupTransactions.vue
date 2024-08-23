@@ -98,13 +98,13 @@ watch(selectedDate, (newDateRange) => {
             :value="transactions"
             removableSort
             scrollable
-            scrollHeight="750px"
+            scrollHeight="600px"
             tableStyle="lg:min-width: 50rem"
             ref="dt"
             :loading="loading"
             >
             <template #header>
-                <div class="flex flex-col md:flex-row gap-3 items-center self-stretch">
+                <div class="flex flex-col md:flex-row gap-3 items-center self-stretch mb-5">
                     <div class="w-full flex flex-col gap-3 md:flex-row">
                         <div class="relative w-full md:w-[272px]">
                             <Calendar
@@ -250,7 +250,7 @@ watch(selectedDate, (newDateRange) => {
                     </div>
                 </template>
             </Column>
-            <ColumnGroup type="footer" v-if="transactions?.length > 0">
+            <ColumnGroup type="footer" v-if="transactions?.length > 0" class="sticky">
                 <Row>
                     <Column class="hidden md:table-cell" :footer="$t('public.total') + ':'" :colspan="2" footerStyle="text-align:right" />
                     <Column class="hidden md:table-cell" :footer="formatAmount(totalAmount)" />

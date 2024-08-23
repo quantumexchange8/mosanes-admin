@@ -161,11 +161,19 @@ class PammController extends Controller
             $asset_subscription = AssetSubscription::where('asset_master_id', $master->id)
                 ->where('status', 'ongoing');
 
-            $asset_profit_distribution = AssetMasterProfitDistribution::where('asset_master_id', $master->id)
-                ->whereDate('profit_distribution_date', \Carbon\Carbon::yesterday())
+            // Get the last profit distribution before today
+            $last_profit_distribution = AssetMasterProfitDistribution::where('asset_master_id', $master->id)
+                ->whereDate('profit_distribution_date', '<', today())
+                ->orderByDesc('profit_distribution_date')
                 ->first();
 
-            $profit = $asset_profit_distribution ? $asset_profit_distribution->profit_distribution_percent : 0;
+            // Initialize the profit with the master's latest profit as a fallback
+            $profit = $master->latest_profit;
+
+            // If there's a last profit distribution, update the profit to that value
+            if ($last_profit_distribution) {
+                $profit = $last_profit_distribution->profit_distribution_percent;
+            }
 
             // Calculate the monthly gain for the current month
             $monthly_gain = AssetMasterProfitDistribution::where('asset_master_id', $master->id)
@@ -201,7 +209,7 @@ class PammController extends Controller
                 'performance_fee' => $master->performance_fee,
                 'total_gain' => $total_gain,
                 'monthly_gain' => $monthly_gain,
-                'latest_profit' => $master->created_at->isToday() ? $master->latest_profit : $profit,
+                'latest_profit' => $profit,
                 'master_profile_photo' => $master->getFirstMediaUrl('master_profile_photo'),
                 'total_likes_count' => $master->total_likes_count + $userFavourites,
                 'status' => $master->status,

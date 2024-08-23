@@ -379,9 +379,11 @@ return [
     "toast_credit_adjustment_success" => "賬戶信用已被調整.",
     "join_date" => "日期",
     "days" => "天",
+    "add_another" => "添加",
     "access_portal" => "會員後台通道",
     "toast_create_asset_master_success" => "您已成功創建了一個新的資產大師!",
     "toast_create_asset_master_error" => "建立資產大師時發生錯誤。",
     "toast_allocate_daily_profit_success" => "您已成功為資產大師分配每日利潤值!",
     "no_history_yet" => "尚未有歷史紀錄",
+    "penalty_fee" => "退出資管費",
 ];

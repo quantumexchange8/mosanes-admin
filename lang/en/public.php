@@ -385,4 +385,5 @@ return [
     "toast_create_asset_master_error" => "There was an error creating the asset master.",
     "toast_allocate_daily_profit_success" => "You’ve successfully allocated daily profit for the asset master!",
     "no_history_yet" => "No History Yet",
+    "penalty_fee" => "Penalty Fee",
 ];

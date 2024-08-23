@@ -207,6 +207,7 @@ class PammController extends Controller
                 'minimum_investment' => $master->minimum_investment,
                 'minimum_investment_period' => $master->minimum_investment_period,
                 'performance_fee' => $master->performance_fee,
+                'penalty_fee' => $master->penalty_fee,
                 'total_gain' => $total_gain,
                 'monthly_gain' => $monthly_gain,
                 'latest_profit' => $profit,
@@ -362,6 +363,7 @@ class PammController extends Controller
                 'min_investment' => ['required'],
                 'min_investment_period' => ['required'],
                 'performance_fee' => ['required'],
+                'penalty_fee' => ['required'],
                 'total_gain' => ['required'],
                 'monthly_gain' => ['required'],
                 'latest' => ['required'],
@@ -372,6 +374,7 @@ class PammController extends Controller
                 'min_investment'=> trans('public.min_investment'),
                 'min_investment_period'=> trans('public.min_investment_period'),
                 'performance_fee'=> trans('public.performance_fee'),
+                'penalty_fee'=> trans('public.penalty_fee'),
                 'total_gain'=> trans('public.total_gain'),
                 'monthly_gain'=> trans('public.monthly_gain'),
                 'latest'=> trans('public.latest'),
@@ -429,6 +432,7 @@ class PammController extends Controller
                  'minimum_investment' => $request->min_investment,
                  'minimum_investment_period' => $request->min_investment_period,
                  'performance_fee' => $request->performance_fee,
+                 'penalty_fee' => $request->penalty_fee,
                  'total_gain' => $request->total_gain,
                  'monthly_gain' => $request->monthly_gain,
                  'latest_profit' => $request->latest,
@@ -497,7 +501,8 @@ class PammController extends Controller
             'total_fund' => ['nullable', 'numeric'],
             'min_investment' => ['nullable', 'numeric'],
             'min_investment_period' => ['required', 'integer'],
-            'performance_fee' => ['nullable', 'numeric'],
+            'performance_fee' => ['required', 'numeric'],
+            'penalty_fee' => ['required', 'numeric'],
             'master_profile_photo' => ['nullable', 'image'],
         ];
 
@@ -511,6 +516,7 @@ class PammController extends Controller
             'min_investment' => trans('public.min_investment'),
             'min_investment_period' => trans('public.min_investment_period'),
             'performance_fee' => trans('public.profit_sharing'),
+            'penalty_fee' => trans('public.penalty_fee'),
             'master_profile_photo' => trans('public.image'),
         ];
 
@@ -549,6 +555,7 @@ class PammController extends Controller
                  'min_investment' => $request->min_investment,
                  'min_investment_period' => $request->min_investment_period,
                  'performance_fee' => $request->performance_fee,
+                 'penalty_fee' => $request->penalty_fee,
                  'edited_by' => Auth::id(),
              ]);
 

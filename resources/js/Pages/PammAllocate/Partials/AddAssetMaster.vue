@@ -47,6 +47,7 @@ const initialFormState = {
     min_investment: 0,
     min_investment_period: '',
     performance_fee: '',
+    penalty_fee: '',
     total_gain: '',
     monthly_gain: '',
     latest: '',
@@ -438,6 +439,18 @@ const removeMasterProfilePhoto = () => {
                                 placeholder="0.00%"
                             />
                             <InputError :message="form.errors.performance_fee" />
+                        </div>
+                        <div class="flex flex-col items-start gap-1 self-stretch md:flex-grow">
+                            <InputLabel for="penalty_fee">{{ $t('public.penalty_fee') }}</InputLabel>
+                            <InputText
+                                id="penalty_fee"
+                                type="number"
+                                class="block w-full"
+                                v-model="form.penalty_fee"
+                                :invalid="!!form.errors.penalty_fee"
+                                placeholder="0.00%"
+                            />
+                            <InputError :message="form.errors.penalty_fee" />
                         </div>
                     </div>
                 </div>

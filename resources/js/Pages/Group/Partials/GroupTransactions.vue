@@ -98,7 +98,7 @@ watch(selectedDate, (newDateRange) => {
             :value="transactions"
             removableSort
             scrollable
-            scrollHeight="750px"
+            scrollHeight="600px"
             tableStyle="lg:min-width: 50rem"
             ref="dt"
             :loading="loading"

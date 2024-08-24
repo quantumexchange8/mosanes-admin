@@ -14,6 +14,7 @@ import FileUpload from 'primevue/fileupload';
 import { transactionFormat } from '@/Composables/index.js';
 import InputNumber from 'primevue/inputnumber';
 import Checkbox from "primevue/checkbox";
+import dayjs from "dayjs";
 
 const { formatDate, formatDateTime, formatAmount } = transactionFormat();
 
@@ -60,7 +61,7 @@ const form = useForm({
     id: props.master.id,
     pamm_name: props.master.asset_name,
     trader_name: props.master.trader_name,
-    created_date: formatDate(props.master.started_at),
+    started_at: props.master.started_at,
     groups: [],
     total_investors: props.master.total_investors,
     total_fund: Number(props.master.total_fund),
@@ -74,7 +75,7 @@ const form = useForm({
 
 // Clear date function
 const clearDate = () => {
-    form.created_date = '';
+    form.started_at = '';
 };
 
 // Handle checkbox change and div click
@@ -189,28 +190,28 @@ const removeMasterProfilePhoto = () => {
                         <InputError :message="form.errors.trader_name" />
                     </div>
                     <div class="flex flex-col items-start gap-1 self-stretch">
-                        <InputLabel for="created_date" :value="$t('public.created_date')" />
+                        <InputLabel for="started_at" :value="$t('public.created_date')" />
                         <div class="relative w-full">
                             <Calendar
-                                v-model="form.created_date"
+                                v-model="form.started_at"
                                 selectionMode="single"
                                 :manualInput="false"
                                 dateFormat="yy/mm/dd"
                                 showIcon
                                 iconDisplay="input"
-                                placeholder="yyyy/mm/dd - yyyy/mm/dd"
+                                placeholder="yyyy/mm/dd"
                                 class="w-full"
-                                :invalid="!!form.errors.created_date"
+                                :invalid="!!form.errors.started_at"
                             />
                             <div
-                                v-if="form.created_date"
+                                v-if="form.started_at"
                                 class="absolute top-2/4 -mt-2.5 right-4 text-gray-400 select-none cursor-pointer bg-white"
                                 @click="clearDate"
                             >
                                 <IconX size="20" stroke-width="1.25" />
                             </div>
                         </div>
-                        <InputError :message="form.errors.created_date" />
+                        <InputError :message="form.errors.started_at" />
                     </div>
                     <div class="flex flex-col items-start gap-1 self-stretch">
                         <InputLabel for="visible_to" :value="$t('public.visible_to')" />

@@ -214,7 +214,7 @@ class PammController extends Controller
                 'master_profile_photo' => $master->getFirstMediaUrl('master_profile_photo'),
                 'total_likes_count' => $master->total_likes_count + $userFavourites,
                 'status' => $master->status,
-                'started_at' => $master->started_at,
+                'started_at' => date_format($master->started_at, 'Y/m/d'),
                 'visible_to' => $master->type,
                 'group_names' => $group_names,
                 'asset_distribution_counts' => $master->asset_distributions()->count(),
@@ -495,7 +495,7 @@ class PammController extends Controller
         $rules = [
             'pamm_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
             'trader_name' => ['required', 'regex:/^[a-zA-Z0-9\p{Han}. ]+$/u', 'max:255'],
-            'created_date' => ['required', 'date'],
+            'started_at' => ['required', 'date'],
             'groups' => ['required'],
             'total_investors' => ['nullable', 'integer'],
             'total_fund' => ['nullable', 'numeric'],
@@ -509,7 +509,7 @@ class PammController extends Controller
         $attributes = [
             'pamm_name' => trans('public.pamm_name'),
             'trader_name' => trans('public.trader_name'),
-            'created_date' => trans('public.created_date'),
+            'started_at' => trans('public.created_date'),
             'groups' => trans('public.group'),
             'total_investors' => trans('public.total_investors'),
             'total_fund' => trans('public.total_fund'),
@@ -544,12 +544,13 @@ class PammController extends Controller
             // Find the asset master by ID
             $assetMaster = AssetMaster::findOrFail($request->id);
 
+            $started_at = $request->started_at;
             // Update the asset master record
              $assetMaster->update([
                  'asset_name' => $request->pamm_name,
                  'trader_name' => $request->trader_name,
                  'type' => $visible,
-                 'started_at' => $request->started_at,
+                 'started_at' => Carbon::parse($started_at)->addDay()->startOfDay(),
                  'total_investors' => $request->total_investors,
                  'total_fund' => $request->total_fund,
                  'min_investment' => $request->min_investment,

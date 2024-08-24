@@ -101,6 +101,7 @@ function calculateLossPercentage(loss, total) {
 
 watch(selectedDate, (newDate) => {
     getProfitLoss(newDate);
+    isCalendarVisible.value = false;
 });
 
 const toggleCalendar = () => {
@@ -227,8 +228,21 @@ watchEffect(() => {
                                     <IconChevronLeft size="16" stroke-width="1.25" />
                                 </div>
                             </Button>
-                            <div class="w-full h-full flex justify-center items-center"  @click="toggleCalendar">
-                                <span class="text-gray-950 text-center text-sm font-semibold">{{ formatMonthDate(selectedDate) }}</span>
+                            <div class="w-full h-full flex justify-center items-center relative">
+                                <span class="text-gray-950 text-center text-sm select-none cursor-pointer font-semibold" @click="toggleCalendar">{{ formatMonthDate(selectedDate) }}</span>
+                                <div class="absolute top-10 z-20">
+                                    <Calendar
+                                        v-if="isCalendarVisible"
+                                        v-model="selectedDate"
+                                        selectionMode="single"
+                                        :manualInput="false"
+                                        :maxDate="today"
+                                        dateFormat="M dd"
+                                        class="w-full"
+                                        inline
+                                    >
+                                    </Calendar>
+                                </div>
                             </div>
                             <Button
                                 type="button"
@@ -241,17 +255,7 @@ watchEffect(() => {
                                 <IconChevronRight size="16" stroke-width="1.25" />
                             </Button>
                          </div>
-                         <Calendar
-                            v-if="isCalendarVisible"
-                            v-model="selectedDate"
-                            selectionMode="single"
-                            :manualInput="false"
-                            :maxDate="today"
-                            dateFormat="M dd"
-                            class="w-full"
-                            inline
-                        >
-                        </Calendar>
+
                          <div class="flex flex-col items-center gap-1.5 self-stretch">
                             <div class="flex justify-between items-center self-stretch">
                                 <span class="text-gray-500 text-xs">{{ $t('public.profit') }}</span>

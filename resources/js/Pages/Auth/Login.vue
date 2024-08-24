@@ -99,7 +99,12 @@ const submit = () => {
                     </Link>
 
                 </div>
-                <Button variant="primary-flat" size="base" class="w-full" :class="{ 'opacity-25': form.processing }" :disabled="form.processing">
+                <Button
+                    variant="primary-flat"
+                    size="base"
+                    class="w-full"
+                    :disabled="form.processing"
+                >
                     {{ $t('public.sign_in') }}
                 </Button>
             </form>

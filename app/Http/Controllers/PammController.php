@@ -214,7 +214,7 @@ class PammController extends Controller
                 'master_profile_photo' => $master->getFirstMediaUrl('master_profile_photo'),
                 'total_likes_count' => $master->total_likes_count + $userFavourites,
                 'status' => $master->status,
-                'created_at' => $master->created_at,
+                'started_at' => $master->started_at,
                 'visible_to' => $master->type,
                 'group_names' => $group_names,
                 'asset_distribution_counts' => $master->asset_distributions()->count(),

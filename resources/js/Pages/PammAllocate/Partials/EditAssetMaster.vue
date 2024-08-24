@@ -60,7 +60,7 @@ const form = useForm({
     id: props.master.id,
     pamm_name: props.master.asset_name,
     trader_name: props.master.trader_name,
-    created_date: formatDate(props.master.created_at),
+    created_date: formatDate(props.master.started_at),
     groups: [],
     total_investors: props.master.total_investors,
     total_fund: Number(props.master.total_fund),

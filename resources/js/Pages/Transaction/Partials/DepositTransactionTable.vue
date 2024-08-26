@@ -310,7 +310,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
-                {{ slotProps.data.transaction_amount ? formatAmount(slotProps.data.transaction_amount) : '' }}
+                {{ slotProps.data.transaction_amount ? formatAmount(slotProps.data.transaction_amount) : '-' }}
             </template>
         </Column>
         <Column
@@ -319,7 +319,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
-                <StatusBadge :value="slotProps.data.status">
+                <StatusBadge class="w-fit" :value="slotProps.data.status">
                     {{ $t('public.' + slotProps.data.status) }}
                 </StatusBadge>
             </template>
@@ -346,7 +346,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                         </div>
                     </div>
                     <div class="overflow-hidden text-right text-ellipsis font-semibold">
-                       {{ slotProps.data.transaction_amount ?  '$&nbsp;' + formatAmount(slotProps.data.transaction_amount) : '' }}
+                       {{ slotProps.data.transaction_amount ?  '$&nbsp;' + formatAmount(slotProps.data.transaction_amount) : '-' }}
                     </div>
                 </div>
             </template>

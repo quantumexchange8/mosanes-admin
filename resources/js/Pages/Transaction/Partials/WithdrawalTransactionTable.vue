@@ -304,7 +304,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
-                {{ slotProps.data.from_meta_login ? slotProps.data.from_meta_login : slotProps.data ? slotProps.data.from_wallet_name : '' }}
+                {{ slotProps.data.from_meta_login ? slotProps.data.from_meta_login : slotProps.data ? $t(`public.${slotProps.data.from_wallet_name}`) : '' }}
             </template>
         </Column>
         <Column
@@ -323,8 +323,9 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
-                <StatusBadge :value="slotProps.data.status">
-                    {{ $t('public.' + (slotProps.data.status === 'rejected' ? 'failed' : slotProps.data.status)) }}
+                <StatusBadge class="w-fit" :value="slotProps.data.status">
+                    <span v-if="slotProps.data.status === 'successful'">{{ $t('public.approved') }}</span>
+                    <span v-else>{{ $t('public.rejected') }}</span>
                 </StatusBadge>
             </template>
         </Column>
@@ -471,18 +472,21 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
             </div>
             <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                 <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.from') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium">Rebate</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium"> {{ data.from_meta_login ? data.from_meta_login : data ? $t(`public.${data.from_wallet_name}`) : '' }}</span>
             </div>
             <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                 <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.status') }}</span>
-                <StatusBadge :value="data.status">{{ $t('public.' + (data.status === 'rejected' ? 'failed' : data.status)) }}</StatusBadge>
+                <StatusBadge :value="data.status">
+                    <span v-if="data.status === 'successful'">{{ $t('public.approved') }}</span>
+                    <span v-else>{{ $t('public.rejected') }}</span>
+                </StatusBadge>
             </div>
         </div>
 
         <div class="flex flex-col items-center py-4 gap-3 self-stretch border-b border-gray-200">
             <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                 <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.wallet_name') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium">My Wallet</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.to_wallet_name }}</span>
             </div>
             <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                 <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.receiving_address') }}</span>

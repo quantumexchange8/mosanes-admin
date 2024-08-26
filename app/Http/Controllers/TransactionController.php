@@ -198,9 +198,9 @@ class TransactionController extends Controller
                     $result['to_wallet_address'] = $transaction->to_wallet_address;
                     $result['from_meta_login'] = $transaction->from_meta_login;
                     $result['from_wallet_id'] = $transaction->from_wallet ? $transaction->from_wallet->id : null;
-                    $result['from_wallet_name'] = $transaction->from_wallet ? $transaction->from_wallet->name : null;
+                    $result['from_wallet_name'] = $transaction->from_wallet ? $transaction->from_wallet->type : null;
                     $result['to_wallet_id'] = $transaction->to_wallet ? $transaction->to_wallet->id : null;
-                    $result['to_wallet_name'] = $transaction->to_wallet ? $transaction->to_wallet->name : null;
+                    $result['to_wallet_name'] = $transaction->payment_account_id ? $transaction->payment_account->payment_account_name : null;
                     $result['approved_at'] = $transaction->approved_at;
                 } elseif ($type === 'transfer') {
                     $result['from_meta_login'] = $transaction->from_meta_login;

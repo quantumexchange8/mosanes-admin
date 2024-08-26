@@ -2,17 +2,20 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\TradingAccount;
+use Inertia\Inertia;
+use App\Models\Wallet;
+use App\Models\AssetRevoke;
 use App\Models\TradingUser;
 use App\Models\Transaction;
-use App\Models\Wallet;
-use App\Services\ChangeTraderBalanceType;
-use App\Services\CTraderService;
-use Auth;
 use Illuminate\Http\Request;
+use App\Models\TradingAccount;
+use App\Services\CTraderService;
+use App\Models\AssetSubscription;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
+use App\Services\RunningNumberService;
+use App\Services\ChangeTraderBalanceType;
 use Illuminate\Validation\ValidationException;
-use Inertia\Inertia;
 
 class PendingController extends Controller
 {
@@ -124,5 +127,109 @@ class PendingController extends Controller
                 'type' => 'success'
             ]);
         }
+    }
+
+    public function getPendingRevokeData(Request $request)
+    {
+        $pendingRevokes = AssetRevoke::with([
+                'user:id,email,name',
+                'asset_master:id,asset_name',
+            ])
+            ->where('status', 'pending')
+            ->latest()
+            ->get()
+            ->map(function ($revoke) {
+                return [
+                    'id' => $revoke->id,
+                    'created_at' => $revoke->created_at,
+                    'user_name' => $revoke->user->name,
+                    'user_email' => $revoke->user->email,
+                    'user_profile_photo' => $revoke->user->getFirstMediaUrl('profile_photo'),
+                    'meta_login' => $revoke->meta_login,
+                    'asset_master_name' => $revoke->asset_master->asset_name,
+                    'amount' => $revoke->penalty_fee,
+                ];
+            });
+
+        $totalAmount = $pendingRevokes->sum('amount');
+
+        return response()->json([
+            'pendingRevokes' => $pendingRevokes,
+            'totalAmount' => $totalAmount,
+        ]);
+    }
+
+    public function revokeApproval(Request $request)
+    {
+        // Validate request data
+        $request->validate([
+            'id' => 'required|integer|exists:asset_revokes,id',
+            'remarks' => 'required|string|max:255',
+        ]);
+    
+        // Check connection status
+        $conn = (new CTraderService)->connectionStatus();
+        if ($conn['code'] != 0) {
+            return back()->with('toast', [
+                'title' => 'Connection Error',
+                'type' => 'error'
+            ]);
+        }
+        
+        // Find the AssetRevoke record or fail
+        $assetRevoke = AssetRevoke::findOrFail($request->id);
+    
+        // Update the AssetRevoke record
+        $assetRevoke->update([
+            'status' => 'revoked',
+            'remarks' => $request->remarks,
+            'approval_at' => now(),
+            'handle_by' => Auth::id(),
+        ]);
+    
+        // Update the related AssetSubscription record using the relationship
+        $assetRevoke->asset_subscription()->update([
+            'status' => 'revoked',
+            'revoked_at' => now(),
+        ]);
+    
+        // Create a trade using CTraderService
+        try {
+            $trade = (new CTraderService)->createTrade($assetRevoke->meta_login,$assetRevoke->penalty_fee,$request->remarks,ChangeTraderBalanceType::WITHDRAW);
+    
+            // Create a new Transaction record
+            Transaction::create([
+                'user_id' => $assetRevoke->user_id,
+                'category' => 'trading_account',
+                'transaction_type' => 'penalty_fee',
+                'from_meta_login' => $assetRevoke->meta_login,
+                'ticket' => $trade->getTicket(),
+                'transaction_number' => RunningNumberService::getID('transaction'),
+                'amount' => $assetRevoke->penalty_fee,
+                'transaction_amount' => $assetRevoke->penalty_fee,
+                'status' => 'successful',
+                'remarks' => $request->remarks,
+                'approved_at' => now(),
+                'handle_by' => Auth::id(),
+            ]);
+    
+        } catch (\Throwable $e) {
+            if ($e->getMessage() == "Not found") {
+                TradingUser::firstWhere('meta_login', $assetRevoke->meta_login)->update(['acc_status' => 'Inactive']);
+            } else {
+                Log::error('Error creating trade or transaction: ' . $e->getMessage());
+            }
+    
+            return back()->with('toast', [
+                'title' => 'Trading account error',
+                'type' => 'error'
+            ]);
+        }
+    
+        // Return a success response
+        return redirect()->back()->with('toast', [
+            'title' => trans('public.toast_approve_revoke_request'),
+            'type' => 'success'
+        ]);
     }
 }

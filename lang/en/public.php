@@ -386,4 +386,11 @@ return [
     "toast_allocate_daily_profit_success" => "You’ve successfully allocated daily profit for the asset master!",
     "no_history_yet" => "No History Yet",
     "penalty_fee" => "Penalty Fee",
+    "empty_pending_request_title" => "No Pending Requests",
+    "empty_pending_request_message" => "You're all caught up! There are no pending requests to process at the moment.",
+    "asset_master" => "Asset Master",
+    "revoke_pamm_request" => ":action Revoke PAMM Request",
+    "revoke_request_caption_1" => "Please enter remarks to ",
+    "revoke_request_caption_2" => " the revoke PAMM request. If unchanged, the default remark will be used.",
+    "toast_approve_revoke_request" => "You’ve successfully approved a revoke PAMM request.",
 ];

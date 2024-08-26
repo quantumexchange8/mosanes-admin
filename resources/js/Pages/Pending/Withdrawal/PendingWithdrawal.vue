@@ -18,6 +18,7 @@ import Dialog from "primevue/dialog";
 import InputLabel from "@/Components/InputLabel.vue";
 import Chip from "primevue/chip";
 import Textarea from "primevue/textarea";
+import Empty from "@/Components/Empty.vue";
 
 const loading = ref(false);
 const dt = ref();
@@ -128,7 +129,6 @@ const submit = (transactionId) => {
             removableSort
             :rows="10"
             :rowsPerPageOptions="[10, 20, 50, 100]"
-            tableStyle="min-width: 50rem"
             paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
             :currentPageReportTemplate="paginator_caption"
             :globalFilterFields="['user_name', 'user_email', 'from']"
@@ -161,69 +161,101 @@ const submit = (transactionId) => {
                     </Button>
                 </div>
             </template>
-            <template #empty>
-                <div class="py-1">
-                    {{ $t('public.no_transaction_yet') }}
-                </div>
-            </template>
+            <template #empty><Empty :title="$t('public.empty_pending_request_title')" :message="$t('public.empty_pending_request_message')" /></template>
             <template #loading>
                 <div class="flex flex-col gap-2 items-center justify-center">
                     <Loader />
                     <span class="text-sm text-gray-700">{{ $t('public.loading_transactions_caption') }}</span>
                 </div>
             </template>
-            <Column field="created_at" sortable style="width: 25%" headerClass="hidden md:table-cell">
-                <template #header>
-                    <span class="hidden md:block">{{ $t('public.requested_date') }}</span>
-                </template>
-                <template #body="slotProps">
-                    {{ dayjs(slotProps.data.created_at).format('YYYY/MM/DD HH:mm:ss') }}
-                </template>
-            </Column>
-            <Column field="name" sortable :header="$t('public.member')" style="width: 25%" headerClass="hidden md:table-cell">
-                <template #body="slotProps">
-                    <div class="flex items-center gap-3">
-                        <div class="w-7 h-7 rounded-full overflow-hidden">
-                            <div v-if="slotProps.data.user_profile_photo">
-                                <img :src="slotProps.data.user_profile_photo" alt="Profile Photo" />
+            <template v-if="pendingWithdrawals?.length > 0">
+                <Column field="created_at" sortable style="width: 25%" headerClass="hidden md:table-cell">
+                    <template #header>
+                        <span class="hidden md:block">{{ $t('public.requested_date') }}</span>
+                    </template>
+                    <template #body="slotProps">
+                        {{ dayjs(slotProps.data.created_at).format('YYYY/MM/DD HH:mm:ss') }}
+                    </template>
+                </Column>
+                <Column field="name" sortable :header="$t('public.member')" style="width: 25%" headerClass="hidden md:table-cell">
+                    <template #body="slotProps">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
+                                <div v-if="slotProps.data.user_profile_photo">
+                                    <img :src="slotProps.data.user_profile_photo" alt="Profile Photo" />
+                                </div>
+                                <div v-else>
+                                    <DefaultProfilePhoto />
+                                </div>
                             </div>
-                            <div v-else>
-                                <DefaultProfilePhoto />
+                            <div class="flex flex-col items-start">
+                                <div class="font-medium">
+                                    {{ slotProps.data.user_name }}
+                                </div>
+                                <div class="text-gray-500 text-xs">
+                                    {{ slotProps.data.user_email }}
+                                </div>
                             </div>
                         </div>
-                        <div class="flex flex-col items-start">
-                            <div class="font-medium">
-                                {{ slotProps.data.user_name }}
+                    </template>
+                </Column>
+                <Column field="from" style="width: 25%" headerClass="hidden md:table-cell">
+                    <template #header>
+                        <span class="hidden md:block items-center justify-center w-full">{{ $t('public.from') }}</span>
+                    </template>
+                    <template #body="slotProps">
+                        {{ slotProps.data.from === 'rebate_wallet' ? $t(`public.${slotProps.data.from}`) : slotProps.data.from }}
+                    </template>
+                </Column>
+                <Column field="amount" header="" sortable style="width: 25%" headerClass="hidden md:table-cell">
+                    <template #header>
+                        <span class="hidden md:block items-center justify-center">{{ $t('public.amount') }} ($)</span>
+                    </template>
+                    <template #body="slotProps">
+                        {{ formatAmount(slotProps.data.amount) }}
+                    </template>
+                </Column>
+                <ColumnGroup type="footer">
+                    <Row>
+                        <Column class="hidden md:table-cell" :footer="$t('public.total') + ' ($) :'" :colspan="3" footerStyle="text-align:right" />
+                        <Column class="hidden md:table-cell" :footer="formatAmount(totalAmount ? totalAmount : 0)" />
+                        <Column class="md:hidden" footerStyle="text-align:right">
+                            <template #footer>
+                                <div class="flex items-center justify-end">
+                                    <div class="overflow-hidden text-right text-ellipsis font-semibold">
+                                        {{ $t('public.total') + ' ($) :' }}
+                                    </div>
+                                    <div class="w-[120px] overflow-hidden text-right text-ellipsis font-semibold">
+                                        {{ formatAmount(totalAmount ? totalAmount : 0) }}
+                                    </div>
+                                </div>
+                            </template>
+                        </Column>
+                    </Row>
+                </ColumnGroup>
+                <Column class="md:hidden">
+                    <template #body="slotProps">
+                        <div class="flex items-center justify-between">
+                            <div class="flex items-center gap-3">
+                                <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
+                                    <DefaultProfilePhoto />
+                                </div>
+                                <div class="flex flex-col items-start">
+                                    <div class="text-sm font-semibold">
+                                        {{ slotProps.data.user_name }}
+                                    </div>
+                                    <div class="text-gray-500 text-xs">
+                                        {{ formatDateTime(slotProps.data.created_at) }}
+                                    </div>
+                                </div>
                             </div>
-                            <div class="text-gray-500 text-xs">
-                                {{ slotProps.data.user_email }}
+                            <div class="overflow-hidden text-right text-ellipsis font-semibold">
+                                {{ slotProps.data.amount ?  '$&nbsp;' + formatAmount(slotProps.data.amount) : '' }}
                             </div>
                         </div>
-                    </div>
-                </template>
-            </Column>
-            <Column field="from" style="width: 25%" headerClass="hidden md:table-cell">
-                <template #header>
-                    <span class="hidden md:block items-center justify-center w-full">{{ $t('public.from') }}</span>
-                </template>
-                <template #body="slotProps">
-                    {{ slotProps.data.from === 'rebate_wallet' ? $t(`public.${slotProps.data.from}`) : slotProps.data.from }}
-                </template>
-            </Column>
-            <Column field="amount" header="" sortable style="width: 25%" headerClass="hidden md:table-cell">
-                <template #header>
-                    <span class="hidden md:block items-center justify-center">{{ $t('public.amount') }} ($)</span>
-                </template>
-                <template #body="slotProps">
-                    {{ formatAmount(slotProps.data.amount) }}
-                </template>
-            </Column>
-            <ColumnGroup type="footer">
-                <Row>
-                    <Column :footer="$t('public.total') + ' ($):'" :colspan="3" footerStyle="text-align:right" />
-                    <Column :footer="formatAmount(totalAmount ? totalAmount : 0)" />
-                </Row>
-            </ColumnGroup>
+                    </template>
+                </Column>
+            </template>
         </DataTable>
     </div>
 
@@ -328,7 +360,7 @@ const submit = (transactionId) => {
         >
             <div class="pt-7 px-4 md:pt-8 md:px-7 flex flex-col gap-3 md:gap-5 self-stretch w-full">
                 <div class="flex flex-col items-center self-stretch gap-2">
-                    <span class="capitalize text-gray-950 text-lg font-semibold">{{ $t('public.withdrawal_request', {action: approvalAction}) }}</span>
+                    <span class="capitalize text-gray-950 text-lg font-semibold">{{ $t('public.withdrawal_request', {action: $t(`public.${approvalAction}`)}) }}</span>
                     <div class="text-gray-500 text-sm">
                         {{ $t('public.withdrawal_request_caption_1') }}
                         <span class="font-semibold lowercase" :class="[approvalAction === 'approve' ? 'text-success-500' : 'text-error-500']">{{ $t(`public.${approvalAction}`) }}</span>
@@ -358,11 +390,11 @@ const submit = (transactionId) => {
 
                 <div class="flex flex-col items-start gap-3 h-40 self-stretch">
                     <InputLabel for="remarks">{{ $t('public.remarks') }}</InputLabel>
-                    <div class="flex items-center content-center gap-2 self-stretch flex-wrap">
+                    <div class="flex items-center gap-2 self-stretch overflow-x-auto">
                         <div v-for="(chip, index) in chips[approvalAction]" :key="index">
                             <Chip
                                 :label="chip.label"
-                                class="text-gray-950"
+                                class="w-full text-gray-950 whitespace-nowrap overflow-hidden"
                                 :class="{
                                     'border-primary-300 bg-primary-50 text-primary-500 hover:bg-primary-50': form.remarks === chip.label,
                                 }"

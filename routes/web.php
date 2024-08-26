@@ -41,8 +41,10 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
     Route::prefix('pending')->group(function () {
         Route::get('/', [PendingController::class, 'index'])->name('pending');
         Route::get('/getPendingWithdrawalData', [PendingController::class, 'getPendingWithdrawalData'])->name('pending.getPendingWithdrawalData');
+        Route::get('/getPendingRevokeData', [PendingController::class, 'getPendingRevokeData'])->name('pending.getPendingRevokeData');
 
         Route::post('withdrawalApproval', [PendingController::class, 'withdrawalApproval'])->name('pending.withdrawalApproval');
+        Route::post('revokeApproval', [PendingController::class, 'revokeApproval'])->name('pending.revokeApproval');
     });
 
     /**

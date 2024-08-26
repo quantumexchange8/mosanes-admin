@@ -138,7 +138,7 @@ const submit = (transactionId) => {
             @row-click="rowClicked($event.data)"
         >
             <template #header>
-                <div class="flex flex-col md:flex-row gap-3 md:justify-between items-center self-stretch">
+                <div class="flex flex-col md:flex-row gap-3 md:justify-between items-center self-stretch md:pb-6">
                     <div class="relative w-full md:w-60">
                         <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                             <IconSearch size="20" stroke-width="1.25" />

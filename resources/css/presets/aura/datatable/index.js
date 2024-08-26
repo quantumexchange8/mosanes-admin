@@ -113,10 +113,10 @@ export default {
 
                 // Shape
                 { 'first:border-l border-y border-r': context?.showGridlines },
-                'border-0 border-b border-solid',
+                'border-0 md:border-b border-solid',
 
                 // Spacing
-                context?.size === 'small' ? 'py-[0.375rem] px-2' : context?.size === 'large' ? 'py-[0.9375rem] px-5' : 'p-3',
+                context?.size === 'small' ? 'py-[0.375rem] px-2' : context?.size === 'large' ? 'py-[0.9375rem] px-5' : 'p-2.5 md:p-3',
 
                 // Color
                 (props.sortable === '' || props.sortable) && context.sorted ? 'bg-primary-50 text-primary-500' : 'bg-white text-gray-950',
@@ -162,7 +162,7 @@ export default {
                 // Spacing
                 { 'py-[0.375rem] px-2': context?.size === 'small' && !state['d_editing'] },
                 { 'py-[0.9375rem] px-5': context?.size === 'large' && !state['d_editing'] },
-                { 'p-3': context?.size !== 'large' && context?.size !== 'small' && !state['d_editing'] },
+                { 'py-2 md:p-3': context?.size !== 'large' && context?.size !== 'small' && !state['d_editing'] },
                 { 'p-3': state['d_editing'] },
 
                 // Color

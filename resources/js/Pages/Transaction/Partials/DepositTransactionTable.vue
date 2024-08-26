@@ -161,7 +161,7 @@ watchEffect(() => {
 
 
 // dialog
-const data = ref({}); 
+const data = ref({});
 const openDialog = (rowData) => {
     visible.value = true;
     data.value = rowData;
@@ -199,7 +199,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         :loading="loading"
     >
         <template #header>
-            <div class="flex flex-col md:flex-row gap-3 items-center self-stretch">
+            <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
                 <div class="relative w-full md:w-60">
                     <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                         <IconSearch size="20" stroke-width="1.25" />
@@ -247,36 +247,41 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 <span class="text-sm text-gray-700">{{ $t('public.loading_transactions_caption') }}</span>
             </div>
         </template>
-        <Column 
-            field="created_at" 
-            sortable 
-            :header="$t('public.date')" 
+        <Column
+            field="created_at"
+            sortable
+            :header="$t('public.date')"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
                 {{ formatDateTime(slotProps.data.created_at) }}
             </template>
         </Column>
-        <Column 
-            field="id_number" 
-            sortable 
-            :header="$t('public.id')" 
+        <Column
+            field="id_number"
+            sortable
+            :header="$t('public.id')"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
                 {{ slotProps.data.transaction_number }}
             </template>
         </Column>
-        <Column 
-            field="name" 
-            sortable 
-            :header="$t('public.name')" 
+        <Column
+            field="name"
+            sortable
+            :header="$t('public.name')"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
                 <div class="flex items-center gap-3">
                     <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                        <DefaultProfilePhoto />
+                        <template v-if="slotProps.data.profile_photo">
+                            <img :src="slotProps.data.profile_photo" alt="profile_photo">
+                        </template>
+                        <template v-else>
+                            <DefaultProfilePhoto />
+                        </template>
                     </div>
                     <div class="flex flex-col items-start">
                         <div class="font-medium">
@@ -289,28 +294,28 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 </div>
             </template>
         </Column>
-        <Column 
-            field="to_meta_login" 
-            :header="$t('public.account')" 
+        <Column
+            field="to_meta_login"
+            :header="$t('public.account')"
             class="hidden md:table-cell">
             <template #body="slotProps"
         >
                 {{ slotProps.data.to_meta_login }}
             </template>
         </Column>
-        <Column 
-            field="transaction_amount" 
-            sortable 
-            :header="$t('public.amount') + '&nbsp;($)'" 
+        <Column
+            field="transaction_amount"
+            sortable
+            :header="$t('public.amount') + '&nbsp;($)'"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
                 {{ slotProps.data.transaction_amount ? formatAmount(slotProps.data.transaction_amount) : '' }}
             </template>
         </Column>
-        <Column 
-            field="status" 
-            :header="$t('public.status')" 
+        <Column
+            field="status"
+            :header="$t('public.status')"
             class="hidden md:table-cell"
         >
             <template #body="slotProps">
@@ -324,7 +329,12 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                            <DefaultProfilePhoto />
+                            <template v-if="slotProps.data.profile_photo">
+                                <img :src="slotProps.data.profile_photo" alt="profile_photo">
+                            </template>
+                            <template v-else>
+                                <DefaultProfilePhoto />
+                            </template>
                         </div>
                         <div class="flex flex-col items-start">
                             <div class="text-sm font-semibold">

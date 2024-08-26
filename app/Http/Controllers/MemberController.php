@@ -50,6 +50,7 @@ class MemberController extends Controller
                     'group_name' => $user->groupHasUser->group->name ?? null,
                     'group_color' => $user->groupHasUser->group->color ?? null,
                     'status' => $user->status,
+                    'profile_photo' => $user->getFirstMediaUrl('profile_photo'),
                 ];
             });
 

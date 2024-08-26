@@ -25,21 +25,21 @@ class GroupController extends Controller
     {
         $startDate = $request->input('startDate');
         $endDate = $request->input('endDate');
-    
+
         $query = DB::table('groups')
             ->select(
-                'groups.id', 
-                'groups.name', 
-                'groups.fee_charges', 
-                'groups.color', 
-                'groups.group_leader as user_id', 
-                'users.name as leader_name', 
-                'users.email as leader_email', 
+                'groups.id',
+                'groups.name',
+                'groups.fee_charges',
+                'groups.color',
+                'groups.group_leader as user_id',
+                'users.name as leader_name',
+                'users.email as leader_email',
                 'groups.deleted_at'
             )
             ->join('users', 'users.id', '=', 'groups.group_leader')
             ->whereNull('groups.deleted_at');
-    
+
         // Apply date range filter if startDate and endDate are provided
         if ($startDate && $endDate) {
             // Both startDate and endDate are provided
@@ -49,7 +49,7 @@ class GroupController extends Controller
             // Apply default start date if no endDate is provided
             $query->whereDate('groups.created_at', '>=', '2024-01-01');
         }
-    
+
         $groups = $query->get()->map(function($group) {
             return [
                 'id' => $group->id,
@@ -69,20 +69,20 @@ class GroupController extends Controller
                 'account_equity' => 0,
             ];
         });
-    
+
         $total = [
             'total_net_balance' => 0,
             'total_deposit' => 0,
             'total_withdrawal' => 0,
             'total_charges' => 0,
         ];
-    
+
         return response()->json([
             'groups' => $groups,
             'total' => $total,
         ]);
     }
-    
+
     public function getAgents()
     {
         $users = (new DropdownOptionService())->getAgents();
@@ -139,17 +139,17 @@ class GroupController extends Controller
         $groupId = $request->input('groupId');
         $startDate = $request->input('startDate');
         $endDate = $request->input('endDate');
-    
+
         // Get all user IDs associated with the groupId
         $userIds = GroupHasUser::where('group_id', $groupId)
             ->pluck('user_id');
-    
+
         // Start building the query
         $query = Transaction::with('user')
             ->whereIn('user_id', $userIds)
             ->whereIn('transaction_type', ['deposit', 'withdrawal'])
             ->where('status', 'successful');
-    
+
         // Apply date range filter if startDate and endDate are provided
         if ($startDate && $endDate) {
             // Both startDate and endDate are provided
@@ -159,7 +159,7 @@ class GroupController extends Controller
             // Apply default start date if no endDate is provided
             $query->whereDate('approved_at', '>=', '2024-01-01');
         }
-    
+
         // Execute the query and get the results
         $transactions = $query->get();
 
@@ -177,7 +177,7 @@ class GroupController extends Controller
                 'transaction_amount' => $transaction->transaction_amount,
             ];
         });
-    
+
         // Calculate total values
         $totalAmount = $transactions->sum('amount');
         $totalFee = $transactions->sum('transaction_charges');
@@ -191,7 +191,7 @@ class GroupController extends Controller
             'totalBalance' => $totalBalance,
         ]);
     }
-        
+
     public function deleteGroup($id)
     {
         Group::destroy($id);

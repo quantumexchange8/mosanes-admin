@@ -205,7 +205,7 @@ const paginator_caption = wTrans('public.paginator_caption');
             </div>
 
             <!-- data table -->
-            <div class="p-6 flex flex-col items-center justify-center self-stretch gap-6 border border-gray-200 bg-white shadow-table rounded-2xl">
+            <div class="py-6 px-4 md:p-6 flex flex-col items-center justify-center self-stretch gap-6 border border-gray-200 bg-white shadow-table rounded-2xl">
                 <DataTable
                     v-model:filters="filters"
                     :value="users"
@@ -213,7 +213,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                     removableSort
                     :rows="10"
                     :rowsPerPageOptions="[10, 20, 50, 100]"
-                    tableStyle="min-width: 50rem"
+                    tableStyle="md:min-width: 50rem"
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
                     :currentPageReportTemplate="paginator_caption"
                     :globalFilterFields="['name']"
@@ -221,7 +221,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                     :loading="loading"
                 >
                     <template #header>
-                        <div class="flex flex-col md:flex-row gap-3 items-center self-stretch pb-6">
+                        <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
                             <div class="relative w-full md:w-60">
                                 <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                                     <IconSearch size="20" stroke-width="1.25" />
@@ -269,7 +269,12 @@ const paginator_caption = wTrans('public.paginator_caption');
                             <span class="text-sm text-gray-700">{{ $t('public.loading_users_caption') }}</span>
                         </div>
                     </template>
-                    <Column field="id_number" sortable style="width: 15%" headerClass="hidden md:table-cell">
+                    <Column
+                        field="id_number"
+                        sortable
+                        style="width: 15%"
+                        class="hidden md:table-cell"
+                    >
                         <template #header>
                             <span class="hidden md:block">id</span>
                         </template>
@@ -277,11 +282,22 @@ const paginator_caption = wTrans('public.paginator_caption');
                             {{ slotProps.data.id_number }}
                         </template>
                     </Column>
-                    <Column field="name" sortable :header="$t('public.name')" style="width: 35%" headerClass="hidden md:table-cell">
+                    <Column
+                        field="name"
+                        sortable
+                        :header="$t('public.name')"
+                        style="width: 35%"
+                        class="hidden md:table-cell"
+                    >
                         <template #body="slotProps">
                             <div class="flex items-center gap-3">
-                                <div class="w-7 h-7 rounded-full overflow-hidden">
-                                    <DefaultProfilePhoto />
+                                <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
+                                    <template v-if="slotProps.data.profile_photo">
+                                        <img :src="slotProps.data.profile_photo" alt="profile_photo">
+                                    </template>
+                                    <template v-else>
+                                        <DefaultProfilePhoto />
+                                    </template>
                                 </div>
                                 <div class="flex flex-col items-start">
                                     <div class="font-medium">
@@ -294,7 +310,11 @@ const paginator_caption = wTrans('public.paginator_caption');
                             </div>
                         </template>
                     </Column>
-                    <Column field="role" style="width: 15%" headerClass="hidden md:table-cell">
+                    <Column
+                        field="role"
+                        style="width: 15%"
+                        class="hidden md:table-cell"
+                    >
                         <template #header>
                             <span class="hidden md:block items-center justify-center w-full text-center">{{ $t('public.role') }}</span>
                         </template>
@@ -304,7 +324,11 @@ const paginator_caption = wTrans('public.paginator_caption');
                             </div>
                         </template>
                     </Column>
-                    <Column field="group" style="width: 20%" headerClass="hidden md:table-cell">
+                    <Column
+                        field="group"
+                        style="width: 20%"
+                        class="hidden md:table-cell"
+                    >
                         <template #header>
                             <span class="hidden md:block items-center justify-center w-full text-center">{{ $t('public.group') }}</span>
                         </template>
@@ -332,11 +356,69 @@ const paginator_caption = wTrans('public.paginator_caption');
                             </div>
                         </template>
                     </Column>
-                    <Column field="action" header="" style="width: 15%" headerClass="hidden md:table-cell">
+                    <Column
+                        field="action"
+                        header=""
+                        style="width: 15%"
+                        class="hidden md:table-cell"
+                    >
                         <template #body="slotProps">
                             <MemberTableActions
                                 :member="slotProps.data"
                             />
+                        </template>
+                    </Column>
+                    <Column class="md:hidden">
+                        <template #body="slotProps">
+                            <div class="flex flex-col items-start gap-1 self-stretch">
+                                <div class="flex items-center gap-2 self-stretch w-full">
+                                    <div class="flex items-center gap-3 w-full">
+                                        <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
+                                            <template v-if="slotProps.data.profile_photo">
+                                                <img :src="slotProps.data.profile_photo" alt="profile_photo">
+                                            </template>
+                                            <template v-else>
+                                                <DefaultProfilePhoto />
+                                            </template>
+                                        </div>
+                                        <div class="flex flex-col items-start">
+                                            <div class="font-medium max-w-[120px] xxs:max-w-[140px] min-[390px]:max-w-[180px] xs:max-w-[220px] truncate">
+                                                {{ slotProps.data.name }}
+                                            </div>
+                                            <div class="text-gray-500 text-xs max-w-[120px] xxs:max-w-[140px] min-[390px]:max-w-[180px] xs:max-w-[220px] truncate">
+                                                {{ slotProps.data.email }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-end">
+                                        <MemberTableActions
+                                            :member="slotProps.data"
+                                        />
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-1 h-[26px]">
+                                    <StatusBadge :value="slotProps.data.role">{{ $t(`public.${slotProps.data.role}`) }}</StatusBadge>
+                                    <div class="flex items-center justify-center">
+                                        <div
+                                            v-if="slotProps.data.group_id"
+                                            class="flex items-center gap-2 rounded justify-center py-1 px-2"
+                                            :style="{ backgroundColor: formatRgbaColor(slotProps.data.group_color, 0.1) }"
+                                        >
+                                            <div
+                                                class="w-1.5 h-1.5 grow-0 shrink-0 rounded-full"
+                                                :style="{ backgroundColor: `#${slotProps.data.group_color}` }"
+                                            ></div>
+                                            <div
+                                                class="text-xs font-semibold"
+                                                :style="{ color: `#${slotProps.data.group_color}` }"
+                                            >
+                                                {{ slotProps.data.group_name }}
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
                         </template>
                     </Column>
                 </DataTable>

@@ -264,7 +264,7 @@ const clearDate = () => {
                                 </div>
                             </div>
                         </div>
-                        <div class="w-full text-right max-w-[100px] truncate font-semibold">
+                        <div class="w-full text-right max-w-[90px] truncate font-semibold">
                             $ {{ formatAmount(slotProps.data.balance) }}
                         </div>
                     </div>

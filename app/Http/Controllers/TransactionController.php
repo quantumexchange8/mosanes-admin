@@ -22,10 +22,10 @@ class TransactionController extends Controller
     {
         $type = $request->query('type');
         $selectedMonths = $request->query('selectedMonths'); // Get selectedMonths as a comma-separated string
-    
+
         // Convert the comma-separated string to an array
         $selectedMonthsArray = !empty($selectedMonths) ? explode(',', $selectedMonths) : [];
-    
+
         // Define common fields
         $commonFields = [
             'id',
@@ -40,14 +40,14 @@ class TransactionController extends Controller
             'remarks',
             'created_at',
         ];
-    
+
         if (empty($selectedMonthsArray)) {
             // If selectedMonths is empty, return an empty result
             return response()->json([
                 'transactions' => [],
             ]);
         }
-    
+
         if ($type === 'payout') {
         // Retrieve query parameters
         $startDate = $request->query('startDate');
@@ -103,7 +103,7 @@ class TransactionController extends Controller
             // Generate detailed data for this summary item
             $symbolGroupDetails = $group->groupBy('symbol_group')->map(function ($symbolGroupItems) use ($allSymbolGroups) {
                 $symbolGroupId = $symbolGroupItems->first()['symbol_group'];
-                
+
                 return [
                     'id' => $symbolGroupId,
                     'name' => $allSymbolGroups[$symbolGroupId] ?? 'Unknown',
@@ -144,12 +144,12 @@ class TransactionController extends Controller
 
         // Sort summary by execute_at in descending order to get the latest dates first
         $summary = $summary->sortByDesc('execute_at');
-    
+
         $data = $summary;
 
         } else {
             $query = Transaction::with('user', 'from_wallet', 'to_wallet');
-    
+
             // Apply filtering for each selected month-year pair
             if (!empty($selectedMonthsArray)) {
                 $query->where(function ($q) use ($selectedMonthsArray) {
@@ -163,7 +163,7 @@ class TransactionController extends Controller
                     }
                 });
             }
-    
+
             // Filter by transaction type
             if ($type) {
                 if ($type === 'transfer') {
@@ -175,17 +175,18 @@ class TransactionController extends Controller
                     $query->where('transaction_type', $type);
                 }
             }
-    
+
             // Fetch data
             $data = $query->latest()->get()->map(function ($transaction) use ($commonFields, $type) {
                 // Initialize result array with common fields
                 $result = $transaction->only($commonFields);
-    
+
                 // Add common user fields
                 $result['name'] = $transaction->user ? $transaction->user->name : null;
                 $result['email'] = $transaction->user ? $transaction->user->email : null;
                 $result['role'] = $transaction->user ? $transaction->user->role : null;
-    
+                $result['profile_photo'] = $transaction->user ? $transaction->user->getFirstMediaUrl('profile_photo') : null;
+
                 // Add type-specific fields
                 if ($type === 'deposit') {
                     $result['from_wallet_address'] = $transaction->from_wallet_address;
@@ -209,11 +210,11 @@ class TransactionController extends Controller
                     $result['to_wallet_id'] = $transaction->to_wallet ? $transaction->to_wallet->id : null;
                     $result['to_wallet_name'] = $transaction->to_wallet ? $transaction->to_wallet->name : null;
                 }
-    
+
                 return $result;
             });
         }
-    
+
         return response()->json([
             'transactions' => $data,
         ]);

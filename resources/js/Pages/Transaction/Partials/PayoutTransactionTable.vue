@@ -199,7 +199,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         :loading="loading"
         >
         <template #header>
-            <div class="flex flex-col md:flex-row gap-3 items-center self-stretch">
+            <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
                 <div class="relative w-full md:w-60">
                     <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                         <IconSearch size="20" stroke-width="1.25" />
@@ -273,7 +273,12 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
             <template #body="slotProps">
                 <div class="flex items-center gap-3">
                     <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                        <DefaultProfilePhoto />
+                        <template v-if="slotProps.data.profile_photo">
+                            <img :src="slotProps.data.profile_photo" alt="profile_photo">
+                        </template>
+                        <template v-else>
+                            <DefaultProfilePhoto />
+                        </template>
                     </div>
                     <div class="flex flex-col items-start">
                         <div class="font-medium">
@@ -320,7 +325,12 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 <div class="flex items-center justify-between">
                     <div class="flex items-center gap-3">
                         <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                            <DefaultProfilePhoto />
+                            <template v-if="slotProps.data.profile_photo">
+                                <img :src="slotProps.data.profile_photo" alt="profile_photo">
+                            </template>
+                            <template v-else>
+                                <DefaultProfilePhoto />
+                            </template>
                         </div>
                         <div class="flex flex-col items-start">
                             <div class="text-sm font-semibold">

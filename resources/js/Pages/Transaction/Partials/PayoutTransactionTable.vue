@@ -254,75 +254,24 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 <span class="text-sm text-gray-700">{{ $t('public.loading_transactions_caption') }}</span>
             </div>
         </template>
-        <Column
-            field="execute_at"
-            sortable
-            :header="$t('public.date')"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                {{ formatDate(slotProps.data.execute_at)}}
-            </template>
-        </Column>
-        <Column
-            field="name"
-            sortable
-            :header="$t('public.name')"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                        <template v-if="slotProps.data.profile_photo">
-                            <img :src="slotProps.data.profile_photo" alt="profile_photo">
-                        </template>
-                        <template v-else>
-                            <DefaultProfilePhoto />
-                        </template>
-                    </div>
-                    <div class="flex flex-col items-start">
-                        <div class="font-medium">
-                            {{ slotProps.data.name }}
-                        </div>
-                        <div class="text-gray-500 text-xs">
-                            {{ slotProps.data.email }}
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </Column>
-        <Column
-            field="account_type"
-            :header="`${$t('public.account')}`"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                {{ $t('public.' + slotProps.data.account_type) }}
-            </template>
-        </Column>
-        <Column
-            field="volume"
-            sortable
-            :header="`${$t('public.volume')}&nbsp;(Ł) `"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                {{ formatAmount(slotProps.data.volume) }}
-            </template>
-        </Column>
-        <Column
-            field="payout"
-            sortable
-            :header="`${$t('public.payout')}&nbsp;($)`"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                {{ formatAmount(slotProps.data.rebate) }}
-            </template>
-        </Column>
-        <Column class="md:hidden">
-            <template #body="slotProps">
-                <div class="flex items-center justify-between">
+        <template v-if="totalTransaction > 0">
+            <Column
+                field="execute_at"
+                sortable
+                :header="$t('public.date')"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    {{ formatDate(slotProps.data.execute_at)}}
+                </template>
+            </Column>
+            <Column
+                field="name"
+                sortable
+                :header="$t('public.name')"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
                     <div class="flex items-center gap-3">
                         <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
                             <template v-if="slotProps.data.profile_photo">
@@ -333,20 +282,73 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                             </template>
                         </div>
                         <div class="flex flex-col items-start">
-                            <div class="text-sm font-semibold">
+                            <div class="font-medium">
                                 {{ slotProps.data.name }}
                             </div>
                             <div class="text-gray-500 text-xs">
-                                {{ formatDateTime(slotProps.data.execute_at) }}
+                                {{ slotProps.data.email }}
                             </div>
                         </div>
                     </div>
-                    <div class="overflow-hidden text-right text-ellipsis font-semibold">
-                        $&nbsp;{{ formatAmount(slotProps.data.rebate) }}
+                </template>
+            </Column>
+            <Column
+                field="account_type"
+                :header="`${$t('public.account')}`"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    {{ $t('public.' + slotProps.data.account_type) }}
+                </template>
+            </Column>
+            <Column
+                field="volume"
+                sortable
+                :header="`${$t('public.volume')}&nbsp;(Ł) `"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    {{ formatAmount(slotProps.data.volume) }}
+                </template>
+            </Column>
+            <Column
+                field="payout"
+                sortable
+                :header="`${$t('public.payout')}&nbsp;($)`"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    {{ formatAmount(slotProps.data.rebate) }}
+                </template>
+            </Column>
+            <Column class="md:hidden">
+                <template #body="slotProps">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
+                                <template v-if="slotProps.data.profile_photo">
+                                    <img :src="slotProps.data.profile_photo" alt="profile_photo">
+                                </template>
+                                <template v-else>
+                                    <DefaultProfilePhoto />
+                                </template>
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <div class="text-sm font-semibold">
+                                    {{ slotProps.data.name }}
+                                </div>
+                                <div class="text-gray-500 text-xs">
+                                    {{ formatDateTime(slotProps.data.execute_at) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="overflow-hidden text-right text-ellipsis font-semibold">
+                            $&nbsp;{{ formatAmount(slotProps.data.rebate) }}
+                        </div>
                     </div>
-                </div>
-            </template>
-        </Column>
+                </template>
+            </Column>
+        </template>
     </DataTable>
 
     <Dialog v-model:visible="visible" modal :header="$t('public.payout_details')" class="dialog-xs md:dialog-md">

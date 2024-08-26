@@ -208,7 +208,7 @@ class PendingController extends Controller
                 'amount' => $assetRevoke->penalty_fee,
                 'transaction_amount' => $assetRevoke->penalty_fee,
                 'status' => 'successful',
-                'remarks' => $request->remarks,
+                'remarks' => 'System Approval',
                 'approved_at' => now(),
                 'handle_by' => Auth::id(),
             ]);

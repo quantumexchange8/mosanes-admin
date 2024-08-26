@@ -251,87 +251,34 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 <span class="text-sm text-gray-700">{{ $t('public.loading_transactions_caption') }}</span>
             </div>
         </template>
-        <Column
-            field="created_at"
-            sortable
-            :header="$t('public.date')"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                {{ formatDateTime(slotProps.data.approved_at) }}
-            </template>
-        </Column>
-        <Column
-            field="transaction_number"
-            sortable
-            :header="$t('public.id')"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                {{ slotProps.data.transaction_number }}
-            </template>
-        </Column>
-        <Column
-            field="name"
-            sortable
-            :header="$t('public.name')"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                <div class="flex items-center gap-3">
-                    <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                        <template v-if="slotProps.data.profile_photo">
-                            <img :src="slotProps.data.profile_photo" alt="profile_photo">
-                        </template>
-                        <template v-else>
-                            <DefaultProfilePhoto />
-                        </template>
-                    </div>
-                    <div class="flex flex-col items-start">
-                        <div class="font-medium">
-                            {{ slotProps.data.name }}
-                        </div>
-                        <div class="text-gray-500 text-xs">
-                            {{ slotProps.data.email }}
-                        </div>
-                    </div>
-                </div>
-            </template>
-        </Column>
-        <Column
-            :field="(transactions && transactions.from_meta_login) ? 'from_meta_login' : 'from_wallet_name'"
-            :header="$t('public.from')"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                {{ slotProps.data.from_meta_login ? slotProps.data.from_meta_login : slotProps.data ? $t(`public.${slotProps.data.from_wallet_name}`) : '' }}
-            </template>
-        </Column>
-        <Column
-            field="amount"
-            sortable
-            :header="$t('public.amount') + '&nbsp;($)'"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                {{ formatAmount(slotProps.data.transaction_amount) }}
-            </template>
-        </Column>
-        <Column
-            field="status"
-            :header="$t('public.status')"
-            class="hidden md:table-cell"
-        >
-            <template #body="slotProps">
-                <StatusBadge class="w-fit" :value="slotProps.data.status">
-                    <span v-if="slotProps.data.status === 'successful'">{{ $t('public.approved') }}</span>
-                    <span v-else>{{ $t('public.rejected') }}</span>
-                </StatusBadge>
-            </template>
-        </Column>
-        <Column class="md:hidden">
-            <template #body="slotProps">
-                <div class="flex items-center justify-between">
+        <template v-if="totalTransaction > 0">
+            <Column
+                field="created_at"
+                sortable
+                :header="$t('public.date')"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    {{ formatDateTime(slotProps.data.approved_at) }}
+                </template>
+            </Column>
+            <Column
+                field="transaction_number"
+                sortable
+                :header="$t('public.id')"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    {{ slotProps.data.transaction_number }}
+                </template>
+            </Column>
+            <Column
+                field="name"
+                sortable
+                :header="$t('public.name')"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
                     <div class="flex items-center gap-3">
                         <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
                             <template v-if="slotProps.data.profile_photo">
@@ -342,20 +289,75 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                             </template>
                         </div>
                         <div class="flex flex-col items-start">
-                            <div class="text-sm font-semibold">
+                            <div class="font-medium">
                                 {{ slotProps.data.name }}
                             </div>
                             <div class="text-gray-500 text-xs">
-                                {{ formatDateTime(slotProps.data.approved_at) }}
+                                {{ slotProps.data.email }}
                             </div>
                         </div>
                     </div>
-                    <div class="overflow-hidden text-right text-ellipsis font-semibold">
-                        $&nbsp;{{ formatAmount(slotProps.data.transaction_amount) }}
+                </template>
+            </Column>
+            <Column
+                :field="(transactions && transactions.from_meta_login) ? 'from_meta_login' : 'from_wallet_name'"
+                :header="$t('public.from')"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    {{ slotProps.data.from_meta_login ? slotProps.data.from_meta_login : slotProps.data ? $t(`public.${slotProps.data.from_wallet_name}`) : '' }}
+                </template>
+            </Column>
+            <Column
+                field="amount"
+                sortable
+                :header="$t('public.amount') + '&nbsp;($)'"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    {{ formatAmount(slotProps.data.transaction_amount) }}
+                </template>
+            </Column>
+            <Column
+                field="status"
+                :header="$t('public.status')"
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    <StatusBadge class="w-fit" :value="slotProps.data.status">
+                        <span v-if="slotProps.data.status === 'successful'">{{ $t('public.approved') }}</span>
+                        <span v-else>{{ $t('public.rejected') }}</span>
+                    </StatusBadge>
+                </template>
+            </Column>
+            <Column class="md:hidden">
+                <template #body="slotProps">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center gap-3">
+                            <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
+                                <template v-if="slotProps.data.profile_photo">
+                                    <img :src="slotProps.data.profile_photo" alt="profile_photo">
+                                </template>
+                                <template v-else>
+                                    <DefaultProfilePhoto />
+                                </template>
+                            </div>
+                            <div class="flex flex-col items-start">
+                                <div class="text-sm font-semibold">
+                                    {{ slotProps.data.name }}
+                                </div>
+                                <div class="text-gray-500 text-xs">
+                                    {{ formatDateTime(slotProps.data.approved_at) }}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="overflow-hidden text-right text-ellipsis font-semibold">
+                            $&nbsp;{{ formatAmount(slotProps.data.transaction_amount) }}
+                        </div>
                     </div>
-                </div>
-            </template>
-        </Column>
+                </template>
+            </Column>
+        </template>
     </DataTable>
 
     <OverlayPanel ref="op">

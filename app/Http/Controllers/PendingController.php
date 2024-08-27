@@ -190,6 +190,7 @@ class PendingController extends Controller
         // Update the related AssetSubscription record using the relationship
         $assetRevoke->asset_subscription()->update([
             'status' => 'revoked',
+            'remarks' => $request->remarks,
             'revoked_at' => now(),
         ]);
     

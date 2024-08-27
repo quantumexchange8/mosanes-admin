@@ -183,7 +183,7 @@ watchEffect(() => {
 
         <!-- Profile -->
         <SidebarLink
-            title="My Profile"
+            :title="$t('public.my_profile')"
             :href="route('profile.edit')"
             :active="route().current('profile.edit')"
         >

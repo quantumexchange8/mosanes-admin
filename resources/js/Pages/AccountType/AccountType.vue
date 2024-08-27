@@ -81,49 +81,51 @@ const rowClicked = (data) => {
                         </div>
                     </template>
 
-                    <Column field="name" sortable class="w-1/2 md:w-1/4"    >
-                        <template #header>
-                            <span class="w-10 truncate sm:w-auto">{{ $t('public.name') }}</span>
-                        </template>
-                        <template #body="slotProps">
-                            <span class="w-20 truncate inline-block sm:w-auto">{{ slotProps.data.name }}</span>
-                        </template>
-                    </Column>
-                    <Column field="max_acc" style="width: 20%" class="hidden md:table-cell">
-                        <template #header>
-                            <span>{{ $t('public.max_account') }}</span>
-                        </template>
-                        <template #body="slotProps">
-                            {{ slotProps.data.maximum_account_number }}
-                        </template>
-                    </Column>
-                    <Column field="trade_delay" style="width: 20%" class="hidden md:table-cell">
-                        <template #header>
-                            <span>{{ $t('public.trade_delay') }}</span>
-                        </template>
-                        <template #body="slotProps">
-                            {{ slotProps.data.trade_delay }}
-                        </template>
-                    </Column>
-                    <Column field="total_acc" sortable class="w-1/3 md:w-1/5" bodyClass="text-center md:text-left" >
-                        <template #header>
-                            <span class="w-14 truncate sm:w-auto">{{ $t('public.total_account') }}</span>
-                        </template>
-                        <template #body="slotProps">
-                            {{ slotProps.data.total_account }}
-                        </template>
-                    </Column>
-                    <Column field="action" style="width: 15%" >
-                        <template #body="slotProps">
-                            <div class="py-2 px-3 flex justify-center items-center gap-2 flex-1">
-                                <AccountTypeStatus :accountTypeId="slotProps.data.id" />
+                    <template v-if="accountTypes?.length > 0">
+                        <Column field="name" sortable class="w-1/2 md:w-1/4">
+                            <template #header>
+                                <span class="w-10 truncate sm:w-auto">{{ $t('public.name') }}</span>
+                            </template>
+                            <template #body="slotProps">
+                                <span class="w-20 truncate inline-block sm:w-auto">{{ slotProps.data.name }}</span>
+                            </template>
+                        </Column>
+                        <Column field="max_acc" style="width: 20%" class="hidden md:table-cell">
+                            <template #header>
+                                <span>{{ $t('public.max_account') }}</span>
+                            </template>
+                            <template #body="slotProps">
+                                {{ slotProps.data.maximum_account_number }}
+                            </template>
+                        </Column>
+                        <Column field="trade_delay" style="width: 20%" class="hidden md:table-cell">
+                            <template #header>
+                                <span>{{ $t('public.trade_delay') }}</span>
+                            </template>
+                            <template #body="slotProps">
+                                {{ slotProps.data.trade_delay }}
+                            </template>
+                        </Column>
+                        <Column field="total_acc" sortable class="w-1/3 md:w-1/5" bodyClass="text-center md:text-left" >
+                            <template #header>
+                                <span class="w-14 truncate sm:w-auto">{{ $t('public.total_account') }}</span>
+                            </template>
+                            <template #body="slotProps">
+                                {{ slotProps.data.total_account }}
+                            </template>
+                        </Column>
+                        <Column field="action" style="width: 15%" >
+                            <template #body="slotProps">
+                                <div class="py-2 px-3 flex justify-center items-center gap-2 flex-1">
+                                    <AccountTypeStatus :accountTypeId="slotProps.data.id" />
 
-                                <div class="hidden md:inline-flex">
-                                    <AccountTypeSetting :accountTypeId="slotProps.data.id" />
+                                    <div class="hidden md:inline-flex">
+                                        <AccountTypeSetting :accountTypeId="slotProps.data.id" />
+                                    </div>
                                 </div>
-                            </div>
-                        </template>
-                    </Column>
+                            </template>
+                        </Column>
+                    </template>
                 </DataTable>
             </div>
         </div>

@@ -30,6 +30,7 @@ import MemberTableActions from "@/Pages/Member/Listing/Partials/MemberTableActio
 import { trans, wTrans } from "laravel-vue-i18n";
 import {generalFormat} from "@/Composables/index.js";
 import StatusBadge from "@/Components/StatusBadge.vue";
+import Empty from "@/Components/Empty.vue";
 
 const total_members = ref(999);
 const total_agents = ref(999);
@@ -262,165 +263,166 @@ const paginator_caption = wTrans('public.paginator_caption');
                             </div>
                         </div>
                     </template>
-                    <template #empty> {{ $t('public.no_user_header') }} </template>
+                    <template #empty><Empty :title="$t('public.empty_member_title')" :message="$t('public.empty_member_message')" /></template>
                     <template #loading>
                         <div class="flex flex-col gap-2 items-center justify-center">
                             <Loader />
                             <span class="text-sm text-gray-700">{{ $t('public.loading_users_caption') }}</span>
                         </div>
                     </template>
-                    <Column
-                        field="id_number"
-                        sortable
-                        style="width: 15%"
-                        class="hidden md:table-cell"
-                    >
-                        <template #header>
-                            <span class="hidden md:block">id</span>
-                        </template>
-                        <template #body="slotProps">
-                            {{ slotProps.data.id_number }}
-                        </template>
-                    </Column>
-                    <Column
-                        field="name"
-                        sortable
-                        :header="$t('public.name')"
-                        style="width: 35%"
-                        class="hidden md:table-cell"
-                    >
-                        <template #body="slotProps">
-                            <div class="flex items-center gap-3">
-                                <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                                    <template v-if="slotProps.data.profile_photo">
-                                        <img :src="slotProps.data.profile_photo" alt="profile_photo">
-                                    </template>
-                                    <template v-else>
-                                        <DefaultProfilePhoto />
-                                    </template>
-                                </div>
-                                <div class="flex flex-col items-start">
-                                    <div class="font-medium">
-                                        {{ slotProps.data.name }}
+                    <template v-if="total_users > 0">
+                        <Column
+                            field="id_number"
+                            sortable
+                            style="width: 15%"
+                            class="hidden md:table-cell"
+                        >
+                            <template #header>
+                                <span class="hidden md:block">id</span>
+                            </template>
+                            <template #body="slotProps">
+                                {{ slotProps.data.id_number }}
+                            </template>
+                        </Column>
+                        <Column
+                            field="name"
+                            sortable
+                            :header="$t('public.name')"
+                            style="width: 35%"
+                            class="hidden md:table-cell"
+                        >
+                            <template #body="slotProps">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
+                                        <template v-if="slotProps.data.profile_photo">
+                                            <img :src="slotProps.data.profile_photo" alt="profile_photo">
+                                        </template>
+                                        <template v-else>
+                                            <DefaultProfilePhoto />
+                                        </template>
                                     </div>
-                                    <div class="text-gray-500 text-xs">
-                                        {{ slotProps.data.email }}
-                                    </div>
-                                </div>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column
-                        field="role"
-                        style="width: 15%"
-                        class="hidden md:table-cell"
-                    >
-                        <template #header>
-                            <span class="hidden md:block items-center justify-center w-full text-center">{{ $t('public.role') }}</span>
-                        </template>
-                        <template #body="slotProps">
-                            <div class="flex items-center justify-center">
-                                <StatusBadge :value="slotProps.data.role">{{ $t(`public.${slotProps.data.role}`) }}</StatusBadge>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column
-                        field="group"
-                        style="width: 20%"
-                        class="hidden md:table-cell"
-                    >
-                        <template #header>
-                            <span class="hidden md:block items-center justify-center w-full text-center">{{ $t('public.group') }}</span>
-                        </template>
-                        <template #body="slotProps">
-                            <div class="flex items-center justify-center">
-                                <div
-                                    v-if="slotProps.data.group_id"
-                                    class="flex items-center gap-2 rounded justify-center py-1 px-2"
-                                    :style="{ backgroundColor: formatRgbaColor(slotProps.data.group_color, 0.1) }"
-                                >
-                                    <div
-                                        class="w-1.5 h-1.5 grow-0 shrink-0 rounded-full"
-                                        :style="{ backgroundColor: `#${slotProps.data.group_color}` }"
-                                    ></div>
-                                    <div
-                                        class="text-xs font-semibold"
-                                        :style="{ color: `#${slotProps.data.group_color}` }"
-                                    >
-                                        {{ slotProps.data.group_name }}
-                                    </div>
-                                </div>
-                                <div v-else>
-                                    -
-                                </div>
-                            </div>
-                        </template>
-                    </Column>
-                    <Column
-                        field="action"
-                        header=""
-                        style="width: 15%"
-                        class="hidden md:table-cell"
-                    >
-                        <template #body="slotProps">
-                            <MemberTableActions
-                                :member="slotProps.data"
-                            />
-                        </template>
-                    </Column>
-                    <Column class="md:hidden">
-                        <template #body="slotProps">
-                            <div class="flex flex-col items-start gap-1 self-stretch">
-                                <div class="flex items-center gap-2 self-stretch w-full">
-                                    <div class="flex items-center gap-3 w-full">
-                                        <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                                            <template v-if="slotProps.data.profile_photo">
-                                                <img :src="slotProps.data.profile_photo" alt="profile_photo">
-                                            </template>
-                                            <template v-else>
-                                                <DefaultProfilePhoto />
-                                            </template>
+                                    <div class="flex flex-col items-start">
+                                        <div class="font-medium">
+                                            {{ slotProps.data.name }}
                                         </div>
-                                        <div class="flex flex-col items-start">
-                                            <div class="font-medium max-w-[120px] xxs:max-w-[140px] min-[390px]:max-w-[180px] xs:max-w-[220px] truncate">
-                                                {{ slotProps.data.name }}
-                                            </div>
-                                            <div class="text-gray-500 text-xs max-w-[120px] xxs:max-w-[140px] min-[390px]:max-w-[180px] xs:max-w-[220px] truncate">
-                                                {{ slotProps.data.email }}
-                                            </div>
+                                        <div class="text-gray-500 text-xs">
+                                            {{ slotProps.data.email }}
                                         </div>
                                     </div>
-                                    <div class="flex items-end">
-                                        <MemberTableActions
-                                            :member="slotProps.data"
-                                        />
-                                    </div>
                                 </div>
-                                <div class="flex items-center gap-1 h-[26px]">
+                            </template>
+                        </Column>
+                        <Column
+                            field="role"
+                            style="width: 15%"
+                            class="hidden md:table-cell"
+                        >
+                            <template #header>
+                                <span class="hidden md:block items-center justify-center w-full text-center">{{ $t('public.role') }}</span>
+                            </template>
+                            <template #body="slotProps">
+                                <div class="flex items-center justify-center">
                                     <StatusBadge :value="slotProps.data.role">{{ $t(`public.${slotProps.data.role}`) }}</StatusBadge>
-                                    <div class="flex items-center justify-center">
+                                </div>
+                            </template>
+                        </Column>
+                        <Column
+                            field="group"
+                            style="width: 20%"
+                            class="hidden md:table-cell"
+                        >
+                            <template #header>
+                                <span class="hidden md:block items-center justify-center w-full text-center">{{ $t('public.group') }}</span>
+                            </template>
+                            <template #body="slotProps">
+                                <div class="flex items-center justify-center">
+                                    <div
+                                        v-if="slotProps.data.group_id"
+                                        class="flex items-center gap-2 rounded justify-center py-1 px-2"
+                                        :style="{ backgroundColor: formatRgbaColor(slotProps.data.group_color, 0.1) }"
+                                    >
                                         <div
-                                            v-if="slotProps.data.group_id"
-                                            class="flex items-center gap-2 rounded justify-center py-1 px-2"
-                                            :style="{ backgroundColor: formatRgbaColor(slotProps.data.group_color, 0.1) }"
+                                            class="w-1.5 h-1.5 grow-0 shrink-0 rounded-full"
+                                            :style="{ backgroundColor: `#${slotProps.data.group_color}` }"
+                                        ></div>
+                                        <div
+                                            class="text-xs font-semibold"
+                                            :style="{ color: `#${slotProps.data.group_color}` }"
                                         >
+                                            {{ slotProps.data.group_name }}
+                                        </div>
+                                    </div>
+                                    <div v-else>
+                                        -
+                                    </div>
+                                </div>
+                            </template>
+                        </Column>
+                        <Column
+                            field="action"
+                            header=""
+                            style="width: 15%"
+                            class="hidden md:table-cell"
+                        >
+                            <template #body="slotProps">
+                                <MemberTableActions
+                                    :member="slotProps.data"
+                                />
+                            </template>
+                        </Column>
+                        <Column class="md:hidden">
+                            <template #body="slotProps">
+                                <div class="flex flex-col items-start gap-1 self-stretch">
+                                    <div class="flex items-center gap-2 self-stretch w-full">
+                                        <div class="flex items-center gap-3 w-full">
+                                            <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
+                                                <template v-if="slotProps.data.profile_photo">
+                                                    <img :src="slotProps.data.profile_photo" alt="profile_photo">
+                                                </template>
+                                                <template v-else>
+                                                    <DefaultProfilePhoto />
+                                                </template>
+                                            </div>
+                                            <div class="flex flex-col items-start">
+                                                <div class="font-medium max-w-[120px] xxs:max-w-[140px] min-[390px]:max-w-[180px] xs:max-w-[220px] truncate">
+                                                    {{ slotProps.data.name }}
+                                                </div>
+                                                <div class="text-gray-500 text-xs max-w-[120px] xxs:max-w-[140px] min-[390px]:max-w-[180px] xs:max-w-[220px] truncate">
+                                                    {{ slotProps.data.email }}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="flex items-end">
+                                            <MemberTableActions
+                                                :member="slotProps.data"
+                                            />
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center gap-1 h-[26px]">
+                                        <StatusBadge :value="slotProps.data.role">{{ $t(`public.${slotProps.data.role}`) }}</StatusBadge>
+                                        <div class="flex items-center justify-center">
                                             <div
-                                                class="w-1.5 h-1.5 grow-0 shrink-0 rounded-full"
-                                                :style="{ backgroundColor: `#${slotProps.data.group_color}` }"
-                                            ></div>
-                                            <div
-                                                class="text-xs font-semibold"
-                                                :style="{ color: `#${slotProps.data.group_color}` }"
+                                                v-if="slotProps.data.group_id"
+                                                class="flex items-center gap-2 rounded justify-center py-1 px-2"
+                                                :style="{ backgroundColor: formatRgbaColor(slotProps.data.group_color, 0.1) }"
                                             >
-                                                {{ slotProps.data.group_name }}
+                                                <div
+                                                    class="w-1.5 h-1.5 grow-0 shrink-0 rounded-full"
+                                                    :style="{ backgroundColor: `#${slotProps.data.group_color}` }"
+                                                ></div>
+                                                <div
+                                                    class="text-xs font-semibold"
+                                                    :style="{ color: `#${slotProps.data.group_color}` }"
+                                                >
+                                                    {{ slotProps.data.group_name }}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-                            </div>
-
-                        </template>
-                    </Column>
+                            </template>
+                        </Column>
+                    </template>
                 </DataTable>
             </div>
 <!--            <div class="flex flex-col justify-center md:justify-normal items-center px-4 md:px-6 py-6 gap-5 md:gap-6 self-stretch max-w-[1440px] rounded-2xl border border-gray-200 bg-white shadow-table">-->

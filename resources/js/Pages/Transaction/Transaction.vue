@@ -14,10 +14,10 @@ import TransferTransactionTable from "@/Pages/Transaction/Partials/TransferTrans
 import PayoutTransactionTable from "@/Pages/Transaction/Partials/PayoutTransactionTable.vue";
 import {wTrans} from "laravel-vue-i18n";
 
-const totalTransaction = ref(0);
-const totalTransactionAmount = ref(0);
-const maxAmount = ref(0);
-const counterDuration = ref(1);
+const totalTransaction = ref(999);
+const totalTransactionAmount = ref(999);
+const maxAmount = ref(999);
+const counterDuration = ref(10);
 const months = ref([]);
 
 const getTransactionMonths = async () => {
@@ -143,6 +143,7 @@ const handleUpdateTotals = (data) => {
   totalTransaction.value = data.totalTransaction;
   totalTransactionAmount.value = data.totalTransactionAmount;
   maxAmount.value = data.maxAmount;
+  counterDuration.value = 1;
 };
 
 </script>

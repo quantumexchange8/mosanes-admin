@@ -393,4 +393,7 @@ return [
     "revoke_request_caption_1" => "請輸入",
     "revoke_request_caption_2" => "停止綁定資管請求的備註. 如果不更改, 將使用默認備註.",
     "toast_approve_revoke_request" => "停止綁定資產大師申請已被批准",
+    "empty_member_title" => "未找到會員",
+    "empty_member_message" => "列表中尚未有會員. 一旦有會員加入, 您會在這裡看到他們的名單及詳細信息.",
+    "my_profile" => "管理員檔案",
 ];

@@ -423,59 +423,6 @@ const paginator_caption = wTrans('public.paginator_caption');
                     </Column>
                 </DataTable>
             </div>
-<!--            <div class="flex flex-col justify-center md:justify-normal items-center px-4 md:px-6 py-6 gap-5 md:gap-6 self-stretch max-w-[1440px] rounded-2xl border border-gray-200 bg-white shadow-table">-->
-<!--                &lt;!&ndash; below md table &ndash;&gt;-->
-<!--                <div class="flex md:hidden flex-col items-center gap-3 self-stretch">-->
-<!--                    <IconField iconPosition="left" class="w-full">-->
-<!--                        <SearchIcon class="w-5 h-5 text-gray-400" />-->
-<!--                        <InputText-->
-<!--                            id="searchSM"-->
-<!--                            type="text"-->
-<!--                            class="block w-full"-->
-<!--                            v-model="form.search"-->
-<!--                            placeholder="Search"-->
-<!--                            :invalid="form.errors.search"-->
-<!--                        />-->
-<!--                    </IconField>-->
-<!--                    <div class="flex justify-center items-center gap-3 self-stretch">-->
-<!--                        <Button variant="gray-text" class="flex flex-1 ring-1 ring-gray-300 hover:bg-gray-50 focus:bg-gray-50 focus:ring-gray-300 focus:ring-1" @click="toggleDialog">-->
-<!--                            <Sliders02Icon />-->
-<!--                            Filter-->
-<!--                            <Badge variant="numberbadge" class="text-xs text-white">{{filterCount}}</Badge>-->
-<!--                        </Button>-->
-<!--                        <Button variant="primary-outlined" class="flex flex-1 focus:ring-0">-->
-<!--                            Export-->
-<!--                            <DownloadCloud01Icon />-->
-<!--                        </Button>-->
-<!--                    </div>-->
-<!--                </div>-->
-<!--                &lt;!&ndash; above md table &ndash;&gt;-->
-<!--                <div class="hidden md:flex justify-between items-center self-stretch">-->
-<!--                    <div class="flex items-center gap-3">-->
-<!--                        <IconField iconPosition="left" class="w-[240px]">-->
-<!--                            <SearchIcon class="w-5 h-5 text-gray-400" />-->
-<!--                            <InputText-->
-<!--                                id="searchMD"-->
-<!--                                type="text"-->
-<!--                                class="block w-full"-->
-<!--                                v-model="form.search"-->
-<!--                                placeholder="Search"-->
-<!--                                :invalid="form.errors.search"-->
-<!--                            />-->
-<!--                        </IconField>-->
-<!--                        <Button variant="gray-text" class="flex flex-1 ring-1 ring-gray-300 hover:bg-gray-50 focus:bg-gray-50 focus:ring-gray-300 focus:ring-1" @click="toggleOverlay">-->
-<!--                            <Sliders02Icon />-->
-<!--                            Filter-->
-<!--                            <Badge variant="numberbadge" class="text-xs text-white">{{filterCount}}</Badge>-->
-<!--                        </Button>-->
-<!--                    </div>-->
-<!--                    <Button variant="primary-outlined" class="flex items-center w-[124px] focus:ring-0">-->
-<!--                        Export-->
-<!--                        <DownloadCloud01Icon />-->
-<!--                    </Button>-->
-<!--                </div>-->
-<!--&lt;!&ndash;                <MemberListingTable />&ndash;&gt;-->
-<!--            </div>-->
         </div>
     </AuthenticatedLayout>
 

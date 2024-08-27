@@ -189,7 +189,7 @@ const removeMasterProfilePhoto = () => {
         type="button"
         variant="primary-flat"
         size="base"
-        lass='w-full md:w-auto'
+        class='w-full md:w-auto'
         @click="visible = true"
     >
         <IconPlus size="20" color="#ffffff" stroke-width="1.25" />

@@ -128,11 +128,13 @@ const toggle = (event) => {
     op.value.toggle(event);
 }
 
-const clearFilter = () => {
+const clearFilter = (event) => {
     selectedGroups.value = [];
     adminUser.value = '';
     tag.value = '';
     status.value = '';
+
+    op.value.toggle(event);
 };
 
 // Watchers for search and sortType

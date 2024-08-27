@@ -14,7 +14,8 @@ import {
     IconId,
     IconCoinMonero,
     IconBusinessplan,
-    IconClockDollar
+    IconClockDollar,
+    IconAward
 } from '@tabler/icons-vue';
 
 const pendingCounts = ref(0);
@@ -121,6 +122,17 @@ watchEffect(() => {
         >
             <template #icon>
                 <IconBusinessplan :size="20" stroke-width="1.25" />
+            </template>
+        </SidebarLink>
+
+        <!-- Billboard -->
+        <SidebarLink
+            :title="$t('public.billboard')"
+            :href="route('billboard')"
+            :active="route().current('billboard')"
+        >
+            <template #icon>
+                <IconAward :size="20" stroke-width="1.25" />
             </template>
         </SidebarLink>
 

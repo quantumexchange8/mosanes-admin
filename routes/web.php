@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\BillboardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PendingController;
 use Inertia\Inertia;
@@ -141,6 +142,20 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
 
         Route::post('/updateRebateAllocation', [RebateController::class, 'updateRebateAllocation'])->name('rebate_allocate.updateRebateAllocation');
         Route::post('/updateRebateAmount', [RebateController::class, 'updateRebateAmount'])->name('rebate_allocate.updateRebateAmount');
+    });
+
+    /**
+     * ==============================
+     *          Billboard
+     * ==============================
+     */
+    Route::prefix('billboard')->group(function () {
+        Route::get('/', [BillboardController::class, 'index'])->name('billboard');
+        Route::get('/getBonusProfiles', [BillboardController::class, 'getBonusProfiles'])->name('billboard.getBonusProfiles');
+        Route::get('/getAgents', [BillboardController::class, 'getAgents'])->name('billboard.getAgents');
+
+        Route::post('/createBonusProfile', [BillboardController::class, 'createBonusProfile'])->name('billboard.createBonusProfile');
+
     });
 
     /**

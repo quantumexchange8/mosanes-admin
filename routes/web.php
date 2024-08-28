@@ -193,10 +193,11 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
      * ==============================
      */
     Route::prefix('profile')->group(function () {
-        Route::get('/edit', [ProfileController::class, 'edit'])->name('profile.edit');
+        Route::get('/', [ProfileController::class, 'index'])->name('profile');
 
-        Route::post('/update', [ProfileController::class, 'update'])->name('profile.update');
-        Route::delete('/delete_profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+        Route::post('/profile', [ProfileController::class, 'update'])->name('profile.update');
+        Route::post('/updateProfilePhoto', [ProfileController::class, 'updateProfilePhoto'])->name('profile.updateProfilePhoto');
+        Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     });
 });
 

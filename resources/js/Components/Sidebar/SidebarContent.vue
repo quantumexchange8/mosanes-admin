@@ -184,8 +184,8 @@ watchEffect(() => {
         <!-- Profile -->
         <SidebarLink
             :title="$t('public.my_profile')"
-            :href="route('profile.edit')"
-            :active="route().current('profile.edit')"
+            :href="route('profile')"
+            :active="route().current('profile')"
         >
             <template #icon>
                 <IconUserCircle :size="20" stroke-width="1.25" />

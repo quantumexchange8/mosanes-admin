@@ -70,7 +70,7 @@ const changeLanguage = async (langVal) => {
             </Link>
             <Link
                 class="w-12 h-12 p-2 items-center justify-center rounded-full hover:cursor-pointer hover:bg-gray-100 hidden md:block"
-                :href="route('profile.edit')"
+                :href="route('profile')"
             >
                 <ProfilePhoto class="w-8 h-8" />
             </Link>

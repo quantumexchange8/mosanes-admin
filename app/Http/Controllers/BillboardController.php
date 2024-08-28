@@ -7,6 +7,7 @@ use App\Models\TradeBrokerHistory;
 use App\Models\TradingAccount;
 use App\Models\Transaction;
 use App\Models\User;
+use App\Models\Wallet;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
@@ -247,6 +248,17 @@ class BillboardController extends Controller
 
             default:
                 return response()->json(['error' => 'Invalid period'], 400);
+        }
+
+        $user = User::find($billboard_profile->user_id);
+
+        if (empty($user->bonus_wallet)) {
+            Wallet::create([
+                'user_id' => $user->id,
+                'type' => 'bonus_wallet',
+                'address' => str_replace('AID', 'BW', $user->id_number),
+                'balance' => 0
+            ]);
         }
 
         return redirect()->back()->with('toast', [

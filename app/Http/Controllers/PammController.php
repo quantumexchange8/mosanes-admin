@@ -6,6 +6,7 @@ use App\Models\AssetMasterProfitDistribution;
 use App\Models\AssetMasterToGroup;
 use App\Models\AssetMasterUserFavourite;
 use App\Models\AssetSubscription;
+use App\Models\TradingAccount;
 use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Models\Group;
@@ -161,6 +162,8 @@ class PammController extends Controller
             $asset_subscription = AssetSubscription::where('asset_master_id', $master->id)
                 ->where('status', 'ongoing');
 
+            $total_real_fund = TradingAccount::whereIn('meta_login', $asset_subscription->pluck('meta_login')->toArray())->sum('balance');
+
             // Get the last profit distribution before today
             $last_profit_distribution = AssetMasterProfitDistribution::where('asset_master_id', $master->id)
                 ->whereDate('profit_distribution_date', '<', today())
@@ -202,7 +205,7 @@ class PammController extends Controller
                 'trader_name' => $master->trader_name,
                 'total_real_investors' => $asset_subscription->count(),
                 'total_investors' => $master->total_investors,
-                'total_real_fund' => $asset_subscription->sum('investment_amount'),
+                'total_real_fund' => $total_real_fund,
                 'total_fund' => $master->total_fund,
                 'minimum_investment' => $master->minimum_investment,
                 'minimum_investment_period' => $master->minimum_investment_period,

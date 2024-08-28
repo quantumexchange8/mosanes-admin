@@ -97,18 +97,18 @@ const clearDate = () => {
             removableSort
             scrollable
             scrollHeight="400px"
-            tableStyle="lg:min-width: 50rem"
+            tableStyle="md:min-width: 50rem"
             ref="dt"
             :loading="loading"
             :globalFilterFields="['user_name', 'user_email', 'meta_login']"
         >
             <template #header>
-                <div class="flex flex-col lg:flex-row gap-3 items-center self-stretch md:pb-6">
-                    <div class="relative w-full lg:w-60">
+                <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
+                    <div class="relative w-full md:w-60">
                         <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                             <IconSearch size="20" stroke-width="1.25" />
                         </div>
-                        <InputText v-model="filters['global'].value" :placeholder="$t('public.keyword_search')" class="font-normal pl-12 w-full lg:w-60" />
+                        <InputText v-model="filters['global'].value" :placeholder="$t('public.keyword_search')" class="font-normal pl-12 w-full md:w-60" />
                         <div
                             v-if="filters['global'].value !== null"
                             class="absolute top-2/4 -mt-2 right-4 text-gray-300 hover:text-gray-400 select-none cursor-pointer"
@@ -117,8 +117,8 @@ const clearDate = () => {
                             <IconCircleXFilled size="16" />
                         </div>
                     </div>
-                    <div class="w-full grid grid-cols-1 lg:grid-cols-2 gap-3">
-                        <div class="relative w-full lg:w-[272px]">
+                    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="relative w-full md:w-[272px]">
                             <Calendar
                                 v-model="selectedDate"
                                 selectionMode="range"
@@ -142,13 +142,13 @@ const clearDate = () => {
                             <Button
                                 variant="primary-outlined"
                                 @click="exportCSV($event)"
-                                class="w-full lg:w-auto"
+                                class="w-full md:w-auto"
                             >
                                 {{ $t('public.export') }}
                             </Button>
                         </div>
                     </div>
-                    <div class="flex justify-end self-stretch lg:hidden">
+                    <div class="flex justify-end self-stretch md:hidden">
                         <span class="text-gray-500 text-right text-sm font-medium">{{ $t('public.total') }}:</span>
                         <span class="text-gray-950 text-sm font-semibold ml-2">$ {{ formatAmount(totalInvestmentAmount)}}</span>
                     </div>
@@ -165,7 +165,7 @@ const clearDate = () => {
                 field="join_date"
                 sortable
                 :header="$t('public.join_date')"
-                class="hidden lg:table-cell"
+                class="hidden md:table-cell"
             >
                 <template #body="slotProps">
                     {{ dayjs(slotProps.data.join_date).format('YYYY/MM/DD') }}
@@ -175,7 +175,7 @@ const clearDate = () => {
                 field="name"
                 sortable
                 :header="$t('public.name')"
-                class="hidden lg:table-cell"
+                class="hidden md:table-cell"
             >
                 <template #body="slotProps">
                     <div class="flex items-center gap-3">
@@ -183,11 +183,11 @@ const clearDate = () => {
                             <DefaultProfilePhoto />
                         </div>
                         <div class="flex flex-col items-start">
-                            <div class="font-medium">
+                            <div class="font-medium max-w-[150px] lg:max-w-[240px] truncate">
                                 {{ slotProps.data.user_name }}
                             </div>
-                            <div class="text-gray-500 text-xs">
-                                {{ slotProps.data.user_email }}
+                            <div class="text-gray-500 text-xs max-w-[150px] lg:max-w-[240px] truncate">
+                                {{ slotProps.data.user_email }}qwqewqeqewe
                             </div>
                         </div>
                     </div>
@@ -196,7 +196,7 @@ const clearDate = () => {
             <Column
                 field="meta_login"
                 :header="$t('public.account')"
-                class="hidden lg:table-cell">
+                class="hidden md:table-cell">
                 <template #body="slotProps"
             >
                     {{ slotProps.data.meta_login }}
@@ -206,7 +206,7 @@ const clearDate = () => {
                 field="balance"
                 sortable
                 :header="$t('public.balance') + '&nbsp;($)'"
-                class="hidden lg:table-cell"
+                class="hidden md:table-cell"
             >
                 <template #body="slotProps">
                     {{ formatAmount(slotProps.data.balance) }}
@@ -216,7 +216,7 @@ const clearDate = () => {
                 v-if="joiningPammAccounts.length > 0 ? (joiningPammAccounts[0].investment_periods > 0 ? $t('public.status') : '') : null"
                 field="investment_periods"
                 :header="$t('public.status')"
-                class="hidden lg:table-cell"
+                class="hidden md:table-cell"
             >
                 <template #body="slotProps">
                     <StatusBadge
@@ -228,7 +228,7 @@ const clearDate = () => {
                     </StatusBadge>
                 </template>
             </Column>
-            <Column class="lg:hidden px-0">
+            <Column class="md:hidden px-0">
                 <template #body="slotProps">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
@@ -272,9 +272,9 @@ const clearDate = () => {
             </Column>
             <ColumnGroup type="footer">
                 <Row>
-                    <Column class="hidden lg:table-cell" :footer="$t('public.total') + ' ($):'" :colspan="3" footerStyle="text-align:right" />
-                    <Column class="hidden lg:table-cell" :footer="formatAmount(totalInvestmentAmount ? totalInvestmentAmount : 0)" />
-                    <Column class="hidden lg:table-cell" v-if="joiningPammAccounts.length > 0 ? (joiningPammAccounts[0].investment_periods > 0 ? $t('public.status') : '') : null" />
+                    <Column class="hidden md:table-cell" :footer="$t('public.total') + ' ($):'" :colspan="3" footerStyle="text-align:right" />
+                    <Column class="hidden md:table-cell" :footer="formatAmount(totalInvestmentAmount ? totalInvestmentAmount : 0)" />
+                    <Column class="hidden md:table-cell" v-if="joiningPammAccounts.length > 0 ? (joiningPammAccounts[0].investment_periods > 0 ? $t('public.status') : '') : null" />
                 </Row>
             </ColumnGroup>
         </DataTable>

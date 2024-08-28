@@ -186,7 +186,7 @@ const toggle = (event) => {
         :header="$t(`public.${dialogType}`)"
         :class="{
             'dialog-xs md:dialog-md': dialogType !== 'pamm_report',
-            'dialog-xs lg:dialog-lg': dialogType === 'pamm_report'
+            'dialog-xs md:dialog-lg': dialogType === 'pamm_report'
         }"
     >
         <template v-if="dialogType === 'daily_profit'">

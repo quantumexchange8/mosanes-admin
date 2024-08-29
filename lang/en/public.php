@@ -457,4 +457,10 @@ return [
     "delete_account_message" => "Oh no, we're sorry to see you go! To delete your account, please enter your password.",
     "bonus_wallet" => "Bonus",
     "revoked_date" => "Revoke Date",
+    "edit_bonus_profile" => "Edit Bonus Profile",
+    "toast_update_bonus_profile_success" => "You’ve successfully updated the bonus profile!",
+    "bonus_payout" => "Bonus Payout",
+    "target" => "Target",
+    "rate" => "Rate",
+    "total_approved" => "Total Approved",
 ];

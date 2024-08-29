@@ -9,6 +9,9 @@ import {
 } from "@tabler/icons-vue";
 import {h, ref} from "vue";
 import TieredMenu from "primevue/tieredmenu";
+import Dialog from "primevue/dialog";
+import EditBonusProfile from "@/Pages/Billboard/BillboardProfile/EditBonusProfile.vue";
+import BonusReport from "@/Pages/Billboard/BillboardProfile/BonusReport.vue";
 
 const props = defineProps({
     profile: Object
@@ -28,7 +31,7 @@ const items = ref([
         icon: h(IconPencilMinus),
         command: () => {
             visible.value = true;
-            dialogType.value = 'edit';
+            dialogType.value = 'edit_bonus_profile';
         },
     },
     {
@@ -39,17 +42,17 @@ const items = ref([
             dialogType.value = 'bonus_report';
         },
     },
-    {
-        separator: true,
-    },
-    {
-        label: 'delete_bonus_profile',
-        icon: h(IconTrash),
-        color: 'red',
-        command: () => {
-            requireConfirmation('disband');
-        },
-    },
+    // {
+    //     separator: true,
+    // },
+    // {
+    //     label: 'delete_bonus_profile',
+    //     icon: h(IconTrash),
+    //     color: 'red',
+    //     command: () => {
+    //         requireConfirmation('disband');
+    //     },
+    // },
 ]);
 </script>
 
@@ -93,4 +96,29 @@ const items = ref([
             </template>
         </TieredMenu>
     </div>
+
+    <Dialog
+        v-model:visible="visible"
+        modal
+        :header="$t(`public.${dialogType}`)"
+        class="dialog-xs md:dialog-md"
+    >
+        <template
+            v-if="dialogType === 'edit_bonus_profile'"
+        >
+            <EditBonusProfile
+                :profile="profile"
+                @update:visible="visible = $event"
+            />
+        </template>
+
+        <template
+            v-if="dialogType === 'bonus_report'"
+        >
+            <BonusReport
+                :profile="profile"
+                @update:visible="visible = $event"
+            />
+        </template>
+    </Dialog>
 </template>

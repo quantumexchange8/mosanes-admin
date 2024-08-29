@@ -28,13 +28,47 @@ class DistributeSalesBonusCommand extends Command
             $achieved_percentage = 0;
             $achieved_amount = 0;
 
-            // Calculate bonus amount based on sales_calculation_mode and sales_category
+            $today = Carbon::today();
+
+            // Set start and end dates based on calculation period
+            if ($profile->calculation_period == 'every_sunday') {
+                // Start of the current week (Monday) and end of the current week (Sunday)
+                $startDate = $today->copy()->startOfWeek();
+                $endDate = $today->copy()->endOfWeek();
+            } elseif ($profile->calculation_period == 'every_second_sunday') {
+                // Start of the month
+                $startDate = $today->copy()->startOfMonth();
+
+                // Find the first Sunday of the month
+                $firstSunday = $startDate->copy()->next('Sunday');
+
+                // Find the second Sunday of the month
+                $secondSunday = $firstSunday->copy()->addWeek();
+
+                // If today is before or on the second Sunday, calculate until the day before the second Sunday
+                if ($today->lessThan($secondSunday)) {
+                    $endDate = $secondSunday->copy()->subDay()->endOfDay();
+                } else {
+                    // If today is after the second Sunday, set startDate to the second Sunday
+                    $startDate = $secondSunday->copy();
+                    $endDate = $today->copy()->endOfWeek(); // Or end of current week if needed
+                }
+
+            } elseif ($profile->calculation_period == 'first_sunday_of_every_month') {
+                $startDate = $today->startOfMonth();
+                $endDate = $startDate->copy()->endOfMonth();
+            } else {
+                // Default to the entire current month if no calculation period is specified
+                $startDate = $today->copy()->startOfMonth();
+                $endDate = $today->copy()->endOfMonth();
+            }
+
             if ($profile->sales_calculation_mode == 'personal_sales') {
                 if ($profile->sales_category == 'gross_deposit') {
                     $gross_deposit = Transaction::where('user_id', $profile->user_id)
+                        ->whereBetween('approved_at', [$startDate, $endDate])
                         ->where('transaction_type', 'deposit')
                         ->orWhere('transaction_type', 'balance_in')
-                        ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
 
@@ -43,17 +77,17 @@ class DistributeSalesBonusCommand extends Command
                     $achieved_amount = $gross_deposit;
                 } elseif ($profile->sales_category == 'net_deposit') {
                     $total_deposit = Transaction::where('user_id', $profile->user_id)
+                        ->whereBetween('approved_at', [$startDate, $endDate])
                         ->where('transaction_type', 'deposit')
                         ->orWhere('transaction_type', 'balance_in')
-                        ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
 
                     $total_withdrawal = Transaction::where('user_id', $profile->user_id)
+                        ->whereBetween('approved_at', [$startDate, $endDate])
                         ->where('transaction_type', 'withdrawal')
                         ->orWhere('transaction_type', 'balance_out')
                         ->orWhere('transaction_type', 'rebate_out')
-                        ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
 
@@ -66,6 +100,7 @@ class DistributeSalesBonusCommand extends Command
                     $meta_logins = $profile->user->tradingAccounts->pluck('meta_login');
 
                     $trade_volume = TradeBrokerHistory::whereIn('meta_login', $meta_logins)
+                        ->whereBetween('created_at', [$startDate, $endDate])
                         ->sum('trade_lots');
 
                     $achieved_percentage = ($trade_volume / $profile->target_amount) * 100;
@@ -73,14 +108,14 @@ class DistributeSalesBonusCommand extends Command
                     $achieved_amount = $trade_volume;
                 }
             } elseif ($profile->sales_calculation_mode == 'group_sales') {
-                if ($profile->sales_category == 'gross_deposit') {
-                    $child_ids = $profile->user->getChildrenIds();
-                    $child_ids[] = $profile->user_id;
+                $child_ids = $profile->user->getChildrenIds();
+                $child_ids[] = $profile->user_id;
 
+                if ($profile->sales_category == 'gross_deposit') {
                     $gross_deposit = Transaction::whereIn('user_id', $child_ids)
+                        ->whereBetween('approved_at', [$startDate, $endDate])
                         ->where('transaction_type', 'deposit')
                         ->orWhere('transaction_type', 'balance_in')
-                        ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
 
@@ -88,21 +123,18 @@ class DistributeSalesBonusCommand extends Command
                     $bonus_amount = ($gross_deposit * $profile->bonus_rate) / 100;
                     $achieved_amount = $gross_deposit;
                 } elseif ($profile->sales_category == 'net_deposit') {
-                    $child_ids = $profile->user->getChildrenIds();
-                    $child_ids[] = $profile->user_id;
-
                     $total_deposit = Transaction::whereIn('user_id', $child_ids)
+                        ->whereBetween('approved_at', [$startDate, $endDate])
                         ->where('transaction_type', 'deposit')
                         ->orWhere('transaction_type', 'balance_in')
-                        ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
 
                     $total_withdrawal = Transaction::whereIn('user_id', $child_ids)
+                        ->whereBetween('approved_at', [$startDate, $endDate])
                         ->where('transaction_type', 'withdrawal')
                         ->orWhere('transaction_type', 'balance_out')
                         ->orWhere('transaction_type', 'rebate_out')
-                        ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
 
@@ -112,15 +144,13 @@ class DistributeSalesBonusCommand extends Command
                     $bonus_amount = ($net_deposit * $profile->bonus_rate) / 100;
                     $achieved_amount = $net_deposit;
                 } elseif ($profile->sales_category == 'trade_volume') {
-                    $child_ids = $profile->user->getChildrenIds();
-                    $child_ids[] = $profile->user_id;
-
                     $meta_logins = TradingAccount::whereIn('user_id', $child_ids)
                         ->get()
                         ->pluck('meta_login')
                         ->toArray();
 
                     $trade_volume = TradeBrokerHistory::whereIn('meta_login', $meta_logins)
+                        ->whereBetween('created_at', [$startDate, $endDate])
                         ->sum('trade_lots');
 
                     $achieved_percentage = ($trade_volume / $profile->target_amount) * 100;

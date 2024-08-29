@@ -35,7 +35,7 @@ export default {
             'cursor-pointer',
             'select-none',
             'shadow-input',
-            { 'bg-gray-50 text-gray-300 select-none pointer-events-none cursor-default': props.disabled }
+            { 'bg-gray-100 disabled:text-gray-400 select-none pointer-events-none cursor-not-allowed': props.disabled }
         ]
     }),
     input: ({ props, parent }) => ({
@@ -50,8 +50,9 @@ export default {
             // Color and Background
             'bg-transparent',
             'border-0',
-            { 'text-gray-950': props.modelValue || props.modelValue === 0, 'text-gray-400': !props.modelValue && props.modelValue !== 0 },
+            { 'text-gray-950': props.modelValue && !props.disabled || props.modelValue === 0, 'text-gray-400': !props.modelValue && props.modelValue !== 0 },
             'placeholder:text-gray-400',
+            { 'text-gray-400': props.disabled },
 
             // Sizing and Spacing
             'w-[1%]',

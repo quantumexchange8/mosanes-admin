@@ -154,8 +154,11 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::get('/getBonusProfiles', [BillboardController::class, 'getBonusProfiles'])->name('billboard.getBonusProfiles');
         Route::get('/getAgents', [BillboardController::class, 'getAgents'])->name('billboard.getAgents');
         Route::get('/getBonusWithdrawalData', [BillboardController::class, 'getBonusWithdrawalData'])->name('billboard.getBonusWithdrawalData');
+        Route::get('/getStatementData', [BillboardController::class, 'getStatementData'])->name('billboard.getStatementData');
+        Route::get('/getBonusWithdrawalHistories', [BillboardController::class, 'getBonusWithdrawalHistories'])->name('billboard.getBonusWithdrawalHistories');
 
         Route::post('/createBonusProfile', [BillboardController::class, 'createBonusProfile'])->name('billboard.createBonusProfile');
+        Route::post('/editBonusProfile', [BillboardController::class, 'editBonusProfile'])->name('billboard.editBonusProfile');
 
     });
 

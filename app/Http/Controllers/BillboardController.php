@@ -62,6 +62,7 @@ class BillboardController extends Controller
                 if ($profile->sales_category == 'gross_deposit') {
                     $gross_deposit = Transaction::where('user_id', $profile->user_id)
                         ->where('transaction_type', 'deposit')
+                        ->orWhere('transaction_type', 'balance_in')
                         ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
@@ -72,12 +73,15 @@ class BillboardController extends Controller
                 } elseif ($profile->sales_category == 'net_deposit') {
                     $total_deposit = Transaction::where('user_id', $profile->user_id)
                         ->where('transaction_type', 'deposit')
+                        ->orWhere('transaction_type', 'balance_in')
                         ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
 
                     $total_withdrawal = Transaction::where('user_id', $profile->user_id)
                         ->where('transaction_type', 'withdrawal')
+                        ->orWhere('transaction_type', 'balance_out')
+                        ->orWhere('transaction_type', 'rebate_out')
                         ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
@@ -104,6 +108,7 @@ class BillboardController extends Controller
 
                     $gross_deposit = Transaction::whereIn('user_id', $child_ids)
                         ->where('transaction_type', 'deposit')
+                        ->orWhere('transaction_type', 'balance_in')
                         ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
@@ -117,17 +122,20 @@ class BillboardController extends Controller
 
                     $total_deposit = Transaction::whereIn('user_id', $child_ids)
                         ->where('transaction_type', 'deposit')
+                        ->orWhere('transaction_type', 'balance_in')
                         ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
 
                     $total_withdrawal = Transaction::whereIn('user_id', $child_ids)
                         ->where('transaction_type', 'withdrawal')
+                        ->orWhere('transaction_type', 'balance_out')
+                        ->orWhere('transaction_type', 'rebate_out')
                         ->whereMonth('approved_at', date('m'))
                         ->where('status', 'successful')
                         ->sum('transaction_amount');
 
-                    $net_deposit = abs($total_deposit - $total_withdrawal);
+                    $net_deposit = $total_deposit - $total_withdrawal;
 
                     $achieved_percentage = ($net_deposit / $profile->target_amount) * 100;
                     $bonus_amount = ($net_deposit * $profile->bonus_rate) / 100;

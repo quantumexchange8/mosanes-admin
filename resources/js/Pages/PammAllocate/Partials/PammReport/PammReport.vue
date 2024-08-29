@@ -29,6 +29,28 @@ const tabs = ref([
     },
 ]);
 
+const fetchPammAccountsDataCount = async () => {
+    try {
+        const response = await axios.get(`/pamm_allocate/getPammAccountsDataCount?asset_master_id=${props.master.id}`);
+
+        // Update row counts for both tabs
+        tabs.value = tabs.value.map(tab => {
+            if (tab.type === 'joining') {
+                tab.rowCount = response.data.joiningCount;
+            } else if (tab.type === 'revoke') {
+                tab.rowCount = response.data.revokeCount;
+            }
+            return tab;
+        });
+    } catch (error) {
+        console.error('Error fetching data count:', error);
+    }
+};
+
+onMounted(() => {
+    fetchPammAccountsDataCount();
+});
+
 const selectedType = ref('joining');
 const activeIndex = ref(tabs.value.findIndex(tab => tab.type === selectedType.value));
 
@@ -38,6 +60,7 @@ watch(selectedType, (newType) => {
     if (index >= 0) {
         activeIndex.value = index;
     }
+    fetchPammAccountsDataCount();
 });
 
 const updateRowCount = (newRowCount) => {

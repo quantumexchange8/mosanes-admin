@@ -719,6 +719,25 @@ class PammController extends Controller
         ]);
     }
 
+    public function getPammAccountsDataCount(Request $request)
+    {
+        $assetMasterId = $request->input('asset_master_id');
+        
+        // Get the count of AssetSubscription records that are not revoked
+        $joiningCount = AssetSubscription::where('asset_master_id', $assetMasterId)
+            ->where('status', '!=', 'revoked')
+            ->count();
+        
+        // Get the count of AssetRevoke records that are revoked
+        $revokeCount = AssetRevoke::where('asset_master_id', $assetMasterId)
+            ->where('status', 'revoked')
+            ->count();
+        
+        return response()->json([
+            'joiningCount' => $joiningCount,
+            'revokeCount' => $revokeCount
+        ]);
+    }
 
     public function addProfitDistribution(Request $request)
     {

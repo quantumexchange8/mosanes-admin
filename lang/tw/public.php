@@ -453,4 +453,5 @@ return [
     "toast_update_profile_success" => "您已成功更新您的帳戶資訊!",
     "toast_reset_password_success" => "密碼已重設.",
     "delete_account_message" => "哦不, 我們很遺憾看到您離開! 要刪除您的帳戶, 必須輸入您的密碼.",
+    "bonus_wallet" => "獎金",
 ];

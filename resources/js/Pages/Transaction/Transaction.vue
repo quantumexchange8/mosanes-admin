@@ -82,9 +82,10 @@ watch(selectedType, (newType) => {
 function updateType(event) {
     const selectedTab = tabs.value[event.index];
     selectedType.value = selectedTab.type;
-    totalTransaction.value = 0;
-    totalTransactionAmount.value = 0;
-    maxAmount.value = 0;
+    totalTransaction.value = 999;
+    totalTransactionAmount.value = 999;
+    maxAmount.value = 999;
+    counterDuration.value = 10;
 }
 
 // data overview

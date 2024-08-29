@@ -210,7 +210,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                 <DataTable
                     v-model:filters="filters"
                     :value="users"
-                    paginator
+                    :paginator="users?.length > 0 && total_users > 0"
                     removableSort
                     :rows="10"
                     :rowsPerPageOptions="[10, 20, 50, 100]"
@@ -270,7 +270,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                             <span class="text-sm text-gray-700">{{ $t('public.loading_users_caption') }}</span>
                         </div>
                     </template>
-                    <template v-if="total_users > 0">
+                    <template v-if="users?.length > 0 && total_users > 0">
                         <Column
                             field="id_number"
                             sortable

@@ -2,21 +2,22 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AssetMasterProfitDistribution;
-use App\Models\AssetMasterToGroup;
-use App\Models\AssetMasterUserFavourite;
-use App\Models\AssetSubscription;
-use App\Models\TradingAccount;
-use Illuminate\Support\Facades\DB;
 use Inertia\Inertia;
 use App\Models\Group;
 use App\Models\AssetMaster;
+use App\Models\AssetRevoke;
 use Illuminate\Http\Request;
+use App\Models\TradingAccount;
 use Illuminate\Support\Carbon;
+use App\Models\AssetSubscription;
+use App\Models\AssetMasterToGroup;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use App\Services\DropdownOptionService;
+use App\Models\AssetMasterUserFavourite;
 use Illuminate\Support\Facades\Validator;
+use App\Models\AssetMasterProfitDistribution;
 
 class PammController extends Controller
 {
@@ -681,6 +682,43 @@ class PammController extends Controller
             'totalInvestmentAmount' => $joiningPammAccounts->sum('balance'),
         ]);
     }
+
+    public function getRevokePammAccountsData(Request $request)
+    {
+        $startDate = $request->query('startDate');
+        $endDate = $request->query('endDate');
+
+        $query = AssetRevoke::where('asset_master_id', $request->asset_master_id)
+            ->where('status', 'revoked');
+
+        if ($startDate && $endDate) {
+            $start_date = Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay();
+            $end_date = Carbon::createFromFormat('Y-m-d', $endDate)->endOfDay();
+
+            $query->whereBetween('created_at', [$start_date, $end_date]);
+        }
+
+        $revokePammAccounts = $query
+            ->latest()
+            ->get()
+            ->map(function ($item) {
+                return [
+                    'id' => $item->id,
+                    'user_profile_photo' => $item->user->getFirstMediaUrl('profile_photo'),
+                    'user_name' => $item->user->name,
+                    'user_email' => $item->user->email,
+                    'revoked_date' => $item->approval_at,
+                    'meta_login' => $item->meta_login,
+                    'penalty_fee' => $item->penalty_fee,
+                ];
+            });
+
+        return response()->json([
+            'revokePammAccounts' => $revokePammAccounts,
+            'totalPenaltyFee' => $revokePammAccounts->sum('penalty_fee'),
+        ]);
+    }
+
 
     public function addProfitDistribution(Request $request)
     {

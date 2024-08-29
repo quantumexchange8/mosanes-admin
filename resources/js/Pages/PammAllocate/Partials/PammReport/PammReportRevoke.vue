@@ -1,19 +1,21 @@
 <script setup>
-import { ref, h, watch, computed, onMounted } from "vue";
+import { ref, watch } from "vue";
 import Button from '@/Components/Button.vue';
-import InputError from '@/Components/InputError.vue';
-import InputLabel from '@/Components/InputLabel.vue';
 import InputText from 'primevue/inputtext';
-import { useForm, usePage } from '@inertiajs/vue3';
-import RadioButton from 'primevue/radiobutton';
 import DataTable from 'primevue/datatable';
 import Column from 'primevue/column';
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import Empty from '@/Components/Empty.vue';
 import Loader from "@/Components/Loader.vue";
-import {FilterMatchMode} from "primevue/api";
-import { IconSearch, IconCircleXFilled, IconX, IconPremiumRights, IconAdjustments, IconScanEye, IconTriangleFilled, IconTriangleInvertedFilled } from '@tabler/icons-vue';
+import { FilterMatchMode } from "primevue/api";
+import { IconSearch, IconCircleXFilled, IconX } from '@tabler/icons-vue';
 import Calendar from 'primevue/calendar';
+import { transactionFormat } from "@/Composables/index.js";
+import dayjs from "dayjs";
+import ColumnGroup from "primevue/columngroup";
+import Row from "primevue/row";
+
+const { formatDateTime, formatAmount } = transactionFormat();
 
 const props = defineProps({
     master: Object
@@ -21,11 +23,18 @@ const props = defineProps({
 
 const dt = ref(null);
 const loading = ref(false);
-const transactions = ref();
+const revokePammAccounts = ref([]);
+const totalPenaltyFee = ref();
+const emit = defineEmits(['update:rowCount']);
+
 const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
 });
+
+const clearFilterGlobal = () => {
+    filters.value['global'].value = null;
+}
 
 // Reactive variable for selected date range
 const selectedDate = ref([]);
@@ -35,34 +44,72 @@ const today = new Date();
 
 const maxDate = ref(today);
 
+const getRevokedPammAccountsData = async (filterDate = null) => {
+    loading.value = true;
+
+    try {
+        let url = `/pamm_allocate/getRevokePammAccountsData?asset_master_id=${props.master.id}`;
+
+        if (filterDate) {
+            const [startDate, endDate] = filterDate;
+            url += `&startDate=${dayjs(startDate).format('YYYY-MM-DD')}&endDate=${dayjs(endDate).format('YYYY-MM-DD')}`;
+        }
+
+        const response = await axios.get(url);
+        revokePammAccounts.value = response.data.revokePammAccounts;
+        totalPenaltyFee.value = response.data.totalPenaltyFee;
+        emit('update:rowCount', revokePammAccounts.value.length);
+    } catch (error) {
+        console.error('Error changing locale:', error);
+    } finally {
+        loading.value = false;
+    }
+};
+
+getRevokedPammAccountsData();
+
+watch(selectedDate, (newDateRange) => {
+    if (Array.isArray(newDateRange)) {
+        const [startDate, endDate] = newDateRange;
+
+        if (startDate && endDate) {
+            getRevokedPammAccountsData([startDate, endDate]);
+        } else if (startDate || endDate) {
+            getRevokedPammAccountsData([startDate || endDate, endDate || startDate]);
+        } else {
+            getRevokedPammAccountsData();
+        }
+    } else {
+        console.warn('Invalid date range format:', newDateRange);
+    }
+})
+
+const clearDate = () => {
+    selectedDate.value = [];
+};
+
 </script>
 
 <template>
     <div class="flex flex-col items-center gap-4 flex-grow self-stretch">
-        <div class="flex justify-end self-stretch lg:hidden">
-            <span class="text-gray-500 text-right text-sm font-medium">{{ $t('public.total') }}:</span>
-            <span class="text-gray-950 text-sm font-semibold ml-2">$ {{ props.master.total_gain }}</span>
-        </div>
         <DataTable
-            :value="transactions"
-            paginator
+            v-model:filters="filters"
+            :value="revokePammAccounts"
             removableSort
-            :rows="10"
-            :rowsPerPageOptions="[10, 20, 50, 100]"
-            tableStyle="lg:min-width: 50rem"
-            paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
-            currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
+            scrollable
+            scrollHeight="400px"
+            tableStyle="md:min-width: 50rem"
             ref="dt"
-            @row-click="(event) => openDialog(event.data)"
             :loading="loading"
+            :globalFilterFields="['user_name', 'user_email', 'meta_login']"
         >
             <template #header>
-                <div class="flex flex-col lg:flex-row gap-3 items-center self-stretch">
-                    <div class="relative w-full lg:w-60">
+                <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
+                    <div class="relative w-full md:w-60">
                         <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                             <IconSearch size="20" stroke-width="1.25" />
                         </div>
-                        <InputText v-model="filters['global'].value" :placeholder="$t('public.keyword_search')" class="font-normal pl-12 w-full lg:w-60" />
+                        <InputText v-model="filters['global'].value" :placeholder="$t('public.keyword_search')" class="font-normal pl-12 w-full md:w-60" />
                         <div
                             v-if="filters['global'].value !== null"
                             class="absolute top-2/4 -mt-2 right-4 text-gray-300 hover:text-gray-400 select-none cursor-pointer"
@@ -71,8 +118,8 @@ const maxDate = ref(today);
                             <IconCircleXFilled size="16" />
                         </div>
                     </div>
-                    <div class="w-full grid grid-cols-1 lg:grid-cols-2 gap-3">
-                        <div class="relative w-full lg:w-[272px]">
+                    <div class="w-full grid grid-cols-1 md:grid-cols-2 gap-3">
+                        <div class="relative w-full md:w-[272px]">
                             <Calendar
                                 v-model="selectedDate"
                                 selectionMode="range"
@@ -82,7 +129,7 @@ const maxDate = ref(today);
                                 showIcon
                                 iconDisplay="input"
                                 placeholder="yyyy/mm/dd - yyyy/mm/dd"
-                                class="w-full"
+                                class="w-full font-normal"
                             />
                             <div
                                 v-if="selectedDate && selectedDate.length > 0"
@@ -96,11 +143,15 @@ const maxDate = ref(today);
                             <Button
                                 variant="primary-outlined"
                                 @click="exportCSV($event)"
-                                class="w-full lg:w-auto"
+                                class="w-full md:w-auto"
                             >
                                 {{ $t('public.export') }}
                             </Button>
                         </div>
+                    </div>
+                    <div class="flex justify-end self-stretch md:hidden" v-if="revokePammAccounts?.length > 0">
+                        <span class="text-gray-500 text-right text-sm font-medium">{{ $t('public.total') }}:</span>
+                        <span class="text-gray-950 text-sm font-semibold ml-2">$ {{ formatAmount(totalPenaltyFee)}}</span>
                     </div>
                 </div>
             </template>
@@ -108,31 +159,23 @@ const maxDate = ref(today);
             <template #loading>
                 <div class="flex flex-col gap-2 items-center justify-center">
                     <Loader />
-                    <span class="text-sm text-gray-700">{{ $t('public.loading_transactions_caption') }}</span>
                 </div>
             </template>
-            <template #footer>
-                <div v-if="transactions" class="hidden lg:flex justify-end items-center py-2 px-3 gap-3 self-stretch border-y">
-                    <span class="flex-grow text-right text-sm">{{ $t('public.total') }}:</span>
-                    <span class="text-sm">7,347.00</span>
-                </div>
-            </template>
-
-            <Column 
-                field="created_at" 
-                sortable 
-                :header="$t('public.date')" 
-                class="hidden lg:table-cell"
+            <Column
+                field="revoked_date"
+                sortable
+                :header="$t('public.revoked_date')"
+                class="hidden md:table-cell"
             >
                 <template #body="slotProps">
-                    {{ formatDateTime(slotProps.data.created_at) }}
+                    {{ dayjs(slotProps.data.revoked_date).format('YYYY/MM/DD') }}
                 </template>
             </Column>
-            <Column 
-                field="name" 
-                sortable 
-                :header="$t('public.name')" 
-                class="hidden lg:table-cell"
+            <Column
+                field="name"
+                sortable
+                :header="$t('public.name')"
+                class="hidden md:table-cell"
             >
                 <template #body="slotProps">
                     <div class="flex items-center gap-3">
@@ -140,57 +183,71 @@ const maxDate = ref(today);
                             <DefaultProfilePhoto />
                         </div>
                         <div class="flex flex-col items-start">
-                            <div class="font-medium">
-                                {{ slotProps.data.name }}
+                            <div class="font-medium max-w-[150px] lg:max-w-[240px] truncate">
+                                {{ slotProps.data.user_name }}
                             </div>
-                            <div class="text-gray-500 text-xs">
-                                {{ slotProps.data.email }}
+                            <div class="text-gray-500 text-xs max-w-[150px] lg:max-w-[240px] truncate">
+                                {{ slotProps.data.user_email }}
                             </div>
                         </div>
                     </div>
                 </template>
             </Column>
-            <Column 
-                field="to_meta_login" 
-                :header="$t('public.account')" 
-                class="hidden lg:table-cell">
+            <Column
+                field="meta_login"
+                :header="$t('public.account')"
+                class="hidden md:table-cell">
                 <template #body="slotProps"
             >
-                    {{ slotProps.data.to_meta_login }}
+                    {{ slotProps.data.meta_login }}
                 </template>
             </Column>
-            <Column 
-                field="transaction_amount" 
-                sortable 
-                :header="$t('public.balance') + '&nbsp;($)'" 
-                class="hidden lg:table-cell"
+            <Column
+                field="penalty_fee"
+                sortable
+                :header="$t('public.balance') + '&nbsp;($)'"
+                class="hidden md:table-cell"
             >
                 <template #body="slotProps">
-                    {{ formatAmount(slotProps.data.transaction_amount) }}
+                    {{ formatAmount(slotProps.data.penalty_fee) }}
                 </template>
             </Column>
-            <Column class="lg:hidden">
+            <Column class="md:hidden px-0">
                 <template #body="slotProps">
                     <div class="flex items-center justify-between">
                         <div class="flex items-center gap-3">
                             <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
                                 <DefaultProfilePhoto />
                             </div>
-                            <div class="flex flex-col items-start">
-                                <div class="text-xs font-medium">
-                                    {{ slotProps.data.name }}
+                            <div class="flex flex-col items-start gap-1">
+                                <div class="text-xs truncate font-medium max-w-36">
+                                    {{ slotProps.data.user_name }}
                                 </div>
-                                <div class="text-gray-500 text-xs">
-                                    {{ formatDateTime(slotProps.data.created_at) }}
+
+                                <div class="flex items-center gap-2 text-gray-500 text-xs">
+                                    <div>
+                                        {{ dayjs(slotProps.data.revoked_date).format('YYYY/MM/DD') }}
+                                    </div>
+                                    <span>|</span>
+                                    <div>
+                                        {{ slotProps.data.meta_login }}
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                        <div class="overflow-hidden text-right text-ellipsis font-semibold">
-                            {{ formatAmount(slotProps.data.transaction_amount) }}
+                        <div class="w-full text-right max-w-[90px] truncate font-semibold">
+                            $ {{ formatAmount(slotProps.data.penalty_fee) }}
                         </div>
                     </div>
                 </template>
             </Column>
+            <ColumnGroup type="footer" v-if="revokePammAccounts?.length > 0">
+                <Row>
+                    <Column class="hidden md:table-cell" :footer="$t('public.total') + ' ($):'" :colspan="3" footerStyle="text-align:right" />
+                    <Column class="hidden md:table-cell" :footer="formatAmount(totalPenaltyFee ? totalPenaltyFee : 0)" />
+                    <Column class="hidden md:table-cell" v-if="revokePammAccounts.length > 0 ? (revokePammAccounts[0].investment_periods > 0 ? $t('public.status') : '') : null" />
+                </Row>
+            </ColumnGroup>
         </DataTable>
     </div>
 </template>

@@ -148,7 +148,7 @@ const clearDate = () => {
                             </Button>
                         </div>
                     </div>
-                    <div class="flex justify-end self-stretch md:hidden">
+                    <div class="flex justify-end self-stretch md:hidden" v-if="joiningPammAccounts?.length > 0">
                         <span class="text-gray-500 text-right text-sm font-medium">{{ $t('public.total') }}:</span>
                         <span class="text-gray-950 text-sm font-semibold ml-2">$ {{ formatAmount(totalInvestmentAmount)}}</span>
                     </div>
@@ -270,7 +270,7 @@ const clearDate = () => {
                     </div>
                 </template>
             </Column>
-            <ColumnGroup type="footer">
+            <ColumnGroup type="footer" v-if="joiningPammAccounts?.length > 0">
                 <Row>
                     <Column class="hidden md:table-cell" :footer="$t('public.total') + ' ($):'" :colspan="3" footerStyle="text-align:right" />
                     <Column class="hidden md:table-cell" :footer="formatAmount(totalInvestmentAmount ? totalInvestmentAmount : 0)" />

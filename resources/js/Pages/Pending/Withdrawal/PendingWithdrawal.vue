@@ -126,7 +126,7 @@ const submit = (transactionId) => {
         <DataTable
             v-model:filters="filters"
             :value="pendingWithdrawals"
-            paginator
+            :paginator="pendingWithdrawals?.length > 0"
             removableSort
             :rows="10"
             :rowsPerPageOptions="[10, 20, 50, 100]"

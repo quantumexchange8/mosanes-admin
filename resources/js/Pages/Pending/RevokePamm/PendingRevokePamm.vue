@@ -123,7 +123,7 @@ const submit = (assetRevokeId) => {
         <DataTable
             v-model:filters="filters"
             :value="pendingRevokes"
-            paginator
+            :paginator="pendingRevokes?.length > 0"
             removableSort
             :rows="10"
             :rowsPerPageOptions="[10, 20, 50, 100]"

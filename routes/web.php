@@ -116,6 +116,7 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::get('/getOptions', [PammController::class, 'getOptions'])->name('pamm_allocate.getOptions');
         Route::get('/getProfitLoss', [PammController::class, 'getProfitLoss'])->name('pamm_allocate.getProfitLoss');
         Route::get('/getJoiningPammAccountsData', [PammController::class, 'getJoiningPammAccountsData'])->name('pamm_allocate.getJoiningPammAccountsData');
+        Route::get('/getRevokePammAccountsData', [PammController::class, 'getRevokePammAccountsData'])->name('pamm_allocate.getRevokePammAccountsData');
         Route::get('/getMasterMonthlyProfit', [PammController::class, 'getMasterMonthlyProfit'])->name('pamm_allocate.getMasterMonthlyProfit');
 
         Route::post('/validateStep', [PammController::class, 'validateStep'])->name('pamm_allocate.validateStep');

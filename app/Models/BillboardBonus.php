@@ -14,7 +14,9 @@ class BillboardBonus extends Model
         'billboard_profile_id',
         'target_amount',
         'achieved_amount',
+        'achieved_percentage',
         'bonus_rate',
         'bonus_amount',
+        'bonus_month',
     ];
 }

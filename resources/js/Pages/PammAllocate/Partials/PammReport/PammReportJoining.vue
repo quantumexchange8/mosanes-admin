@@ -187,7 +187,7 @@ const clearDate = () => {
                                 {{ slotProps.data.user_name }}
                             </div>
                             <div class="text-gray-500 text-xs max-w-[150px] lg:max-w-[240px] truncate">
-                                {{ slotProps.data.user_email }}qwqewqeqewe
+                                {{ slotProps.data.user_email }}
                             </div>
                         </div>
                     </div>

@@ -118,7 +118,6 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::get('/getJoiningPammAccountsData', [PammController::class, 'getJoiningPammAccountsData'])->name('pamm_allocate.getJoiningPammAccountsData');
         Route::get('/getMasterMonthlyProfit', [PammController::class, 'getMasterMonthlyProfit'])->name('pamm_allocate.getMasterMonthlyProfit');
 
-        Route::post('/upload_image', [PammController::class, 'upload_image'])->name('pamm_allocate.upload_image');
         Route::post('/validateStep', [PammController::class, 'validateStep'])->name('pamm_allocate.validateStep');
         Route::post('/create_asset_master', [PammController::class, 'create_asset_master'])->name('pamm_allocate.create_asset_master');
         Route::post('/edit_asset_master', [PammController::class, 'edit_asset_master'])->name('pamm_allocate.edit_asset_master');
@@ -153,6 +152,7 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::get('/', [BillboardController::class, 'index'])->name('billboard');
         Route::get('/getBonusProfiles', [BillboardController::class, 'getBonusProfiles'])->name('billboard.getBonusProfiles');
         Route::get('/getAgents', [BillboardController::class, 'getAgents'])->name('billboard.getAgents');
+        Route::get('/getBonusWithdrawalData', [BillboardController::class, 'getBonusWithdrawalData'])->name('billboard.getBonusWithdrawalData');
 
         Route::post('/createBonusProfile', [BillboardController::class, 'createBonusProfile'])->name('billboard.createBonusProfile');
 

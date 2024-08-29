@@ -18,12 +18,16 @@ import {
     IconAward
 } from '@tabler/icons-vue';
 
-const pendingCounts = ref(0);
+const pendingWithdrawals = ref(0);
+const pendingPammAllocate = ref(0);
+const pendingBonusWithdrawal = ref(0);
 
 const getPendingCounts = async () => {
     try {
         const response = await axios.get('/getPendingCounts');
-        pendingCounts.value = response.data.pendingCounts
+        pendingWithdrawals.value = response.data.pendingWithdrawals
+        pendingPammAllocate.value = response.data.pendingPammAllocate
+        pendingBonusWithdrawal.value = response.data.pendingBonusWithdrawal
     } catch (error) {
         console.error('Error pending counts:', error);
     }
@@ -62,7 +66,7 @@ watchEffect(() => {
             :title="$t('public.pending')"
             :href="route('pending')"
             :active="route().current('pending')"
-            :pendingCounts="pendingCounts"
+            :pendingCounts="pendingWithdrawals"
         >
             <template #icon>
                 <IconClockDollar :size="20" stroke-width="1.25" />
@@ -108,6 +112,7 @@ watchEffect(() => {
             :title="$t('public.pamm_allocate')"
             :href="route('pamm_allocate')"
             :active="route().current('pamm_allocate')"
+            :pendingCounts="pendingPammAllocate"
         >
             <template #icon>
                 <IconCoinMonero :size="20" stroke-width="1.25" />
@@ -130,6 +135,7 @@ watchEffect(() => {
             :title="$t('public.billboard')"
             :href="route('billboard')"
             :active="route().current('billboard')"
+            :pendingCounts="pendingBonusWithdrawal"
         >
             <template #icon>
                 <IconAward :size="20" stroke-width="1.25" />

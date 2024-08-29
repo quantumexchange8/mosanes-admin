@@ -170,6 +170,10 @@ class PammController extends Controller
                 ->orderByDesc('profit_distribution_date')
                 ->first();
 
+            $asset_distribution_counts = AssetMasterProfitDistribution::where('asset_master_id', $master->id)
+                ->whereDate('profit_distribution_date', '>=', today())
+                ->count();
+
             // Initialize the profit with the master's latest profit as a fallback
             $profit = $master->latest_profit;
 
@@ -220,7 +224,7 @@ class PammController extends Controller
                 'started_at' => date_format($master->started_at, 'Y/m/d'),
                 'visible_to' => $master->type,
                 'group_names' => $group_names,
-                'asset_distribution_counts' => $master->asset_distributions()->count(),
+                'asset_distribution_counts' => $asset_distribution_counts,
                 'last_distribution_date' => $master->asset_distributions()->latest('profit_distribution_date')->first()->profit_distribution_date,
             ];
         });
@@ -597,12 +601,6 @@ class PammController extends Controller
                 'type' => 'error'
             ]);
         }
-    }
-
-
-    public function upload_image(Request $request)
-    {
-        dd($request->all());
     }
 
     public function update_asset_master_status(Request $request)

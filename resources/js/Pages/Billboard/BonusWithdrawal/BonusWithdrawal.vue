@@ -31,7 +31,7 @@ const getResults = async () => {
     loading.value = true;
 
     try {
-        const response = await axios.get('/pending/getPendingWithdrawalData');
+        const response = await axios.get('/billboard/getBonusWithdrawalData');
         pendingWithdrawals.value = response.data.pendingWithdrawals;
         totalAmount.value = response.data.totalAmount;
     } catch (error) {
@@ -200,14 +200,6 @@ const submit = (transactionId) => {
                         </div>
                     </template>
                 </Column>
-                <Column field="from" style="width: 25%" headerClass="hidden md:table-cell">
-                    <template #header>
-                        <span class="hidden md:block items-center justify-center w-full">{{ $t('public.from') }}</span>
-                    </template>
-                    <template #body="slotProps">
-                        {{ slotProps.data.from === 'rebate_wallet' ? $t(`public.${slotProps.data.from}`) : slotProps.data.from }}
-                    </template>
-                </Column>
                 <Column field="amount" header="" sortable style="width: 25%" headerClass="hidden md:table-cell">
                     <template #header>
                         <span class="hidden md:block items-center justify-center">{{ $t('public.amount') }} ($)</span>
@@ -218,7 +210,7 @@ const submit = (transactionId) => {
                 </Column>
                 <ColumnGroup type="footer">
                     <Row>
-                        <Column class="hidden md:table-cell" :footer="$t('public.total') + ' ($) :'" :colspan="3" footerStyle="text-align:right" />
+                        <Column class="hidden md:table-cell" :footer="$t('public.total') + ' ($) :'" :colspan="2" footerStyle="text-align:right" />
                         <Column class="hidden md:table-cell" :footer="formatAmount(totalAmount ? totalAmount : 0)" />
                         <Column class="md:hidden" footerStyle="text-align:right">
                             <template #footer>
@@ -304,7 +296,7 @@ const submit = (transactionId) => {
                             {{ $t('public.from') }}
                         </div>
                         <div class="text-gray-950 text-sm font-medium">
-                            {{ pendingData.from === 'rebate_wallet' ? $t(`public.${pendingData.from}`) : pendingData.from }}
+                            {{ $t(`public.${pendingData.from}`) }}
                         </div>
                     </div>
                     <div class="flex flex-col md:flex-row md:items-center gap-1 self-stretch">

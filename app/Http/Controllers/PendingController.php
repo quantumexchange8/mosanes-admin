@@ -32,6 +32,7 @@ class PendingController extends Controller
         ])
             ->where('transaction_type', 'withdrawal')
             ->where('status', 'processing')
+            ->whereNot('category', 'bonus_wallet')
             ->latest()
             ->get()
             ->map(function ($transaction) {
@@ -42,6 +43,7 @@ class PendingController extends Controller
                     'user_email' => $transaction->user->email,
                     'user_profile_photo' => $transaction->user->getFirstMediaUrl('profile_photo'),
                     'from' => $transaction->category == 'trading_account' ? $transaction->from_meta_login : 'rebate_wallet',
+                    'balance' => $transaction->category == 'trading_account' ? $transaction->from_meta_login->balance : $transaction->from_wallet->balance,
                     'amount' => $transaction->amount,
                     'transaction_charges' => $transaction->transaction_charges,
                     'transaction_amount' => $transaction->transaction_amount,
@@ -93,6 +95,19 @@ class PendingController extends Controller
                 ]);
 
                 $rebate_wallet->save();
+            }
+
+            if ($transaction->category == 'bonus_wallet') {
+                $bonus_wallet = Wallet::where('user_id', $transaction->user_id)
+                    ->where('type', 'bonus_wallet')
+                    ->first();
+
+                $transaction->update([
+                    'old_wallet_amount' => $bonus_wallet->balance,
+                    'new_wallet_amount' => $bonus_wallet->balance += $transaction->amount,
+                ]);
+
+                $bonus_wallet->save();
             }
 
             if ($transaction->category == 'trading_account') {
@@ -166,7 +181,7 @@ class PendingController extends Controller
             'id' => 'required|integer|exists:asset_revokes,id',
             'remarks' => 'required|string|max:255',
         ]);
-    
+
         // Check connection status
         $conn = (new CTraderService)->connectionStatus();
         if ($conn['code'] != 0) {
@@ -175,10 +190,10 @@ class PendingController extends Controller
                 'type' => 'error'
             ]);
         }
-        
+
         // Find the AssetRevoke record or fail
         $assetRevoke = AssetRevoke::findOrFail($request->id);
-    
+
         // Update the AssetRevoke record
         $assetRevoke->update([
             'status' => 'revoked',
@@ -186,18 +201,18 @@ class PendingController extends Controller
             'approval_at' => now(),
             'handle_by' => Auth::id(),
         ]);
-    
+
         // Update the related AssetSubscription record using the relationship
         $assetRevoke->asset_subscription()->update([
             'status' => 'revoked',
             'remarks' => $request->remarks,
             'revoked_at' => now(),
         ]);
-    
+
         // Create a trade using CTraderService
         try {
             $trade = (new CTraderService)->createTrade($assetRevoke->meta_login,$assetRevoke->penalty_fee,$request->remarks,ChangeTraderBalanceType::WITHDRAW);
-    
+
             // Create a new Transaction record
             Transaction::create([
                 'user_id' => $assetRevoke->user_id,
@@ -213,20 +228,20 @@ class PendingController extends Controller
                 'approved_at' => now(),
                 'handle_by' => Auth::id(),
             ]);
-    
+
         } catch (\Throwable $e) {
             if ($e->getMessage() == "Not found") {
                 TradingUser::firstWhere('meta_login', $assetRevoke->meta_login)->update(['acc_status' => 'Inactive']);
             } else {
                 Log::error('Error creating trade or transaction: ' . $e->getMessage());
             }
-    
+
             return back()->with('toast', [
                 'title' => 'Trading account error',
                 'type' => 'error'
             ]);
         }
-    
+
         // Return a success response
         return redirect()->back()->with('toast', [
             'title' => trans('public.toast_approve_revoke_request'),

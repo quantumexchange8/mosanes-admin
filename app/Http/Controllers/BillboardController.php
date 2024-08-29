@@ -94,7 +94,7 @@ class BillboardController extends Controller
                         ->sum('trade_lots');
 
                     $achieved_percentage = ($trade_volume / $profile->target_amount) * 100;
-                    $bonus_amount = $achieved_amount >= $profile->bonus_calculation_threshold ? $profile->bonus_rate : 0;
+                    $bonus_amount = $achieved_percentage >= $profile->bonus_calculation_threshold ? $profile->bonus_rate : 0;
                     $achieved_amount = $trade_volume;
                 }
             } elseif ($profile->sales_calculation_mode == 'group_sales') {
@@ -145,7 +145,7 @@ class BillboardController extends Controller
                         ->sum('trade_lots');
 
                     $achieved_percentage = ($trade_volume / $profile->target_amount) * 100;
-                    $bonus_amount = $achieved_amount >= $profile->bonus_calculation_threshold ? $profile->bonus_rate : 0;
+                    $bonus_amount = $achieved_percentage >= $profile->bonus_calculation_threshold ? $profile->bonus_rate : 0;
                     $achieved_amount = $trade_volume;
                 }
             }
@@ -264,6 +264,42 @@ class BillboardController extends Controller
         return redirect()->back()->with('toast', [
             "title" => trans('public.toast_create_bonus_profile_success'),
             "type" => "success"
+        ]);
+    }
+
+    public function getBonusWithdrawalData(Request $request)
+    {
+        $pendingWithdrawals = Transaction::with([
+            'user:id,email,name',
+            'payment_account:id,payment_account_name,account_no',
+        ])
+            ->where('transaction_type', 'withdrawal')
+            ->where('status', 'processing')
+            ->where('category', 'bonus_wallet')
+            ->latest()
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'id' => $transaction->id,
+                    'created_at' => $transaction->created_at,
+                    'user_name' => $transaction->user->name,
+                    'user_email' => $transaction->user->email,
+                    'user_profile_photo' => $transaction->user->getFirstMediaUrl('profile_photo'),
+                    'from' => 'bonus_wallet',
+                    'balance' => $transaction->from_wallet->balance,
+                    'amount' => $transaction->amount,
+                    'transaction_charges' => $transaction->transaction_charges,
+                    'transaction_amount' => $transaction->transaction_amount,
+                    'wallet_name' => $transaction->payment_account->payment_account_name,
+                    'wallet_address' => $transaction->payment_account->account_no,
+                ];
+            });
+
+        $totalAmount = $pendingWithdrawals->sum('amount');
+
+        return response()->json([
+            'pendingWithdrawals' => $pendingWithdrawals,
+            'totalAmount' => $totalAmount,
         ]);
     }
 }

@@ -455,4 +455,5 @@ return [
     "toast_update_profile_success" => "You’ve successfully updated your account details!",
     "toast_reset_password_success" => "Password has been reset.",
     "delete_account_message" => "Oh no, we're sorry to see you go! To delete your account, please enter your password.",
+    "bonus_wallet" => "Bonus",
 ];

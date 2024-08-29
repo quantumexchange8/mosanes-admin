@@ -12,9 +12,11 @@ return new class extends Migration {
             $table->unsignedBigInteger('user_id')->nullable();
             $table->unsignedBigInteger('billboard_profile_id')->nullable();
             $table->decimal('target_amount', 13)->nullable();
+            $table->decimal('achieved_percentage')->nullable();
             $table->decimal('achieved_amount', 13)->nullable();
             $table->decimal('bonus_rate')->nullable();
             $table->decimal('bonus_amount')->nullable();
+            $table->integer('bonus_month')->nullable();
             $table->softDeletes();
             $table->timestamps();
 

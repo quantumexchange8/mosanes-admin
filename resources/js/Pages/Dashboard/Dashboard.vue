@@ -10,15 +10,17 @@ import Vue3Autocounter from 'vue3-autocounter';
 import { ref, watch, onMounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import Dropdown from "primevue/dropdown";
+import dayjs from "dayjs";
 
 const page = usePage();
 
 const { formatAmount } = transactionFormat();
 
 const counterDuration = ref(10);
+const accountBalanceDuration = ref(10);
 const balance = ref(99999.00)
 const equity = ref(99999.00)
-const pendingWithdrawal = ref(99999.00)
+const pendingWithdrawal = ref(0)
 const netAsset = ref(99999.00)
 const totalDeposit = ref(99999.00)
 const totalWithdrawal = ref(99999.00)
@@ -28,38 +30,32 @@ const pendingWithdrawalCount = ref(0)
 const counterEquity = ref(null);
 const counterBalance = ref(null);
 
-// Function to get the current month and year as a string
-const getCurrentMonthYear = () => {
-  const date = new Date();
-  const month = String(date.getMonth() + 1).padStart(2, '0'); // Get month (01 to 12)
-  const year = date.getFullYear(); // Get year (e.g., 2024)
-  return `${month}/${year}`; // Format as MM/YYYY
-};
+const selectedMonth = ref('');
+const currentYear = dayjs().year();
+const transactionMonth = ref([]);
 
-// Reactive variables
-const selectedMonth = ref(getCurrentMonthYear()); // Initialize with current month/year
-const transactionMonth = ref();
+// Populate historyPeriodOptions with all months of the current year
+for (let month = 1; month <= 12; month++) {
+    transactionMonth.value.push({
+        value: dayjs().month(month - 1).year(currentYear).format('MM/YYYY')
+    });
+}
+
+selectedMonth.value = dayjs().format('MM/YYYY');
 
 const updateBalEquity = () => {
     counterEquity.value.reset();
     counterBalance.value.reset();
-    getAccountData(); 
+    getAccountData();
 }
-
-const getOptions = async () => {
-    try {
-        const response = await axios.get('/getOptions');
-        transactionMonth.value = response.data;
-    } catch (error) {
-        console.error('Error transaction month data:', error);
-    }
-};
 
 const getAccountData = async () => {
     try {
         const response = await axios.get('/getAccountData');
         balance.value = response.data.totalBalance;
         equity.value = response.data.totalEquity;
+
+        accountBalanceDuration.value = 1
     } catch (error) {
         console.error('Error accounts data:', error);
     }
@@ -72,6 +68,8 @@ const getPendingData = async () => {
         pendingWithdrawalCount.value = parseFloat(response.data.pendingCounts);
     } catch (error) {
         console.error('Error pending data:', error);
+    } finally {
+        counterDuration.value = 1
     }
 };
 
@@ -95,6 +93,8 @@ const getAssetData = async (selectedMonth) => {
         netAsset.value = parseFloat(totalDeposit.value - totalWithdrawal.value);
     } catch (error) {
         console.error('Error fetching asset data:', error);
+    } finally {
+        counterDuration.value = 1
     }
 };
 
@@ -104,25 +104,9 @@ watch(selectedMonth, (newMonth) => {
     getAssetData(newMonth);
 });
 
-// Fetch all initial data sequentially
-const fetchAllData = async () => {
-    try {
-        // Fetch all data sequentially
-        await getOptions();
-        await getAccountData();
-        await getPendingData();
-        await getAssetData(selectedMonth.value);
-    } catch (error) {
-        console.error('Error fetching all data:', error);
-    } finally {
-        // Reset counter duration back to 10 seconds after fetching is complete
-        counterDuration.value = 1;
-    }
-};
-
-onMounted(() => {
-    fetchAllData();
-});
+getAccountData();
+getPendingData();
+getAssetData(selectedMonth.value);
 
 const goToTransactionPage = (type) => {
     // Navigate to the transaction page with a query parameter
@@ -176,7 +160,7 @@ const goToTransactionPage = (type) => {
                                 {{ $t('public.balance') }} ($)
                             </div>
                             <div class="text-gray-950 text-lg md:text-xl font-semibold">
-                                <vue3-autocounter ref="counterBalance" :startAmount="0" :endAmount="balance" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                                <vue3-autocounter ref="counterBalance" :startAmount="0" :endAmount="Number(balance)" :duration="accountBalanceDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
 
@@ -187,7 +171,7 @@ const goToTransactionPage = (type) => {
                                 {{ $t('public.equity') }} ($)
                             </div>
                             <div class="text-gray-950 text-lg md:text-xl font-semibold">
-                                <vue3-autocounter ref="counterEquity" :startAmount="0" :endAmount="equity" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                                <vue3-autocounter ref="counterEquity" :startAmount="0" :endAmount="Number(equity)" :duration="accountBalanceDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                             </div>
                         </div>
                     </div>
@@ -203,14 +187,13 @@ const goToTransactionPage = (type) => {
                             size="sm"
                             type="button"
                             iconOnly
-                            v-slot="{ iconSizeClasses }"
                         >
                             <IconChevronRight size="16" stroke-width="1.25" color="#667085"/>
                         </Button>
                     </div>
 
                     <div class="self-stretch text-gray-950 text-xl md:text-xxl font-semibold">
-                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="pendingWithdrawal" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="pendingWithdrawal" :duration="1" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                     </div>
 
                     <div class="flex items-center gap-2">
@@ -238,7 +221,9 @@ const goToTransactionPage = (type) => {
                         <Dropdown
                             v-model="selectedMonth"
                             :options="transactionMonth"
-                            :placeholder="$t('public.select_group_placeholder')"
+                            optionLabel="value"
+                            optionValue="value"
+                            :placeholder="$t('public.month_placeholder')"
                             scroll-height="236px"
                             :pt="{
                                 root: 'inline-flex items-center justify-center relative rounded-lg bg-gray-100 px-3 py-2 gap-3 cursor-pointer overflow-hidden overflow-ellipsis whitespace-nowrap appearance-none',

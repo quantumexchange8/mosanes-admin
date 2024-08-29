@@ -29,7 +29,6 @@ Route::get('/', function () {
 Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
     Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard');
     Route::get('/getPendingCounts', [DashboardController::class, 'getPendingCounts'])->name('dashboard.getPendingCounts');
-    Route::get('/getOptions', [DashboardController::class, 'getOptions'])->name('dashboard.getOptions');
     Route::get('/getAccountData', [DashboardController::class, 'getAccountData'])->name('dashboard.getAccountData');
     Route::get('/getPendingData', [DashboardController::class, 'getPendingData'])->name('dashboard.getPendingData');
     Route::get('/getAssetData', [DashboardController::class, 'getAssetData'])->name('dashboard.getAssetData');

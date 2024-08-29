@@ -144,10 +144,7 @@ class CTraderService
 
     public function getMultipleTraders($from, $to, $groupId )
     {
-        $response = Http::acceptJson()->get($this->baseURL . "/v2/webserv/traders/?from=$from&to=$to&groupId=$groupId&token=$this->token");
-
-        Log::debug($response);
-        return $response;
+        return Http::acceptJson()->get($this->baseURL . "/v2/webserv/traders/?from=$from&to=$to&groupId=$groupId&token=$this->token");
     }
 }
 

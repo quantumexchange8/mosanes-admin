@@ -53,13 +53,6 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function getOptions()
-    {
-        $transactionMonths = (new DropdownOptionService())->getTransactionMonths();
-
-        return response()->json($transactionMonths);
-    }
-
     public function getAccountData()
     {
         $from = '2024-01-01T00:00:00.000';
@@ -69,10 +62,6 @@ class DashboardController extends Controller
         $groupIds = AccountType::whereNotNull('account_group_id')
             ->pluck('account_group_id')
             ->toArray();
-
-        // Initialize total balance and equity
-        $totalBalance = 0;
-        $totalEquity = 0;
 
         foreach ($groupIds as $groupId) {
             // Fetch data for each group ID
@@ -85,16 +74,20 @@ class DashboardController extends Controller
             $groupBalance = 0;
             $groupEquity = 0;
 
+            $meta_logins = TradingAccount::where('account_type_id', $accountType->id)->pluck('meta_login')->toArray();
+
             // Assuming the response is an associative array with a 'trader' key
             if (isset($response['trader']) && is_array($response['trader'])) {
                 foreach ($response['trader'] as $trader) {
-                    // Determine the divisor based on moneyDigits
-                    $moneyDigits = isset($trader['moneyDigits']) ? (int)$trader['moneyDigits'] : 0;
-                    $divisor = $moneyDigits > 0 ? pow(10, $moneyDigits) : 1; // 10^moneyDigits
+                    if (in_array($trader['login'], $meta_logins)) {
+                        // Determine the divisor based on moneyDigits
+                        $moneyDigits = isset($trader['moneyDigits']) ? (int)$trader['moneyDigits'] : 0;
+                        $divisor = $moneyDigits > 0 ? pow(10, $moneyDigits) : 1; // 10^moneyDigits
 
-                    // Adjust balance and equity based on the divisor
-                    $groupBalance += $trader['balance'] / $divisor;
-                    $groupEquity += $trader['equity'] / $divisor;
+                        // Adjust balance and equity based on the divisor
+                        $groupBalance += $trader['balance'] / $divisor;
+                        $groupEquity += $trader['equity'] / $divisor;
+                    }
                 }
 
                 // Update account group balance and equity

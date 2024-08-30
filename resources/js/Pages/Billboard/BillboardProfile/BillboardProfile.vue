@@ -150,7 +150,7 @@ watchEffect(() => {
 
     </div>
 
-    <div v-if="profileCount === 0 || !bonusProfiles.length">
+    <div v-if="profileCount === 0 && !bonusProfiles.length">
         <Empty
             :title="$t('public.no_bonus_profiles_created_yet')"
             :message="$t('public.no_bonus_profiles_created_yet_caption')"
@@ -223,6 +223,17 @@ watchEffect(() => {
                     <div class="h-2 bg-gray-200 rounded-full w-40 my-1.5"></div>
                 </div>
             </div>
+        </div>
+
+        <div v-else-if="!bonusProfiles.length">
+            <Empty
+                :title="$t('public.no_bonus_profiles_created_yet')"
+                :message="$t('public.no_bonus_profiles_created_yet_caption')"
+            >
+                <template #image>
+                    <img src="/img/no_data/no_bonus_profiles_created.svg" alt="no data" />
+                </template>
+            </Empty>
         </div>
 
         <div

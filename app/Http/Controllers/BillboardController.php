@@ -446,7 +446,8 @@ class BillboardController extends Controller
 
         $query = Transaction::where('user_id', $profile->user_id)
             ->where('category', 'bonus_wallet')
-            ->where('transaction_type', 'withdrawal');
+            ->where('transaction_type', 'withdrawal')
+            ->whereNot('status', 'processing');
 
         if ($startDate && $endDate) {
             $start_date = Carbon::createFromFormat('Y-m-d', $startDate)->startOfDay();
@@ -462,8 +463,10 @@ class BillboardController extends Controller
                 return [
                     'category' => $transaction->category,
                     'transaction_type' => $transaction->transaction_type,
-                    'from_meta_login' => $transaction->from_meta_login,
-                    'to_meta_login' => $transaction->to_meta_login,
+                    'user_name' => $transaction->user->name,
+                    'user_email' => $transaction->user->email,
+                    'user_profile_photo' => $transaction->user->getFirstMediaUrl('profile_photo'),
+                    'from_wallet_name' => $transaction->from_wallet->type,
                     'transaction_number' => $transaction->transaction_number,
                     'payment_account_id' => $transaction->payment_account_id,
                     'from_wallet_address' => $transaction->from_wallet_address,
@@ -476,7 +479,8 @@ class BillboardController extends Controller
                     'comment' => $transaction->comment,
                     'remarks' => $transaction->remarks,
                     'created_at' => $transaction->created_at,
-                    'wallet_name' => $transaction->payment_account->payment_account_name ?? '-'
+                    'approved_at' => $transaction->approved_at,
+                    'to_wallet_name' => $transaction->payment_account->payment_account_name ?? '-'
                 ];
             });
 

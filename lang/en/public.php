@@ -463,4 +463,6 @@ return [
     "target" => "Target",
     "rate" => "Rate",
     "total_approved" => "Total Approved",
+    "copy" => "Copy",
+    "copied" => "Copied",
 ];

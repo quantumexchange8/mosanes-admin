@@ -110,8 +110,9 @@ class DashboardController extends Controller
 
     public function getPendingData()
     {
-
-        $pendingWithdrawals = Transaction::where('transaction_type', 'withdrawal')->where('status', 'processing');
+        $pendingWithdrawals = Transaction::whereNot('category', 'bonus_wallet')
+            ->where('transaction_type', 'withdrawal')
+            ->where('status', 'processing');
 
         return response()->json([
             'pendingAmount' => $pendingWithdrawals->sum('transaction_amount'),

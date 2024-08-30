@@ -183,10 +183,12 @@ const goToTransactionPage = (type) => {
                             {{ $t('public.pending_withdrawal') }} ($)
                         </div>
                         <Button
+                            external
                             variant="gray-text"
                             size="sm"
                             type="button"
                             iconOnly
+                            :href="route('pending')"
                         >
                             <IconChevronRight size="16" stroke-width="1.25" color="#667085"/>
                         </Button>

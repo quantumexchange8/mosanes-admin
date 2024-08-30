@@ -455,4 +455,12 @@ return [
     "delete_account_message" => "哦不, 我們很遺憾看到您離開! 要刪除您的帳戶, 必須輸入您的密碼.",
     "bonus_wallet" => "獎金",
     "revoked_date" => "日期",
+    "edit_bonus_profile" => "編輯參賽者檔案",
+    "toast_update_bonus_profile_success" => "您已成功更新了參賽者檔案!",
+    "bonus_payout" => "獎金報表",
+    "target" => "目標",
+    "rate" => "百分比",
+    "total_approved" => "批准總額",
+    "copy" => "拷貝",
+    "copied" => "已拷貝!",
 ];

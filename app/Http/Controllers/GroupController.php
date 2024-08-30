@@ -23,52 +23,53 @@ class GroupController extends Controller
 
     public function getGroups(Request $request)
     {
-        $startDate = $request->input('startDate');
-        $endDate = $request->input('endDate');
+        $groups = Group::get()
+            ->map(function ($group) use ($request) {
+                $groupUserIds = GroupHasUser::where('group_id', $group->id)
+                    ->pluck('user_id')
+                    ->toArray();
 
-        $query = DB::table('groups')
-            ->select(
-                'groups.id',
-                'groups.name',
-                'groups.fee_charges',
-                'groups.color',
-                'groups.group_leader as user_id',
-                'users.name as leader_name',
-                'users.email as leader_email',
-                'groups.deleted_at'
-            )
-            ->join('users', 'users.id', '=', 'groups.group_leader')
-            ->whereNull('groups.deleted_at');
+                $startDate = $request->input('startDate') ?? now()->startOfYear();
+                $endDate = $request->input('endDate') ?? today()->endOfDay();
 
-        // Apply date range filter if startDate and endDate are provided
-        if ($startDate && $endDate) {
-            // Both startDate and endDate are provided
-            $query->whereDate('groups.created_at', '>=', $startDate)
-                ->whereDate('groups.created_at', '<=', $endDate);
-        } else {
-            // Apply default start date if no endDate is provided
-            $query->whereDate('groups.created_at', '>=', '2024-01-01');
-        }
+                $total_deposit = Transaction::whereIn('user_id', $groupUserIds)
+                    ->whereBetween('approved_at', [$startDate, $endDate])
+                    ->where(function ($query) {
+                        $query->where('transaction_type', 'deposit')
+                            ->orWhere('transaction_type', 'balance_in');
+                    })
+                    ->where('status', 'successful')
+                    ->sum('transaction_amount');
 
-        $groups = $query->get()->map(function($group) {
-            return [
-                'id' => $group->id,
-                'name' => $group->name,
-                'fee_charges' => $group->fee_charges,
-                'color' => $group->color,
-                'user_id' => $group->user_id,
-                'leader_name' => $group->leader_name,
-                'leader_email' => $group->leader_email,
-                'profile_photo' => User::find($group->user_id)->getFirstMediaUrl('profile_photo'),
-                'member_count' => GroupHasUser::where('group_id', $group->id)->count(),
-                'deposit' => 0,
-                'withdrawal' => 0,
-                'charges' => 0,
-                'net_balance' => 0,
-                'account_balance' => 0,
-                'account_equity' => 0,
-            ];
-        });
+                $total_withdrawal = Transaction::whereIn('user_id', $groupUserIds)
+                    ->whereBetween('approved_at', [$startDate, $endDate])
+                    ->where(function ($query) {
+                        $query->where('transaction_type', 'withdrawal')
+                            ->orWhere('transaction_type', 'balance_out')
+                            ->orWhere('transaction_type', 'rebate_out');
+                    })
+                    ->where('status', 'successful')
+                    ->sum('amount');
+
+                $transaction_fee_charges = $total_deposit / $group->fee_charges;
+                $net_balance = $total_deposit - $transaction_fee_charges - $total_withdrawal;
+
+                return [
+                    'id' => $group->id,
+                    'name' => $group->name,
+                    'fee_charges' => $group->fee_charges,
+                    'color' => $group->color,
+                    'leader_name' => $group->leader->name,
+                    'leader_email' => $group->leader->email,
+                    'profile_photo' => $group->leader->getFirstMediaUrl('profile_photo'),
+                    'deposit' => $total_deposit,
+                    'withdrawal' => $total_withdrawal,
+                    'transaction_fee_charges' => $transaction_fee_charges,
+                    'net_balance' => $net_balance,
+                    'account_balance' => 0, // calculate balance and equity
+                    'account_equity' => 0,
+                ];
+            });
 
         $total = [
             'total_net_balance' => 0,
@@ -97,7 +98,7 @@ class GroupController extends Controller
             'name' => $request->group_name,
             'fee_charges' => $request->fee_charges,
             'color' => $request->color,
-            'group_leader' => $agent_id,
+            'group_leader_id' => $agent_id,
             'edited_by' => Auth::id(),
         ]);
 
@@ -124,7 +125,7 @@ class GroupController extends Controller
         $group->name = $request->group_name;
         $group->fee_charges = $request->fee_charges;
         $group->color = $request->color;
-        $group->group_leader = $request->agent['value'];
+        $group->group_leader_id = $request->agent['value'];
         $group->edited_by = Auth::id();
         $group->save();
 

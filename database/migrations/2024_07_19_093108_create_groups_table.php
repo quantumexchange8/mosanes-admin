@@ -12,12 +12,12 @@ return new class extends Migration {
             $table->string('name');
             $table->decimal('fee_charges');
             $table->string('color');
-            $table->unsignedBigInteger('group_leader');
+            $table->unsignedBigInteger('group_leader_id');
             $table->unsignedBigInteger('edited_by');
             $table->softDeletes();
             $table->timestamps();
 
-            $table->foreign('group_leader')
+            $table->foreign('group_leader_id')
                 ->references('id')
                 ->on('users')
                 ->onUpdate('cascade')

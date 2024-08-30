@@ -142,7 +142,6 @@ watchEffect(() => {
                             v-model="selectedDate"
                             selectionMode="range"
                             :manualInput="false"
-                            :minDate="minDate"
                             :maxDate="maxDate"
                             dateFormat="dd/mm/yy"
                             showIcon
@@ -241,7 +240,7 @@ watchEffect(() => {
                                         {{ group.fee_charges }}% {{ $t('public.fee_charges') }} ($)
                                     </div>
                                     <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.charges) }}
+                                        {{ formatAmount(group.transaction_fee_charges) }}
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">

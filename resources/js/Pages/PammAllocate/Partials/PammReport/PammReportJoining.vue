@@ -24,6 +24,7 @@ const dt = ref(null);
 const loading = ref(false);
 const joiningPammAccounts = ref([]);
 const totalInvestmentAmount = ref();
+const filteredValueCount = ref(0);
 const {formatDateTime, formatAmount} = transactionFormat();
 const emit = defineEmits(['update:rowCount']);
 
@@ -87,6 +88,9 @@ const clearDate = () => {
     selectedDate.value = [];
 };
 
+const handleFilter = (e) => {
+    filteredValueCount.value = e.filteredValue.length;
+};
 </script>
 
 <template>
@@ -101,6 +105,7 @@ const clearDate = () => {
             ref="dt"
             :loading="loading"
             :globalFilterFields="['user_name', 'user_email', 'meta_login']"
+            @filter="handleFilter"
         >
             <template #header>
                 <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
@@ -148,7 +153,7 @@ const clearDate = () => {
                             </Button>
                         </div>
                     </div>
-                    <div class="flex justify-end self-stretch md:hidden" v-if="joiningPammAccounts.length > 0">
+                    <div class="flex justify-end self-stretch md:hidden" v-if="joiningPammAccounts.length > 0 && filteredValueCount > 0">
                         <span class="text-gray-500 text-right text-sm font-medium">{{ $t('public.total') }}:</span>
                         <span class="text-gray-950 text-sm font-semibold ml-2">$ {{ formatAmount(totalInvestmentAmount)}}</span>
                     </div>
@@ -271,7 +276,7 @@ const clearDate = () => {
                 </template>
             </Column>
             <ColumnGroup type="footer">
-                <Row v-if="joiningPammAccounts.length > 0">
+                <Row v-if="joiningPammAccounts.length > 0 && filteredValueCount > 0">
                     <Column class="hidden md:table-cell" :footer="$t('public.total') + ' ($):'" :colspan="3" footerStyle="text-align:right" />
                     <Column class="hidden md:table-cell" :footer="formatAmount(totalInvestmentAmount ? totalInvestmentAmount : 0)" />
                     <Column class="hidden md:table-cell" v-if="joiningPammAccounts.length > 0 ? (joiningPammAccounts[0].investment_periods > 0 ? $t('public.status') : '') : null" />

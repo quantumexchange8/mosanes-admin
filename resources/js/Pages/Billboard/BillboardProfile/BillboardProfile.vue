@@ -150,7 +150,7 @@ watchEffect(() => {
 
     </div>
 
-    <div v-if="profileCount === 0 && !bonusProfiles.length">
+    <div v-if="profileCount === 0 || !bonusProfiles.length">
         <Empty
             :title="$t('public.no_bonus_profiles_created_yet')"
             :message="$t('public.no_bonus_profiles_created_yet_caption')"

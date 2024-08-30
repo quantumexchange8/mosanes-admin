@@ -39,6 +39,7 @@ const totalTransactionAmount = ref(0);
 const minFilterAmount = ref(0);
 const maxFilterAmount = ref(0);
 const maxAmount = ref(0);
+const filteredValueCount = ref(0);
 
 onMounted(() => {
     getResults(props.selectedType, props.selectedMonths);
@@ -183,13 +184,17 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
   });
 });
 
+const handleFilter = (e) => {
+    filteredValueCount.value = e.filteredValue.length;
+};
+
 </script>
 
 <template>
     <DataTable
         v-model:filters="filters"
         :value="transactions"
-        :paginator="transactions?.length > 0 && totalTransaction > 0"
+        :paginator="transactions?.length > 0 && filteredValueCount > 0"
         removableSort
         :rows="10"
         :rowsPerPageOptions="[10, 20, 50, 100]"
@@ -201,7 +206,8 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
         selectionMode="single"
         @row-click="(event) => openDialog(event.data)"
         :loading="loading"
-        >
+        @filter="handleFilter"
+    >
         <template #header>
             <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
                 <div class="relative w-full md:w-60">
@@ -251,7 +257,7 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
                 <span class="text-sm text-gray-700">{{ $t('public.loading_transactions_caption') }}</span>
             </div>
         </template>
-        <template v-if="transactions?.length > 0 && totalTransaction > 0">
+        <template v-if="transactions?.length > 0 && filteredValueCount > 0">
             <Column
                 field="created_at"
                 sortable

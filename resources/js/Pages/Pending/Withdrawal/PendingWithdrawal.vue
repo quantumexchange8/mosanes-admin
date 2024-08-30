@@ -26,6 +26,7 @@ const pendingWithdrawals = ref();
 const paginator_caption = wTrans('public.paginator_caption');
 const {formatAmount, formatDateTime} = transactionFormat();
 const totalAmount = ref();
+const filteredValueCount = ref(0);
 
 const getResults = async () => {
     loading.value = true;
@@ -118,6 +119,10 @@ const submit = (transactionId) => {
         },
     });
 };
+
+const handleFilter = (e) => {
+    filteredValueCount.value = e.filteredValue.length;
+};
 </script>
 
 <template>
@@ -126,7 +131,7 @@ const submit = (transactionId) => {
         <DataTable
             v-model:filters="filters"
             :value="pendingWithdrawals"
-            :paginator="pendingWithdrawals?.length > 0"
+            :paginator="pendingWithdrawals?.length > 0 && filteredValueCount > 0"
             removableSort
             :rows="10"
             :rowsPerPageOptions="[10, 20, 50, 100]"
@@ -137,6 +142,7 @@ const submit = (transactionId) => {
             :loading="loading"
             selectionMode="single"
             @row-click="rowClicked($event.data)"
+            @filter="handleFilter"
         >
             <template #header>
                 <div class="flex flex-col md:flex-row gap-3 md:justify-between items-center self-stretch md:pb-6">
@@ -169,7 +175,7 @@ const submit = (transactionId) => {
                     <span class="text-sm text-gray-700">{{ $t('public.loading_transactions_caption') }}</span>
                 </div>
             </template>
-            <template v-if="pendingWithdrawals?.length > 0">
+            <template v-if="pendingWithdrawals?.length > 0 && filteredValueCount > 0">
                 <Column field="created_at" sortable style="width: 25%" headerClass="hidden md:table-cell">
                     <template #header>
                         <span class="hidden md:block">{{ $t('public.requested_date') }}</span>

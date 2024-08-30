@@ -6,7 +6,7 @@ import InputText from "primevue/inputtext";
 import Column from "primevue/column";
 import Button from "@/Components/Button.vue";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
-import {ref, watchEffect} from "vue";
+import {ref, watchEffect,watch} from "vue";
 import {wTrans} from "laravel-vue-i18n";
 import {FilterMatchMode} from "primevue/api";
 import {useForm, usePage} from "@inertiajs/vue3";
@@ -26,6 +26,7 @@ const pendingWithdrawals = ref();
 const paginator_caption = wTrans('public.paginator_caption');
 const {formatAmount, formatDateTime} = transactionFormat();
 const totalAmount = ref();
+const filteredValueCount = ref(0);
 
 const getResults = async () => {
     loading.value = true;
@@ -118,6 +119,11 @@ const submit = (transactionId) => {
         },
     });
 };
+
+const handleFilter = (e) => {
+    filteredValueCount.value = e.filteredValue.length;
+};
+
 </script>
 
 <template>
@@ -126,7 +132,7 @@ const submit = (transactionId) => {
         <DataTable
             v-model:filters="filters"
             :value="pendingWithdrawals"
-            paginator
+            :paginator="pendingWithdrawals?.length > 0 && filteredValueCount > 0"
             removableSort
             :rows="10"
             :rowsPerPageOptions="[10, 20, 50, 100]"
@@ -137,6 +143,7 @@ const submit = (transactionId) => {
             :loading="loading"
             selectionMode="single"
             @row-click="rowClicked($event.data)"
+            @filter="handleFilter"
         >
             <template #header>
                 <div class="flex flex-col md:flex-row gap-3 md:justify-between items-center self-stretch md:pb-6">
@@ -169,8 +176,8 @@ const submit = (transactionId) => {
                     <span class="text-sm text-gray-700">{{ $t('public.loading_transactions_caption') }}</span>
                 </div>
             </template>
-            <template v-if="pendingWithdrawals?.length > 0">
-                <Column field="created_at" sortable style="width: 25%" headerClass="hidden md:table-cell">
+            <template v-if="pendingWithdrawals?.length > 0 && filteredValueCount > 0">
+                <Column field="created_at" sortable style="width: 25%" class="hidden md:table-cell">
                     <template #header>
                         <span class="hidden md:block">{{ $t('public.requested_date') }}</span>
                     </template>
@@ -178,7 +185,7 @@ const submit = (transactionId) => {
                         {{ dayjs(slotProps.data.created_at).format('YYYY/MM/DD HH:mm:ss') }}
                     </template>
                 </Column>
-                <Column field="name" sortable :header="$t('public.member')" style="width: 25%" headerClass="hidden md:table-cell">
+                <Column field="name" sortable :header="$t('public.member')" style="width: 25%" class="hidden md:table-cell">
                     <template #body="slotProps">
                         <div class="flex items-center gap-3">
                             <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
@@ -200,7 +207,7 @@ const submit = (transactionId) => {
                         </div>
                     </template>
                 </Column>
-                <Column field="amount" header="" sortable style="width: 25%" headerClass="hidden md:table-cell">
+                <Column field="amount" header="" sortable style="width: 25%" class="hidden md:table-cell">
                     <template #header>
                         <span class="hidden md:block items-center justify-center">{{ $t('public.amount') }} ($)</span>
                     </template>
@@ -209,7 +216,7 @@ const submit = (transactionId) => {
                     </template>
                 </Column>
                 <ColumnGroup type="footer">
-                    <Row>
+                    <Row v-if="filteredValueCount > 0">
                         <Column class="hidden md:table-cell" :footer="$t('public.total') + ' ($) :'" :colspan="2" footerStyle="text-align:right" />
                         <Column class="hidden md:table-cell" :footer="formatAmount(totalAmount ? totalAmount : 0)" />
                         <Column class="md:hidden" footerStyle="text-align:right">

@@ -1,6 +1,6 @@
 ;<script setup>
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
-import { onMounted, ref, watchEffect, watch } from 'vue';
+import {onMounted, ref, watchEffect, watch, reactive} from 'vue';
 import { transactionFormat } from '@/Composables/index.js';
 import { IconX, IconUserFilled, IconRefresh } from '@tabler/icons-vue';
 import Button from '@/Components/Button.vue';
@@ -90,6 +90,47 @@ watchEffect(() => {
     }
 });
 
+const refreshingGroup = reactive({});
+
+const refreshGroup = async (groupId) => {
+    try {
+        refreshingGroup[groupId] = true;
+        let response;
+        const [startDate, endDate] = selectedDate.value;
+
+        let url = `/group/refreshGroup`;
+
+        if (selectedDate.value) {
+            url += `?startDate=${formatDate(startDate)}&endDate=${formatDate(endDate)}`;
+        }
+
+        if (groupId) {
+            url += `&group_id=${groupId}`;
+        }
+
+        response = await axios.get(url);
+        const refreshedGroup = response.data.refreshed_group;
+
+        // Find the index of the group to be replaced
+        const groupIndex = groups.value.findIndex(group => group.id === refreshedGroup.id);
+
+        if (groupIndex !== -1) {
+            // Replace the group data with the refreshed group data
+            groups.value[groupIndex] = refreshedGroup;
+        }
+
+        total.value = response.data.total;
+        totalNetBalance.value = total.value.total_net_balance;
+        totalDeposit.value = total.value.total_deposit;
+        totalWithdrawal.value = total.value.total_withdrawal;
+        totalFeeCharges.value = total.value.total_charges;
+        counterDuration.value = 1;
+    } catch (error) {
+        console.error('Error fetching group:', error);
+    } finally {
+        refreshingGroup[groupId] = false;
+    }
+}
 </script>
 
 <template>
@@ -101,14 +142,14 @@ watchEffect(() => {
                         {{ $t('public.total_net_balance') }} ($)
                     </div>
                     <div class="self-stretch text-gray-950 text-xxl font-semibold md:flex-1 md:text-right">
-                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalNetBalance" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="Number(totalNetBalance)" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                     </div>
                 </div>
 
                 <div class="w-full flex flex-col items-center gap-3 self-stretch md:flex-row md:gap-5">
                     <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch md:gap-3 md:flex-1 border-b-4 border-green bg-gradient-to-t from-[#06d00114] to-[#ffffff14]">
                         <div class="self-stretch text-gray-950 text-lg font-semibold md:text-xl">
-                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalDeposit" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="Number(totalDeposit)" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                         </div>
                         <div class="text-left w-full text-gray-500 text-sm md:text-xs xl:text-sm">
                             {{ $t('public.total_deposit') }} ($)
@@ -117,7 +158,7 @@ watchEffect(() => {
 
                     <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch md:gap-3 md:flex-1 border-b-4 border-pink bg-gradient-to-t from-[#ff2d5814] to-[#ffffff14]">
                         <div class="self-stretch text-gray-950 text-lg font-semibold md:text-xl">
-                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalWithdrawal" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="Number(totalWithdrawal)" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                         </div>
                         <div class="text-left w-full text-gray-500 text-sm md:text-xs xl:text-sm">
                             {{ $t('public.total_withdrawal') }} ($)
@@ -126,7 +167,7 @@ watchEffect(() => {
 
                     <div class="py-4 px-6 flex flex-col items-center gap-2 self-stretch md:gap-3 md:flex-1 border-b-4 border-gray-500 bg-gradient-to-t from-[#F2F4F7] to-[#ffffff14]">
                         <div class="self-stretch text-gray-950 text-lg font-semibold md:text-xl">
-                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalFeeCharges" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                            <vue3-autocounter ref="counter" :startAmount="0" :endAmount="Number(totalFeeCharges)" :duration="counterDuration" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                         </div>
                         <div class="text-left w-full text-gray-500 text-sm md:text-xs xl:text-sm">
                             {{ $t('public.total_fee_charges') }} ($)
@@ -211,9 +252,11 @@ watchEffect(() => {
                                         type="button"
                                         iconOnly
                                         pill
-                                        v-slot="{ iconSizeClasses }"
+                                        @click="refreshGroup(group.id)"
                                     >
-                                        <IconRefresh size="16" stroke-width="1.25" color="#667085" />
+                                        <div :class="{ 'animate-spin': refreshingGroup[group.id] }">
+                                            <IconRefresh size="16" stroke-width="1.25" color="#667085" />
+                                        </div>
                                     </Button>
                                     <GroupMenu :group="group" :date="selectedDate" />
                                 </div>

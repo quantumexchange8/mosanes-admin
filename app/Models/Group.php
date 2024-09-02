@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Group extends Model
@@ -22,5 +23,10 @@ class Group extends Model
     public function leader(): BelongsTo
     {
         return $this->belongsTo(User::class, 'group_leader_id', 'id');
+    }
+
+    public function group_has_user(): HasMany
+    {
+        return $this->hasMany(GroupHasUser::class, 'group_id', 'id');
     }
 }

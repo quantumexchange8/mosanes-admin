@@ -2,7 +2,7 @@
 import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
 import {onMounted, ref, watchEffect, watch, reactive} from 'vue';
 import { transactionFormat } from '@/Composables/index.js';
-import { IconX, IconUserFilled, IconRefresh } from '@tabler/icons-vue';
+import {IconX, IconUserFilled, IconRefresh, IconDotsVertical} from '@tabler/icons-vue';
 import Button from '@/Components/Button.vue';
 import Calendar from 'primevue/calendar';
 import DefaultProfilePhoto from '@/Components/DefaultProfilePhoto.vue';
@@ -12,6 +12,10 @@ import Vue3Autocounter from 'vue3-autocounter';
 import Empty from '@/Components/Empty.vue';
 import { usePage } from '@inertiajs/vue3';
 
+defineProps({
+    groupCount: Number
+})
+
 const { formatAmount, formatDate } = transactionFormat();
 
 const counterDuration = ref(10);
@@ -19,9 +23,9 @@ const totalNetBalance = ref(0.00);
 const totalDeposit = ref(0.00);
 const totalWithdrawal = ref(0.00);
 const totalFeeCharges = ref(0.00);
-const groups = ref();
-const groupsLength = ref();
+const groups = ref([]);
 const total = ref();
+const isLoading = ref(false);
 
 // Get current date
 const today = new Date();
@@ -55,6 +59,7 @@ watch(selectedDate, (newDateRange) => {
 });
 
 const getGroups = async (selectedDate = []) => {
+    isLoading.value = true
     try {
         let response;
         const [startDate, endDate] = selectedDate;
@@ -67,7 +72,6 @@ const getGroups = async (selectedDate = []) => {
 
         response = await axios.get(url);
         groups.value = response.data.groups;
-        groupsLength.value = response.data.groups.length;
 
         total.value = response.data.total;
         totalNetBalance.value = total.value.total_net_balance;
@@ -77,6 +81,8 @@ const getGroups = async (selectedDate = []) => {
         counterDuration.value = 1;
     } catch (error) {
         console.error('Error fetching group:', error);
+    } finally {
+        isLoading.value = false
     }
 };
 
@@ -201,29 +207,25 @@ const refreshGroup = async (groupId) => {
                     <NewGroup />
                 </div>
 
-                <template v-if="groupsLength === 0">
-                    <div class="py-5 flex flex-col items-center gap-5 self-stretch">
-                        <Empty :title="$t('public.no_group_header')" :message="$t('public.no_group_caption')" />
-                    </div>
+                <template v-if="groupCount === 0 && !groups.length">
+                    <Empty :title="$t('public.no_group_header')" :message="$t('public.no_group_caption')" />
                 </template>
 
                 <template v-else>
                     <div
-                        v-for="(group, index) in groups"
-                        :key="index"
+                        v-if="isLoading"
                         class="flex flex-col items-center self-stretch"
                     >
                         <div
-                            class="py-2 px-4 flex items-center gap-3 self-stretch"
-                            :style="{'backgroundColor': `#${group.color}`}"
+                            class="py-2 px-4 flex items-center gap-3 self-stretch bg-primary-300"
                         >
-                            <div class="flex-1 text-white font-semibold">
-                                {{ group.name }}
+                            <div class="flex-1 text-white font-semibold animate-pulse">
+                                <div class="h-2.5 bg-primary-200 rounded-full w-40 my-1"></div>
                             </div>
                             <div class="flex items-center gap-2">
                                 <IconUserFilled size="16" stroke-width="1.25" color="white" />
-                                <div class="text-white text-right text-sm font-medium">
-                                    {{ formatAmount(group.member_count, 0) }}
+                                <div class="text-white text-right text-sm font-medium animate-pulse">
+                                    <div class="h-2 bg-primary-200 rounded-full w-8 my-1.5"></div>
                                 </div>
                             </div>
                         </div>
@@ -231,19 +233,14 @@ const refreshGroup = async (groupId) => {
                             <div class="min-w-[240px] pb-3 flex items-center gap-3 self-stretch border-b border-solid border-gray-200">
                                 <div class="flex items-center gap-3 flex-1">
                                     <div class="w-7 h-7 rounded-full overflow-hidden">
-                                        <template v-if="group.profile_photo">
-                                            <img :src="group.profile_photo" alt="group_leader_profile_photo">
-                                        </template>
-                                        <template v-else>
-                                            <DefaultProfilePhoto />
-                                        </template>
+                                        <DefaultProfilePhoto />
                                     </div>
                                     <div class="flex flex-col items-start flex-1">
                                         <div class="max-w-40 self-stretch overflow-hidden whitespace-nowrap text-gray-950 text-ellipsis text-sm font-medium md:max-w-[500px] xl:max-w-3xl">
-                                            {{ group.leader_name }}
+                                            <div class="h-2.5 bg-gray-200 rounded-full w-28 my-1"></div>
                                         </div>
                                         <div class="max-w-40 self-stretch overflow-hidden whitespace-nowrap text-gray-500 text-ellipsis text-xs md:max-w-[500px] xl:max-w-3xl">
-                                            {{ group.leader_email }}
+                                            <div class="h-2 bg-gray-200 rounded-full w-36 my-1.5"></div>
                                         </div>
                                     </div>
                                     <Button
@@ -252,13 +249,18 @@ const refreshGroup = async (groupId) => {
                                         type="button"
                                         iconOnly
                                         pill
-                                        @click="refreshGroup(group.id)"
                                     >
-                                        <div :class="{ 'animate-spin': refreshingGroup[group.id] }">
-                                            <IconRefresh size="16" stroke-width="1.25" color="#667085" />
-                                        </div>
+                                        <IconRefresh size="16" stroke-width="1.25" color="#667085" />
                                     </Button>
-                                    <GroupMenu :group="group" :date="selectedDate" />
+                                    <Button
+                                        variant="gray-text"
+                                        size="sm"
+                                        type="button"
+                                        iconOnly
+                                        pill
+                                    >
+                                        <IconDotsVertical size="16" stroke-width="1.25" color="#667085" />
+                                    </Button>
                                 </div>
                             </div>
                             <div class="py-3 grid grid-cols-2 items-start content-start gap-y-3 gap-x-5 self-stretch flex-wrap md:grid-cols-3 md:gap-2 xl:grid-cols-6">
@@ -266,48 +268,180 @@ const refreshGroup = async (groupId) => {
                                     <div class="text-gray-500 text-xs">
                                         {{ $t('public.deposit') }} ($)
                                     </div>
-                                    <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.deposit) }}
+                                    <div class="text-gray-950 font-semibold animate-pulse">
+                                        <div class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
                                         {{ $t('public.withdrawal') }} ($)
                                     </div>
-                                    <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.withdrawal) }}
+                                    <div class="text-gray-950 font-semibold animate-pulse">
+                                        <div class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
-                                        {{ group.fee_charges }}% {{ $t('public.fee_charges') }} ($)
+                                        {{ $t('public.fee_charges') }} ($)
                                     </div>
-                                    <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.transaction_fee_charges) }}
+                                    <div class="text-gray-950 font-semibold animate-pulse">
+                                        <div class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
                                         {{ $t('public.net_balance') }} ($)
                                     </div>
-                                    <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.net_balance) }}
+                                    <div class="text-gray-950 font-semibold animate-pulse">
+                                        <div class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
                                         {{ $t('public.account_balance') }} ($)
                                     </div>
-                                    <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.account_balance) }}
+                                    <div class="text-gray-950 font-semibold animate-pulse">
+                                        <div class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
                                     </div>
                                 </div>
                                 <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
                                     <div class="text-gray-500 text-xs">
                                         {{ $t('public.account_equity') }} ($)
                                     </div>
-                                    <div class="text-gray-950 font-semibold">
-                                        {{ formatAmount(group.account_equity) }}
+                                    <div class="text-gray-950 font-semibold animate-pulse">
+                                        <div class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div v-else class="w-full">
+                        <div
+                            v-for="(group, index) in groups"
+                            :key="index"
+                            class="flex flex-col items-center self-stretch"
+                        >
+                            <div
+                                class="py-2 px-4 flex items-center gap-3 self-stretch"
+                                :style="{'backgroundColor': `#${group.color}`}"
+                            >
+                                <div class="flex-1 text-white font-semibold">
+                                    {{ group.name }}
+                                </div>
+                                <div class="flex items-center gap-2">
+                                    <IconUserFilled size="16" stroke-width="1.25" color="white" />
+                                    <div class="text-white text-right text-sm font-medium">
+                                        {{ formatAmount(group.member_count, 0) }}
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="p-4 flex flex-col items-center gap-2 self-stretch">
+                                <div class="min-w-[240px] pb-3 flex items-center gap-3 self-stretch border-b border-solid border-gray-200">
+                                    <div class="flex items-center gap-3 flex-1">
+                                        <div class="w-7 h-7 rounded-full overflow-hidden">
+                                            <template v-if="group.profile_photo">
+                                                <img :src="group.profile_photo" alt="group_leader_profile_photo">
+                                            </template>
+                                            <template v-else>
+                                                <DefaultProfilePhoto />
+                                            </template>
+                                        </div>
+                                        <div class="flex flex-col items-start flex-1">
+                                            <div class="max-w-40 self-stretch overflow-hidden whitespace-nowrap text-gray-950 text-ellipsis text-sm font-medium md:max-w-[500px] xl:max-w-3xl">
+                                                {{ group.leader_name }}
+                                            </div>
+                                            <div class="max-w-40 self-stretch overflow-hidden whitespace-nowrap text-gray-500 text-ellipsis text-xs md:max-w-[500px] xl:max-w-3xl">
+                                                {{ group.leader_email }}
+                                            </div>
+                                        </div>
+                                        <Button
+                                            variant="gray-text"
+                                            size="sm"
+                                            type="button"
+                                            iconOnly
+                                            pill
+                                            @click="refreshGroup(group.id)"
+                                        >
+                                            <div :class="{ 'animate-spin': refreshingGroup[group.id] }">
+                                                <IconRefresh size="16" stroke-width="1.25" color="#667085" />
+                                            </div>
+                                        </Button>
+                                        <GroupMenu :group="group" :date="selectedDate" />
+                                    </div>
+                                </div>
+                                <div class="py-3 grid grid-cols-2 items-start content-start gap-y-3 gap-x-5 self-stretch flex-wrap md:grid-cols-3 md:gap-2 xl:grid-cols-6">
+                                    <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
+                                        <div class="text-gray-500 text-xs">
+                                            {{ $t('public.deposit') }} ($)
+                                        </div>
+                                        <div
+                                            class="text-gray-950 font-semibold"
+                                            :class="{'animate-pulse': refreshingGroup[group.id] }"
+                                        >
+                                            <div v-if="refreshingGroup[group.id]" class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
+                                            <span v-else>{{ formatAmount(group.deposit) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
+                                        <div class="text-gray-500 text-xs">
+                                            {{ $t('public.withdrawal') }} ($)
+                                        </div>
+                                        <div
+                                            class="text-gray-950 font-semibold"
+                                            :class="{'animate-pulse': refreshingGroup[group.id] }"
+                                        >
+                                            <div v-if="refreshingGroup[group.id]" class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
+                                            <span v-else>{{ formatAmount(group.withdrawal) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
+                                        <div class="text-gray-500 text-xs">
+                                            {{ group.fee_charges }}% {{ $t('public.fee_charges') }} ($)
+                                        </div>
+                                        <div
+                                            class="text-gray-950 font-semibold"
+                                            :class="{'animate-pulse': refreshingGroup[group.id] }"
+                                        >
+                                            <div v-if="refreshingGroup[group.id]" class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
+                                            <span v-else>{{ formatAmount(group.transaction_fee_charges) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
+                                        <div class="text-gray-500 text-xs">
+                                            {{ $t('public.net_balance') }} ($)
+                                        </div>
+                                        <div
+                                            class="text-gray-950 font-semibold"
+                                            :class="{'animate-pulse': refreshingGroup[group.id] }"
+                                        >
+                                            <div v-if="refreshingGroup[group.id]" class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
+                                            <span v-else>{{ formatAmount(group.net_balance) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
+                                        <div class="text-gray-500 text-xs">
+                                            {{ $t('public.account_balance') }} ($)
+                                        </div>
+                                        <div
+                                            class="text-gray-950 font-semibold"
+                                            :class="{'animate-pulse': refreshingGroup[group.id] }"
+                                        >
+                                            <div v-if="refreshingGroup[group.id]" class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
+                                            <span v-else>{{ formatAmount(group.account_balance) }}</span>
+                                        </div>
+                                    </div>
+                                    <div class="min-w-[100px] flex flex-col items-start gap-1 flex-1 md:min-w-[160px] xl:min-w-max">
+                                        <div class="text-gray-500 text-xs">
+                                            {{ $t('public.account_equity') }} ($)
+                                        </div>
+                                        <div
+                                            class="text-gray-950 font-semibold"
+                                            :class="{'animate-pulse': refreshingGroup[group.id] }"
+                                        >
+                                            <div v-if="refreshingGroup[group.id]" class="h-2.5 bg-gray-200 rounded-full w-40 my-1"></div>
+                                            <span v-else>{{ formatAmount(group.account_equity) }}</span>
+                                        </div>
                                     </div>
                                 </div>
                             </div>

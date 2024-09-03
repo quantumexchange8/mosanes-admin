@@ -12,7 +12,6 @@ use App\Models\Group;
 use App\Models\Transaction;
 use App\Models\GroupHasUser;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
 use App\Http\Requests\GroupRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Http\Requests\EditGroupRequest;
@@ -22,7 +21,11 @@ class GroupController extends Controller
 {
     public function show()
     {
-        return Inertia::render('Group/Group');
+        $groupCount = Group::count();
+
+        return Inertia::render('Group/Group', [
+            'groupCount' => $groupCount,
+        ]);
     }
 
     public function getGroups(Request $request)
@@ -74,7 +77,10 @@ class GroupController extends Controller
                 $groupEquity = 0;
 
                 foreach ($groupIds as $groupId) {
-                    $response = (new CTraderService)->getMultipleTraders($startDate, $endDate, $groupId);
+                    $startDateFormatted = $startDate->format('Y-m-d\TH:i:s.v');
+                    $endDateFormatted = $endDate->format('Y-m-d\TH:i:s.v');
+
+                    $response = (new CTraderService)->getMultipleTraders($startDateFormatted, $endDateFormatted, $groupId);
 
                     $accountType = AccountType::where('account_group_id', $groupId)->first();
 
@@ -170,7 +176,10 @@ class GroupController extends Controller
 
             foreach ($groupIds as $groupId) {
                 // Fetch data for each group ID
-                $response = (new CTraderService)->getMultipleTraders($startDate, $endDate, $groupId);
+                $startDateFormatted = $startDate->format('Y-m-d\TH:i:s.v');
+                $endDateFormatted = $endDate->format('Y-m-d\TH:i:s.v');
+
+                $response = (new CTraderService)->getMultipleTraders($startDateFormatted, $endDateFormatted, $groupId);
 
                 // Find the corresponding AccountType model
                 $accountType = AccountType::where('account_group_id', $groupId)->first();

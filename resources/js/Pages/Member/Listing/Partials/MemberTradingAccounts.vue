@@ -279,7 +279,7 @@ watchEffect(() => {
                         v-model="form.remarks"
                         autofocus
                         placeholder="Account balance adjustment :)"
-                        :invalid="form.errors.remarks"
+                        :invalid="!!form.errors.remarks"
                         rows="5"
                         cols="30"
                     />

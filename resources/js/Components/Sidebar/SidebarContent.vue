@@ -94,6 +94,12 @@ watchEffect(() => {
                 :active="route().current('member.network')"
             />
 
+            <SidebarCollapsibleItem
+                :title="$t('public.account_listing')"
+                :href="route('member.account_listing')"
+                :active="route().current('member.account_listing')"
+            />
+
         </SidebarCollapsible>
 
         <!-- Group -->

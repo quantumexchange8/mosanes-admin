@@ -465,4 +465,9 @@ return [
     "total_approved" => "Total Approved",
     "copy" => "Copy",
     "copied" => "Copied",
+    "account_listing" => "Account Listing",
+    "all_accounts" => "All Accounts",
+    "deleted_accounts" => "Deleted Accounts",
+    "last_logged_in" => "Last Logged In",
+    "account_credit" => "Account Credit",
 ];

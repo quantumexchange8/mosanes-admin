@@ -3,6 +3,7 @@
 use App\Http\Controllers\BillboardController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\PendingController;
+use App\Http\Controllers\TradingAccountController;
 use Inertia\Inertia;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\Route;
@@ -66,6 +67,7 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::post('/uploadKyc', [MemberController::class, 'uploadKyc'])->name('member.uploadKyc');
 
         Route::delete('/deleteMember', [MemberController::class, 'deleteMember'])->name('member.deleteMember');
+
         // details
         Route::get('/detail/{id_number}', [MemberController::class, 'detail'])->name('member.detail');
         Route::get('/getUserData', [MemberController::class, 'getUserData'])->name('member.getUserData');
@@ -77,12 +79,18 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::post('/updateCryptoWalletInfo', [MemberController::class, 'updateCryptoWalletInfo'])->name('member.updateCryptoWalletInfo');
         Route::post('/updateKYCStatus', [MemberController::class, 'updateKYCStatus'])->name('member.updateKYCStatus');
         Route::post('/walletAdjustment', [MemberController::class, 'walletAdjustment'])->name('member.walletAdjustment');
-        Route::post('/accountAdjustment', [MemberController::class, 'accountAdjustment'])->name('member.accountAdjustment');
         Route::post('/accountDelete', [MemberController::class, 'accountDelete'])->name('member.accountDelete');
 
         // network
         Route::get('/network', [NetworkController::class, 'network'])->name('member.network');
         Route::get('/getDownlineData', [NetworkController::class, 'getDownlineData'])->name('member.getDownlineData');
+
+        // account listing
+        Route::get('/account_listing', [TradingAccountController::class, 'index'])->name('member.account_listing');
+        Route::get('/getAccountListingData', [TradingAccountController::class, 'getAccountListingData'])->name('member.getAccountListingData');
+        Route::get('/getTradingAccountData', [TradingAccountController::class, 'getTradingAccountData'])->name('member.getTradingAccountData');
+
+        Route::post('/accountAdjustment', [TradingAccountController::class, 'accountAdjustment'])->name('member.accountAdjustment');
     });
 
     /**

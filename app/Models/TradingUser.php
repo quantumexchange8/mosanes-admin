@@ -11,6 +11,18 @@ class TradingUser extends Model
 {
     use SoftDeletes;
 
+    /**
+     * Get the attributes that should be cast.
+     *
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'last_access' => 'datetime',
+        ];
+    }
+
     // Relations
     public function user(): BelongsTo
     {

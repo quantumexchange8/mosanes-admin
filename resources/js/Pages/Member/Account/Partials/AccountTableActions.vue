@@ -36,7 +36,7 @@ const items = ref([
 </script>
 
 <template>
-    <div class="flex items-center justify-center gap-2 w-full">
+    <div class="flex items-center justify-center gap-2">
         <Button
             type="button"
             variant="gray-text"

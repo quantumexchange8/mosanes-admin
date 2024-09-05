@@ -9,6 +9,7 @@ import InputNumber from "primevue/inputnumber";
 import Textarea from "primevue/textarea";
 import Chip from "primevue/chip";
 import Button from "@/Components/Button.vue";
+import {IconAlertCircle} from "@tabler/icons-vue"
 
 const props = defineProps({
     account: Object,
@@ -20,7 +21,7 @@ const {formatAmount} = transactionFormat();
 const emit = defineEmits(['update:visible'])
 const getTradingAccountData = async () => {
     try {
-        const response = await axios.get(`/member/getTradingAccountData?account_id=${props.account.id}&dialog_type=${props.dialogType}`);
+        const response = await axios.get(`/member/getTradingAccountData?account_id=${props.account.id}`);
         currentAmount.value = response.data.currentAmount;
     } catch (error) {
         console.error('Error update account:', error);
@@ -106,13 +107,14 @@ const submitForm = () => {
         <div class="flex flex-col gap-5 items-center self-stretch">
             <div class="flex flex-col justify-center items-center px-8 py-4 gap-2 self-stretch bg-gray-200">
                 <div class="text-gray-500 text-center text-xs font-medium">
-                    #{{ account.meta_login }} - {{ dialogType === 'account_balance' ? $t('public.current_account_balance') : $t('public.current_account_credit') }}
+                    #{{ account.meta_login }} - {{ dialogType === 'account_balance' ? $t('public.available_account_balance') : $t('public.available_account_credit') }}
                 </div>
                 <div v-if="currentAmount === null" class="animate-pulse">
                     <div class="h-3 bg-gray-400 rounded-full w-28 my-1"></div>
                 </div>
                 <div v-else class="text-gray-950 text-center text-xl font-semibold">
-                    $ {{ formatAmount(currentAmount) }}
+                    <span v-if="dialogType === 'account_balance'">$ {{ formatAmount(currentAmount['account_balance'] - currentAmount['account_credit']) }}</span>
+                    <span v-else>$ {{ formatAmount(currentAmount[dialogType]) }}</span>
                 </div>
             </div>
 

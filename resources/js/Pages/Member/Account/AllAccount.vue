@@ -1,25 +1,43 @@
 <script setup>
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import {ref} from "vue";
+import {ref, watch} from "vue";
 import {FilterMatchMode} from "primevue/api";
 import Loader from "@/Components/Loader.vue";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
-import StatusBadge from "@/Components/StatusBadge.vue";
-import MemberTableActions from "@/Pages/Member/Listing/Partials/MemberTableActions.vue";
+import OverlayPanel from 'primevue/overlaypanel';
 import Empty from "@/Components/Empty.vue";
 import dayjs from "dayjs";
 import AccountTableActions from "@/Pages/Member/Account/Partials/AccountTableActions.vue";
+import Badge from "@/Components/Badge.vue";
+import InputText from "primevue/inputtext";
+import Button from "@/Components/Button.vue";
+import {IconAdjustments, IconCircleXFilled, IconSearch} from "@tabler/icons-vue";
+import RadioButton from "primevue/radiobutton";
 
+// overlay panel
+const op = ref();
 const accounts = ref([]);
 const loading = ref(false);
-const filteredValueCount = ref(0);
+const filterCount = ref(0);
+const selectedFilterLastLoggedIn = ref('');
+const selectedFilterBalance = ref('');
 
 const getResults = async () => {
     loading.value = true;
 
     try {
-        const response = await axios.get('/member/getAccountListingData?account_listing=all');
+        let url = '/member/getAccountListingData?account_listing=all';
+
+        if (selectedFilterLastLoggedIn.value) {
+            url += `&last_logged_in_days=${selectedFilterLastLoggedIn.value}`;
+        }
+
+        if (selectedFilterBalance.value) {
+            url += `&balance=${selectedFilterBalance.value}`;
+        }
+
+        const response = await axios.get(url);
         accounts.value = response.data.accounts;
     } catch (error) {
         console.error('Error changing locale:', error);
@@ -30,25 +48,48 @@ const getResults = async () => {
 
 getResults();
 
+const clearFilterGlobal = () => {
+    filters.value['global'].value = null;
+}
+
 const exportCSV = () => {
     dt.value.exportCSV();
 };
 
 const filters = ref({
     global: {value: null, matchMode: FilterMatchMode.CONTAINS},
-    name: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
-    upline_id: {value: null, matchMode: FilterMatchMode.EQUALS},
-    group_id: {value: null, matchMode: FilterMatchMode.EQUALS},
-    role: {value: null, matchMode: FilterMatchMode.EQUALS},
-    status: {value: null, matchMode: FilterMatchMode.EQUALS},
 });
+
+watch(filters, () => {
+    filterCount.value = Object.values(filters.value).filter(filter => filter.value !== null).length;
+}, { deep: true });
+
+watch([selectedFilterLastLoggedIn, selectedFilterBalance], () => {
+    op.value.toggle(false);
+    getResults();
+
+    filterCount.value = Object.values(filters.value).filter(filter => filter.value !== null).length +
+        (selectedFilterLastLoggedIn.value ? 1 : 0) +
+        (selectedFilterBalance.value ? 1 : 0);
+}, { deep: true });
+
+const toggle = (event) => {
+    op.value.toggle(event);
+}
 
 const openDialog = (data) => {
 
 }
 
-const handleFilter = (e) => {
-    filteredValueCount.value = e.filteredValue.length;
+const clearFilter = () => {
+    op.value.toggle(false);
+
+    filters.value = {
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+    };
+
+    selectedFilterLastLoggedIn.value = '';
+    selectedFilterBalance.value = '';
 };
 </script>
 
@@ -56,21 +97,64 @@ const handleFilter = (e) => {
     <DataTable
         v-model:filters="filters"
         :value="accounts"
-        :paginator="accounts?.length > 0 && filteredValueCount > 0"
+        :paginator="accounts?.length > 0"
         removableSort
         :rows="10"
         :rowsPerPageOptions="[10, 20, 50, 100]"
         tableStyle="md:min-width: 50rem"
         paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
         :currentPageReportTemplate="$t('public.paginator_caption')"
-        :globalFilterFields="['name']"
+        :globalFilterFields="['user_name', 'user_email', 'meta_login']"
         ref="dt"
         selectionMode="single"
         @row-click="(event) => openDialog(event.data)"
         :loading="loading"
-        @filter="handleFilter"
     >
-        <template #empty><Empty :title="$t('public.empty_member_title')" :message="$t('public.empty_member_message')" /></template>
+        <template #header>
+            <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
+                <div class="relative w-full md:w-60">
+                    <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
+                        <IconSearch size="20" stroke-width="1.25" />
+                    </div>
+                    <InputText v-model="filters['global'].value" :placeholder="$t('public.keyword_search')" class="font-normal pl-12 w-full md:w-60" />
+                    <div
+                        v-if="filters['global'].value !== null"
+                        class="absolute top-2/4 -mt-2 right-4 text-gray-300 hover:text-gray-400 select-none cursor-pointer"
+                        @click="clearFilterGlobal"
+                    >
+                        <IconCircleXFilled size="16" />
+                    </div>
+                </div>
+                <div class="grid grid-cols-2 w-full gap-3">
+                    <Button
+                        variant="gray-outlined"
+                        @click="toggle"
+                        size="sm"
+                        class="flex gap-3 items-center justify-center py-3 w-full md:w-[130px]"
+                    >
+                        <IconAdjustments size="20" color="#0C111D" stroke-width="1.25" />
+                        <div class="text-sm text-gray-950 font-medium">
+                            {{ $t('public.filter') }}
+                        </div>
+                        <Badge class="w-5 h-5 text-xs text-white" variant="numberbadge">
+                            {{ filterCount }}
+                        </Badge>
+                    </Button>
+                    <div class="w-full flex justify-end">
+                        <Button
+                            variant="primary-outlined"
+                            @click="exportCSV($event)"
+                            class="w-full md:w-auto"
+                        >
+                            {{ $t('public.export') }}
+                        </Button>
+                    </div>
+                </div>
+            </div>
+        </template>
+        <template #empty>
+            <Empty :title="$t('public.empty_member_title')" :message="$t('public.empty_member_message')" />
+        </template>
         <template #loading>
             <div class="flex flex-col gap-2 items-center justify-center">
                 <Loader />
@@ -166,56 +250,74 @@ const handleFilter = (e) => {
             </Column>
             <Column class="md:hidden">
                 <template #body="slotProps">
-                    <div class="flex flex-col items-start gap-1 self-stretch">
-                        <div class="flex items-center gap-2 self-stretch w-full">
-                            <div class="flex items-center gap-3 w-full">
-                                <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                                    <template v-if="slotProps.data.profile_photo">
-                                        <img :src="slotProps.data.profile_photo" alt="profile_photo">
-                                    </template>
-                                    <template v-else>
-                                        <DefaultProfilePhoto />
-                                    </template>
-                                </div>
-                                <div class="flex flex-col items-start">
-                                    <div class="font-medium max-w-[120px] xxs:max-w-[140px] min-[390px]:max-w-[180px] xs:max-w-[220px] truncate">
-                                        {{ slotProps.data.name }}
-                                    </div>
-                                    <div class="text-gray-500 text-xs max-w-[120px] xxs:max-w-[140px] min-[390px]:max-w-[180px] xs:max-w-[220px] truncate">
-                                        {{ slotProps.data.email }}
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex items-end">
-                                <MemberTableActions
-                                    :member="slotProps.data"
-                                />
+                    <div class="flex items-center gap-2 self-stretch">
+                        <div class="flex flex-col items-start w-full">
+                            <span class="text-sm text-gray-950 font-semibold">{{ slotProps.data.meta_login }}</span>
+                            <div class="text-xs">
+                                <span class="text-gray-500">{{ $t('public.last_logged_in') }}</span> <span class="text-gray-700 font-medium"> {{ dayjs(slotProps.data.last_login).format('YYYY/MM/DD HH:mm:ss') }}</span>
                             </div>
                         </div>
-                        <div class="flex items-center gap-1 h-[26px]">
-                            <StatusBadge :value="slotProps.data.role">{{ $t(`public.${slotProps.data.role}`) }}</StatusBadge>
-                            <div class="flex items-center justify-center">
-                                <div
-                                    v-if="slotProps.data.group_id"
-                                    class="flex items-center gap-2 rounded justify-center py-1 px-2"
-                                    :style="{ backgroundColor: formatRgbaColor(slotProps.data.group_color, 0.1) }"
-                                >
-                                    <div
-                                        class="w-1.5 h-1.5 grow-0 shrink-0 rounded-full"
-                                        :style="{ backgroundColor: `#${slotProps.data.group_color}` }"
-                                    ></div>
-                                    <div
-                                        class="text-xs font-semibold"
-                                        :style="{ color: `#${slotProps.data.group_color}` }"
-                                    >
-                                        {{ slotProps.data.group_name }}
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+                        <AccountTableActions
+                            :account="slotProps.data"
+                        />
                     </div>
                 </template>
             </Column>
         </template>
     </DataTable>
+
+    <OverlayPanel ref="op">
+        <div class="flex flex-col gap-8 w-60 py-5 px-4">
+            <!-- Filter Last logged in-->
+            <div class="flex flex-col gap-2 items-center self-stretch">
+                <div class="flex self-stretch text-xs text-gray-950 font-semibold">
+                    {{ $t('public.filter_last_logged_in') }}
+                </div>
+                <div class="flex flex-col gap-1 self-stretch">
+                    <div class="flex items-center gap-2 text-sm text-gray-950">
+                        <div class="flex w-8 h-8 p-2 justify-center items-center rounded-full grow-0 shrink-0 hover:bg-gray-100">
+                            <RadioButton
+                                v-model="selectedFilterLastLoggedIn"
+                                inputId="greater_than_90_days"
+                                value="greater_than_90_days"
+                                class="w-4 h-4"
+                            />
+                        </div>
+                        <label for="greater_than_90_days">{{ $t('public.greater_than_90_days') }}</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter balance -->
+            <div class="flex flex-col gap-2 items-center self-stretch">
+                <div class="flex self-stretch text-xs text-gray-950 font-semibold">
+                    {{ $t('public.filter_balance') }}
+                </div>
+                <div class="flex flex-col gap-1 self-stretch">
+                    <div class="flex items-center gap-2 text-sm text-gray-950">
+                        <div class="flex w-8 h-8 p-2 justify-center items-center rounded-full grow-0 shrink-0 hover:bg-gray-100">
+                            <RadioButton
+                                v-model="selectedFilterBalance"
+                                inputId="zero_balance"
+                                value="zero_balance"
+                                class="w-4 h-4"
+                            />
+                        </div>
+                        <label for="zero_balance">{{ $t('public.zero_balance') }}</label>
+                    </div>
+                </div>
+            </div>
+
+            <div class="flex w-full">
+                <Button
+                    type="button"
+                    variant="primary-outlined"
+                    class="flex justify-center w-full"
+                    @click="clearFilter()"
+                >
+                    {{ $t('public.clear_all') }}
+                </Button>
+            </div>
+        </div>
+    </OverlayPanel>
 </template>

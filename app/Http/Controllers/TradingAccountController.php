@@ -25,10 +25,27 @@ class TradingAccountController extends Controller
     public function getAccountListingData(Request $request)
     {
         if ($request->account_listing == 'all') {
-            $accounts = TradingUser::with([
+            $accountQuery = TradingUser::with([
                 'user:id,name,email',
                 'trading_account:id,meta_login,equity'
-            ])
+            ]);
+
+            if ($request->last_logged_in_days) {
+                switch ($request->last_logged_in_days) {
+                    case 'greater_than_90_days':
+                        $accountQuery->whereDate('last_access', '<=', today()->subDays(90));
+                        break;
+
+                    default:
+                        $accountQuery->whereDate('last_access', '<=', today());
+                }
+            }
+
+            if ($request->balance == 'zero_balance') {
+                $accountQuery->where('balance', 0);
+            }
+
+            $accounts = $accountQuery
                 ->orderByDesc('last_access')
                 ->get()
                 ->map(function ($account) {
@@ -40,7 +57,7 @@ class TradingAccountController extends Controller
                         'user_profile_photo' => $account->user->getFirstMediaUrl('profile_photo'),
                         'balance' => $account->balance,
                         'equity' => $account->trading_account->equity,
-                        'last_login' => intval($account->last_access),
+                        'last_login' => $account->last_access,
                     ];
                 });
         } else {
@@ -72,7 +89,10 @@ class TradingAccountController extends Controller
         }
 
         return response()->json([
-            'currentAmount' => $request->dialog_type == 'account_balance' ? $account->balance : $account->credit,
+            'currentAmount' => [
+                'account_balance' => $account->balance,
+                'account_credit' => $account->credit
+            ],
         ]);
     }
 
@@ -117,7 +137,7 @@ class TradingAccountController extends Controller
         $type = $request->type;
         $amount = $request->amount;
 
-        if ($type === 'account_balance' && $action === 'balance_out' && $trading_account->balance < $amount) {
+        if ($type === 'account_balance' && $action === 'balance_out' && ($trading_account->balance - $trading_account->credit) < $amount) {
             throw ValidationException::withMessages(['amount' => trans('public.insufficient_balance')]);
         }
 
@@ -176,10 +196,11 @@ class TradingAccountController extends Controller
                 Log::error($e->getMessage());
             }
 
-            return response()->json([
-                'message' => 'Account adjustment failed',
-                'error' => $e->getMessage(),
-            ], 500);
+            return back()
+                ->with('toast', [
+                    'title' => 'Adjustment failed',
+                    'type' => 'error'
+                ]);
         }
     }
 }

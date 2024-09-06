@@ -475,4 +475,9 @@ return [
     "greater_than_90_days" => "Greater than 90 days",
     "filter_balance" => "Filter by balance",
     "zero_balance" => "Zero balance",
+    "empty_account_title" => "No Accounts Found",
+    "empty_account_message" => "There are no accounts in the listing yet. Once accounts are added, you'll see their details here.",
+    "loading_accounts_data" => "Loading accounts data. Please wait.",
+    "account_have_balance" => "Unable to delete: This account still has a remaining balance.",
+    "deleted_time" => "Deleted time",
 ];

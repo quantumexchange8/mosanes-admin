@@ -1,7 +1,7 @@
 <script setup>
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
-import {ref, watch} from "vue";
+import {ref, watch, watchEffect} from "vue";
 import {FilterMatchMode} from "primevue/api";
 import Loader from "@/Components/Loader.vue";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
@@ -14,6 +14,9 @@ import InputText from "primevue/inputtext";
 import Button from "@/Components/Button.vue";
 import {IconAdjustments, IconCircleXFilled, IconSearch} from "@tabler/icons-vue";
 import RadioButton from "primevue/radiobutton";
+import {transactionFormat} from "@/Composables/index.js";
+import Dialog from "primevue/dialog";
+import {usePage} from "@inertiajs/vue3";
 
 // overlay panel
 const op = ref();
@@ -21,7 +24,8 @@ const accounts = ref([]);
 const loading = ref(false);
 const filterCount = ref(0);
 const selectedFilterLastLoggedIn = ref('');
-const selectedFilterBalance = ref('');
+const {formatAmount} = transactionFormat();
+const visible = ref(false);
 
 const getResults = async () => {
     loading.value = true;
@@ -31,10 +35,6 @@ const getResults = async () => {
 
         if (selectedFilterLastLoggedIn.value) {
             url += `&last_logged_in_days=${selectedFilterLastLoggedIn.value}`;
-        }
-
-        if (selectedFilterBalance.value) {
-            url += `&balance=${selectedFilterBalance.value}`;
         }
 
         const response = await axios.get(url);
@@ -58,27 +58,29 @@ const exportCSV = () => {
 
 const filters = ref({
     global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+    balance: {value: null, matchMode: FilterMatchMode.EQUALS},
 });
 
 watch(filters, () => {
     filterCount.value = Object.values(filters.value).filter(filter => filter.value !== null).length;
 }, { deep: true });
 
-watch([selectedFilterLastLoggedIn, selectedFilterBalance], () => {
+watch([selectedFilterLastLoggedIn], () => {
     op.value.toggle(false);
     getResults();
 
     filterCount.value = Object.values(filters.value).filter(filter => filter.value !== null).length +
-        (selectedFilterLastLoggedIn.value ? 1 : 0) +
-        (selectedFilterBalance.value ? 1 : 0);
+        (selectedFilterLastLoggedIn.value ? 1 : 0);
 }, { deep: true });
 
 const toggle = (event) => {
     op.value.toggle(event);
 }
 
-const openDialog = (data) => {
-
+const data = ref({});
+const openDialog = (rowData) => {
+    visible.value = true;
+    data.value = rowData;
 }
 
 const clearFilter = () => {
@@ -86,11 +88,17 @@ const clearFilter = () => {
 
     filters.value = {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        balance: { value: null, matchMode: FilterMatchMode.EQUALS },
     };
 
     selectedFilterLastLoggedIn.value = '';
-    selectedFilterBalance.value = '';
 };
+
+watchEffect(() => {
+    if (usePage().props.toast !== null) {
+        getResults();
+    }
+});
 </script>
 
 <template>
@@ -153,12 +161,12 @@ const clearFilter = () => {
             </div>
         </template>
         <template #empty>
-            <Empty :title="$t('public.empty_member_title')" :message="$t('public.empty_member_message')" />
+            <Empty :title="$t('public.empty_account_title')" :message="$t('public.empty_account_message')"/>
         </template>
         <template #loading>
             <div class="flex flex-col gap-2 items-center justify-center">
                 <Loader />
-                <span class="text-sm text-gray-700">{{ $t('public.loading_users_caption') }}</span>
+                <span class="text-sm text-gray-700">{{ $t('public.loading_accounts_data') }}</span>
             </div>
         </template>
         <template v-if="accounts?.length > 0">
@@ -222,7 +230,7 @@ const clearFilter = () => {
                     <span class="hidden md:block max-w-[40px] lg:max-w-[100px] truncate">{{ $t('public.balance') }} ($)</span>
                 </template>
                 <template #body="slotProps">
-                    {{ slotProps.data.balance }}
+                    {{ formatAmount(slotProps.data.balance) }}
                 </template>
             </Column>
             <Column
@@ -234,7 +242,7 @@ const clearFilter = () => {
                     <span class="hidden md:block max-w-[40px] lg:max-w-[100px] truncate">{{ $t('public.equity') }} ($)</span>
                 </template>
                 <template #body="slotProps">
-                    {{ slotProps.data.equity }}
+                    {{ formatAmount(slotProps.data.equity) }}
                 </template>
             </Column>
             <Column
@@ -297,9 +305,9 @@ const clearFilter = () => {
                     <div class="flex items-center gap-2 text-sm text-gray-950">
                         <div class="flex w-8 h-8 p-2 justify-center items-center rounded-full grow-0 shrink-0 hover:bg-gray-100">
                             <RadioButton
-                                v-model="selectedFilterBalance"
+                                v-model="filters['balance'].value"
                                 inputId="zero_balance"
-                                value="zero_balance"
+                                value="0.00"
                                 class="w-4 h-4"
                             />
                         </div>
@@ -320,4 +328,58 @@ const clearFilter = () => {
             </div>
         </div>
     </OverlayPanel>
+
+    <Dialog
+        v-model:visible="visible"
+        modal
+        :header="$t('public.account_details')"
+        class="dialog-xs md:dialog-sm"
+    >
+        <div class="flex flex-col justify-center items-start pb-4 gap-3 self-stretch border-b border-gray-200 md:flex-row md:pt-4 md:justify-between">
+            <div class="flex items-center gap-3 self-stretch">
+                <div class="w-9 h-9 rounded-full overflow-hidden grow-0 shrink-0">
+                    <div v-if="data.user_profile_photo">
+                        <img :src="data.user_profile_photo" alt="Profile Photo" />
+                    </div>
+                    <div v-else>
+                        <DefaultProfilePhoto />
+                    </div>
+                </div>
+                <div class="flex flex-col items-start flex-grow">
+                    <span class="self-stretch overflow-hidden text-gray-950 text-ellipsis text-sm font-medium">{{ data.user_name }}</span>
+                    <span class="self-stretch overflow-hidden text-gray-500 text-ellipsis text-xs">{{ data.user_email }}</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center py-4 gap-3 self-stretch border-b border-gray-200">
+            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.account') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.meta_login }}</span>
+            </div>
+            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.balance') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">$ {{ formatAmount(data.balance) }}</span>
+            </div>
+            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.equity') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">$ {{ formatAmount(data.equity) }}</span>
+            </div>
+            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.credit') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">$ {{ formatAmount(data.credit) }}</span>
+            </div>
+            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.leverage') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">1:{{ data.leverage }}</span>
+            </div>
+        </div>
+
+        <div class="flex flex-col items-center py-4 gap-3 self-stretch">
+            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:min-w-[140px] text-gray-500 text-xs">{{ $t('public.last_logged_in') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">{{ dayjs(data.last_login).format('YYYY/MM/DD HH:mm:ss') }} ({{ dayjs().diff(dayjs(data.last_login), 'day') }} {{ $t('public.days') }})</span>
+            </div>
+        </div>
+    </Dialog>
 </template>

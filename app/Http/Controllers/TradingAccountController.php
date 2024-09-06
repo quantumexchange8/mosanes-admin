@@ -8,12 +8,14 @@ use App\Models\Transaction;
 use App\Services\ChangeTraderBalanceType;
 use App\Services\CTraderService;
 use App\Services\RunningNumberService;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use function Symfony\Component\Translation\t;
 
 class TradingAccountController extends Controller
 {
@@ -41,10 +43,6 @@ class TradingAccountController extends Controller
                 }
             }
 
-            if ($request->balance == 'zero_balance') {
-                $accountQuery->where('balance', 0);
-            }
-
             $accounts = $accountQuery
                 ->orderByDesc('last_access')
                 ->get()
@@ -57,11 +55,48 @@ class TradingAccountController extends Controller
                         'user_profile_photo' => $account->user->getFirstMediaUrl('profile_photo'),
                         'balance' => $account->balance,
                         'equity' => $account->trading_account->equity,
+                        'credit' => $account->credit,
+                        'leverage' => $account->leverage,
                         'last_login' => $account->last_access,
+                        'last_login_days' => Carbon::parse($account->last_access)->diffInDays(today()),
                     ];
                 });
         } else {
-            $accounts = TradingAccount::withTrashed();
+            $startDate = $request->query('startDate');
+            $endDate = $request->query('endDate');
+
+            $accountQuery = TradingUser::onlyTrashed()
+                ->with([
+                    'user:id,name,email',
+                    'trading_account:id,user_id,meta_login'
+                ])->withTrashed(['user:id,name,email', 'trading_account:id,user_id,meta_login']);
+
+            if ($startDate && $endDate) {
+                $start_date = Carbon::createFromFormat('Y/m/d', $startDate)->startOfDay();
+                $end_date = Carbon::createFromFormat('Y/m/d', $endDate)->endOfDay();
+
+                $accountQuery->whereBetween('deleted_at', [$start_date, $end_date]);
+            }
+
+            $accounts = $accountQuery
+                ->orderByDesc('deleted_at')
+                ->get()
+                ->map(function ($account) {
+                    return [
+                        'id' => $account->id,
+                        'meta_login' => $account->meta_login,
+                        'user_name' => optional($account->user)->name,
+                        'user_email' => optional($account->user)->email,
+                        'user_profile_photo' => optional($account->user)->getFirstMediaUrl('profile_photo'),
+                        'balance' => $account->balance,
+                        'equity' => 0,
+                        'credit' => $account->credit,
+                        'leverage' => $account->leverage,
+                        'deleted_at' => $account->deleted_at,
+                        'last_login' => $account->last_access,
+                        'last_login_days' => Carbon::parse($account->last_access)->diffInDays(today()),
+                    ];
+                });
         }
 
         return response()->json([
@@ -80,7 +115,7 @@ class TradingAccountController extends Controller
                 ]);
         }
 
-        $account = TradingAccount::find($request->account_id);
+        $account = TradingAccount::where('meta_login', $request->meta_login)->first();
 
         try {
             (new CTraderService)->getUserInfo($account->meta_login);
@@ -120,9 +155,8 @@ class TradingAccountController extends Controller
                 ]);
         }
 
-        $trading_account = TradingAccount::find($request->account_id);
         try {
-            $cTraderService->getUserInfo($trading_account->meta_login);
+            $cTraderService->getUserInfo($request->meta_login);
         } catch (\Throwable $e) {
             Log::error($e->getMessage());
 
@@ -133,6 +167,7 @@ class TradingAccountController extends Controller
                 ]);
         }
 
+        $trading_account = TradingAccount::where('meta_login', $request->meta_login)->first();
         $action = $request->action;
         $type = $request->type;
         $amount = $request->amount;
@@ -199,6 +234,64 @@ class TradingAccountController extends Controller
             return back()
                 ->with('toast', [
                     'title' => 'Adjustment failed',
+                    'type' => 'error'
+                ]);
+        }
+    }
+
+    public function accountDelete(Request $request)
+    {
+        $cTraderService = (new CTraderService);
+
+        $conn = $cTraderService->connectionStatus();
+        if ($conn['code'] != 0) {
+            return back()
+                ->with('toast', [
+                    'title' => 'Connection Error',
+                    'type' => 'error'
+                ]);
+        }
+
+        try {
+            $cTraderService->getUserInfo($request->meta_login);
+        } catch (\Throwable $e) {
+            Log::error($e->getMessage());
+
+            return back()
+                ->with('toast', [
+                    'title' => 'No Account Found',
+                    'type' => 'error'
+                ]);
+        }
+
+        $trading_account = TradingAccount::where('meta_login', $request->meta_login)->first();
+
+        if ($trading_account->balance > 0 || $trading_account->equity > 0 || $trading_account->credit > 0) {
+            return back()
+                ->with('toast', [
+                    'title' => trans('public.account_have_balance'),
+                    'type' => 'error'
+                ]);
+        }
+
+        try {
+            $cTraderService->deleteTrader($trading_account->meta_login);
+
+            $trading_account->trading_user->delete();
+            $trading_account->delete();
+
+            // Return success response with a flag for toast
+            return redirect()->back()->with('toast', [
+                'title' => trans('public.toast_delete_trading_account_success'),
+                'type' => 'success',
+            ]);
+        } catch (\Throwable $e) {
+            // Log the error and return failure response
+            Log::error('Failed to delete trading account: ' . $e->getMessage());
+
+            return back()
+                ->with('toast', [
+                    'title' => 'No Account Found',
                     'type' => 'error'
                 ]);
         }

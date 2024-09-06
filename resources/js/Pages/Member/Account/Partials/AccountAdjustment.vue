@@ -21,7 +21,7 @@ const {formatAmount} = transactionFormat();
 const emit = defineEmits(['update:visible'])
 const getTradingAccountData = async () => {
     try {
-        const response = await axios.get(`/member/getTradingAccountData?account_id=${props.account.id}`);
+        const response = await axios.get(`/member/getTradingAccountData?meta_login=${props.account.meta_login}`);
         currentAmount.value = response.data.currentAmount;
     } catch (error) {
         console.error('Error update account:', error);
@@ -31,7 +31,7 @@ const getTradingAccountData = async () => {
 onMounted(getTradingAccountData);
 
 const form = useForm({
-    account_id: props.account.id,
+    meta_login: props.account.meta_login,
     action: '',
     amount: 0,
     remarks: '',

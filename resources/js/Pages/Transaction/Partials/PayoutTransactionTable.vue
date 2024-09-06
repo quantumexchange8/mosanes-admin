@@ -30,9 +30,9 @@ const visible = ref(false);
 const transactions = ref();
 const dt = ref();
 const loading = ref(false);
-const totalTransaction = ref(0);
-const totalTransactionAmount = ref(0);
-const maxAmount = ref(0);
+const totalTransaction = ref(null);
+const totalTransactionAmount = ref(null);
+const maxAmount = ref(null);
 const filteredValueCount = ref(0);
 
 const getResults = async (type, selectedMonths = [], selectedDate = []) => {

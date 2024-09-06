@@ -276,8 +276,8 @@ watchEffect(() => {
                                  ></div>
                              </div>
                             <div class="flex justify-between items-center self-stretch">
-                                <span class="text-gray-950 text-sm font-medium">${{ formatAmount(profit) }}</span>
-                                <span class="text-gray-950 text-right text-sm font-medium">${{ formatAmount(loss) }}</span>
+                                <span class="text-gray-950 text-sm font-medium">{{ formatAmount(profit) }}%</span>
+                                <span class="text-gray-950 text-right text-sm font-medium">{{ formatAmount(loss) }}%</span>
                             </div>
                          </div>
                     </div>

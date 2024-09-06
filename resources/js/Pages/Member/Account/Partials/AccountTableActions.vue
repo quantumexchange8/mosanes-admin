@@ -5,6 +5,9 @@ import TieredMenu from "primevue/tieredmenu";
 import {h, onMounted, ref} from "vue";
 import Dialog from "primevue/dialog";
 import AccountAdjustment from "@/Pages/Member/Account/Partials/AccountAdjustment.vue";
+import {useConfirm} from "primevue/useconfirm";
+import {trans} from "laravel-vue-i18n";
+import {router} from "@inertiajs/vue3";
 
 const props = defineProps({
     account: Object,
@@ -33,6 +36,46 @@ const items = ref([
         },
     },
 ]);
+
+const confirm = useConfirm();
+
+const requireConfirmation = (action_type) => {
+    const messages = {
+        delete_account: {
+            group: 'headless-error',
+            header: trans('public.delete_trading_account_header'),
+            text: trans('public.delete_trading_account_message'),
+            cancelButton: trans('public.cancel'),
+            acceptButton: trans('public.delete_confirm'),
+            action: () => {
+                router.visit(route('member.accountDelete'), {
+                    method: 'delete',
+                    data: {
+                        meta_login: props.account.meta_login,
+                    },
+                })
+            }
+        },
+    };
+
+    const { group, header, text, dynamicText, suffix, actionType, cancelButton, acceptButton, action } = messages[action_type];
+
+    confirm.require({
+        group,
+        header,
+        actionType,
+        text,
+        dynamicText,
+        suffix,
+        cancelButton,
+        acceptButton,
+        accept: action
+    });
+};
+
+const deleteAccount = () => {
+    requireConfirmation('delete_account')
+}
 </script>
 
 <template>
@@ -55,6 +98,7 @@ const items = ref([
             size="sm"
             icon-only
             pill
+            @click="deleteAccount"
         >
             <IconTrash size="16" stroke-width="1.25" />
         </Button>

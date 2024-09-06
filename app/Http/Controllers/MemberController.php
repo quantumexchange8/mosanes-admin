@@ -543,37 +543,6 @@ class MemberController extends Controller
         return response()->json($adjustment_history);
     }
 
-    public function accountDelete(Request $request)
-    {
-        // Validate the incoming request data
-        $request->validate([
-            'id' => 'required|exists:trading_accounts,id',
-        ]);
-
-        // Find the trading account by id
-        $tradingAccount = TradingAccount::find($request->input('id'));
-
-        try {
-            // Delete the trader account using the meta_login
-            (new CTraderService)->deleteTrader($tradingAccount->meta_login);
-
-            // Delete the trading account from the database
-            $tradingAccount->transactions()->delete();
-            $tradingAccount->tradingUsers()->delete();
-            $tradingAccount->delete();
-
-            // Return success response with a flag for toast
-            return redirect()->back()->with('toast', [
-                'title' => trans('public.toast_delete_trading_account_success'),
-                'type' => 'success',
-            ]);
-        } catch (\Throwable $e) {
-            // Log the error and return failure response
-            Log::error('Failed to delete trading account: ' . $e->getMessage());
-        }
-
-    }
-
     public function uploadKyc(Request $request)
     {
         dd($request->all());

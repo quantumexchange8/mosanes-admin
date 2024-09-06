@@ -79,7 +79,6 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::post('/updateCryptoWalletInfo', [MemberController::class, 'updateCryptoWalletInfo'])->name('member.updateCryptoWalletInfo');
         Route::post('/updateKYCStatus', [MemberController::class, 'updateKYCStatus'])->name('member.updateKYCStatus');
         Route::post('/walletAdjustment', [MemberController::class, 'walletAdjustment'])->name('member.walletAdjustment');
-        Route::post('/accountDelete', [MemberController::class, 'accountDelete'])->name('member.accountDelete');
 
         // network
         Route::get('/network', [NetworkController::class, 'network'])->name('member.network');
@@ -91,6 +90,7 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::get('/getTradingAccountData', [TradingAccountController::class, 'getTradingAccountData'])->name('member.getTradingAccountData');
 
         Route::post('/accountAdjustment', [TradingAccountController::class, 'accountAdjustment'])->name('member.accountAdjustment');
+        Route::delete('/accountDelete', [TradingAccountController::class, 'accountDelete'])->name('member.accountDelete');
     });
 
     /**

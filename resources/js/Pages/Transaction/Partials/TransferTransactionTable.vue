@@ -18,7 +18,7 @@ import Badge from '@/Components/Badge.vue';
 import {IconSearch, IconCircleXFilled, IconAdjustments, IconX} from '@tabler/icons-vue';
 import Slider from 'primevue/slider';
 
-const { formatDate, formatDateTime, formatAmount } = transactionFormat();
+const { formatDateTime, formatAmount } = transactionFormat();
 
 const props = defineProps({
   selectedMonths: Array,
@@ -33,11 +33,11 @@ const visible = ref(false);
 const transactions = ref();
 const dt = ref();
 const loading = ref(false);
-const totalTransaction = ref(0);
-const totalTransactionAmount = ref(0);
+const totalTransaction = ref(null);
+const totalTransactionAmount = ref(null);
 const minFilterAmount = ref(0);
 const maxFilterAmount = ref(0);
-const maxAmount = ref(0);
+const maxAmount = ref(null);
 const filteredValueCount = ref(0);
 
 onMounted(() => {
@@ -65,7 +65,6 @@ const getResults = async (type, selectedMonths = []) => {
         totalTransactionAmount.value = transactions.value.filter(item => ['successful'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
         maxAmount.value = transactions.value?.length ? Math.max(...transactions.value.map(item => parseFloat(item.transaction_amount || 0))) : 0;
         maxFilterAmount.value = maxAmount.value;
-
     } catch (error) {
         console.error('Error fetching transactions:', error);
     } finally {

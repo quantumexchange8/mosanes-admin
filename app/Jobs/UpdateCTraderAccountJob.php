@@ -21,7 +21,7 @@ class UpdateCTraderAccountJob implements ShouldQueue
 
     public function handle(): void
     {
-        $trading_accounts = TradingAccount::all();
+        $trading_accounts = TradingAccount::where('account_type_id', 1)->get();
 
         foreach ($trading_accounts as $account) {
             (new CTraderService())->getUserInfo($account->meta_login);

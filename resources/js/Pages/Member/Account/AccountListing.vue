@@ -62,7 +62,7 @@ const refreshAll = () => {
                         <IconRefresh color="white" size="20" stroke-width="1.25" />
                         <span>{{ $t('public.refresh_all') }}</span>
                     </Button>
-                    <span class="text-gray-500 text-sm">{{ dayjs(last_refresh_datetime) }}</span>
+                    <span class="text-gray-500 text-sm">{{ $t('public.last_refreshed') }}: {{ last_refresh_datetime ? dayjs(last_refresh_datetime).format('YYYY/MM/DD HH:mm:ss') : '-' }}</span>
                 </div>
             </div>
             <div class="py-6 px-4 md:p-6 flex flex-col items-center self-stretch border border-gray-200 bg-white shadow-table rounded-2xl">

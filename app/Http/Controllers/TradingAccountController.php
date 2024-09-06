@@ -28,7 +28,7 @@ class TradingAccountController extends Controller
             ->first();
 
         return Inertia::render('Member/Account/AccountListing', [
-            'last_refresh_datetime' => $last_refresh_datetime
+            'last_refresh_datetime' => $last_refresh_datetime->reserved_at
         ]);
     }
 

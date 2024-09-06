@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\UpdateCTraderAccountJob;
 use App\Models\TradingAccount;
 use App\Models\TradingUser;
 use App\Models\Transaction;
@@ -9,19 +10,26 @@ use App\Services\ChangeTraderBalanceType;
 use App\Services\CTraderService;
 use App\Services\RunningNumberService;
 use Carbon\Carbon;
+use DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
-use function Symfony\Component\Translation\t;
 
 class TradingAccountController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Member/Account/AccountListing');
+        $last_refresh_datetime = DB::table('jobs')
+            ->where('queue', 'refresh_accounts')
+            ->orderByDesc('reserved_at')
+            ->first();
+
+        return Inertia::render('Member/Account/AccountListing', [
+            'last_refresh_datetime' => $last_refresh_datetime
+        ]);
     }
 
     public function getAccountListingData(Request $request)
@@ -295,5 +303,10 @@ class TradingAccountController extends Controller
                     'type' => 'error'
                 ]);
         }
+    }
+
+    public function refreshAllAccount(): void
+    {
+        UpdateCTraderAccountJob::dispatch();
     }
 }

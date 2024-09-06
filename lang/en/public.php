@@ -480,4 +480,5 @@ return [
     "loading_accounts_data" => "Loading accounts data. Please wait.",
     "account_have_balance" => "Unable to delete: This account still has a remaining balance.",
     "deleted_time" => "Deleted time",
+    "refresh_all" => "Refresh All",
 ];

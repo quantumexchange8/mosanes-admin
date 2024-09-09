@@ -6,6 +6,7 @@ import {
     IconUserShield,
     IconPencilMinus,
     IconBan,
+    IconTrash,
 } from "@tabler/icons-vue";
 import Button from "@/Components/Button.vue";
 import {computed, h, ref, watch} from "vue";
@@ -75,25 +76,47 @@ const items = ref([
     {
         separator: true,
     },
-    {
-        label: 'disband',
-        icon: h(IconBan),
-        color: 'red',
-        command: () => {
-            requireConfirmation('disband');
+    props.master?.total_real_investors > 0
+        ? {
+            label: 'disband',
+            icon: h(IconBan),
+            color: 'red',
+            command: () => {
+                requireConfirmation('disband');
+            },
+        }
+        : {
+            label: 'delete',
+            icon: h(IconTrash),
+            color: 'red',
+            command: () => {
+                requireConfirmation('delete');
+            },
         },
-    },
 ]);
 
 const checked = ref(props.master.status === 'active')
 const confirm = useConfirm();
 
 const form = useForm({
-    id: props.master.id
+    id: props.master.id,
+    action: '',
 })
 
 const requireConfirmation = (type) => {
     const messages = {
+        delete: {
+            group: 'headless-error',
+            actionType: 'delete',
+            header: trans('public.delete_pamm_header'),
+            text: trans('public.delete_pamm_message'),
+            cancelButton: trans('public.cancel'),
+            acceptButton: trans('public.delete'),
+            action: () => {
+                form.action = 'delete'
+                form.post(route('pamm_allocate.disband'));
+            }
+        },
         disband: {
             group: 'headless-error',
             actionType: 'disband',
@@ -104,6 +127,7 @@ const requireConfirmation = (type) => {
             cancelButton: trans('public.cancel'),
             acceptButton: trans('public.disband'),
             action: () => {
+                form.action = 'disband'
                 form.post(route('pamm_allocate.disband'));
             }
         },

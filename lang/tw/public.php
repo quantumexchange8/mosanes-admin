@@ -478,4 +478,8 @@ return [
     "loading_accounts_data" => "正在載入賬戶資料。請稍候。",
     "account_have_balance" => "無法刪除：此賬戶仍有剩餘餘額。",
     "deleted_time" => "刪除日期",
+    "refresh_all" => "全部刷新",
+    "last_refreshed" => "最後刷新",
+    "delete_pamm_header" => "刪除 PAMM",
+    "delete_pamm_message" => "您確定要刪除此 PAMM 嗎？一旦執行此操作將無法撤回。",
 ];

@@ -482,4 +482,6 @@ return [
     "deleted_time" => "Deleted time",
     "refresh_all" => "Refresh All",
     "last_refreshed" => "Last refreshed",
+    "delete_pamm_header" => "Delete PAMM",
+    "delete_pamm_message" => "Are you sure you want to delete this PAMM? This action cannot be undone.",
 ];

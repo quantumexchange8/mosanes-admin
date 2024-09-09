@@ -621,6 +621,17 @@ class PammController extends Controller
     {
         $assetMaster = AssetMaster::find($request->id);
 
+        if ($request->action == 'delete') {
+            $assetMaster->delete();
+        } else {
+            $assetMaster->asset_subscriptions()->delete();
+            $assetMaster->total_fund = 0;
+            $assetMaster->total_investors = 0;
+            $assetMaster->save();
+
+            $assetMaster->delete();
+        }
+
         return back()->with('toast', [
             'title' => trans("public.toast_asset_master_disband"),
             'type' => 'success',
@@ -722,17 +733,17 @@ class PammController extends Controller
     public function getPammAccountsDataCount(Request $request)
     {
         $assetMasterId = $request->input('asset_master_id');
-        
+
         // Get the count of AssetSubscription records that are not revoked
         $joiningCount = AssetSubscription::where('asset_master_id', $assetMasterId)
             ->where('status', '!=', 'revoked')
             ->count();
-        
+
         // Get the count of AssetRevoke records that are revoked
         $revokeCount = AssetRevoke::where('asset_master_id', $assetMasterId)
             ->where('status', 'revoked')
             ->count();
-        
+
         return response()->json([
             'joiningCount' => $joiningCount,
             'revokeCount' => $revokeCount

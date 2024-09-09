@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\AssetSubscription;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Carbon;
 use Inertia\Inertia;
 use App\Models\Wallet;
 use App\Models\Country;
@@ -437,14 +439,30 @@ class MemberController extends Controller
     {
         $query = Transaction::query()
             ->where('user_id', $request->id)
-            ->where('status', 'successful')
-            ->select('id', 'from_meta_login', 'to_meta_login', 'transaction_type', 'amount', 'transaction_amount', 'status', 'created_at');
+            ->where('category', 'trading_account')
+            ->where('status', 'successful');
 
         $total_deposit = (clone $query)->where('transaction_type', 'deposit')->sum('transaction_amount');
         $total_withdrawal = (clone $query)->where('transaction_type', 'withdrawal')->sum('amount');
-        $transaction_history = $query->whereIn('transaction_type', ['deposit', 'withdrawal'])
+        $transaction_history = $query->whereIn('transaction_type', ['deposit', 'withdrawal', 'balance_in', 'balance_out'])
             ->latest()
-            ->get();
+            ->get()
+            ->map(function ($transaction) {
+                return [
+                    'category' => $transaction->category,
+                    'transaction_type' => $transaction->transaction_type,
+                    'from_meta_login' => $transaction->from_meta_login,
+                    'to_meta_login' => $transaction->to_meta_login,
+                    'amount' => $transaction->amount,
+                    'transaction_charges' => $transaction->transaction_charges,
+                    'transaction_amount' => $transaction->transaction_amount,
+                    'status' => $transaction->status,
+                    'comment' => $transaction->comment,
+                    'remarks' => $transaction->remarks,
+                    'created_at' => $transaction->created_at,
+                    'approved_at' => $transaction->approved_at,
+                ];
+            });
 
         $rebate_wallet = Wallet::where('user_id', $request->id)
             ->where('type', 'rebate_wallet')
@@ -513,6 +531,17 @@ class MemberController extends Controller
             ->where('user_id', $request->id)
             ->get() // Fetch the results from the database
             ->map(function($trading_account) {
+                $following_master = AssetSubscription::with('asset_master:id,asset_name')
+                    ->where('meta_login', $trading_account->meta_login)
+                    ->whereIn('status', ['ongoing', 'pending'])
+                    ->first();
+
+                $remaining_days = null;
+
+                if ($following_master && $following_master->matured_at) {
+                    $matured_at = Carbon::parse($following_master->matured_at);
+                    $remaining_days = Carbon::now()->diffInDays($matured_at);
+                }
                 return [
                     'id' => $trading_account->id,
                     'meta_login' => $trading_account->meta_login,
@@ -523,6 +552,9 @@ class MemberController extends Controller
                     'leverage' => $trading_account->margin_leverage,
                     'account_type_color' => $trading_account->accountType->color,
                     'updated_at' => $trading_account->updated_at,
+                    'asset_master_id' => $following_master->asset_master->id ?? null,
+                    'asset_master_name' => $following_master->asset_master->asset_name ?? null,
+                    'remaining_days' => intval($remaining_days),
                 ];
             });
 

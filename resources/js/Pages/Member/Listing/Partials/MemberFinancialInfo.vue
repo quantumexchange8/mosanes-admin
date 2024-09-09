@@ -113,13 +113,13 @@ watchEffect(() => {
                     :class="{ 'border-transparent': index === transactionHistory.length - 1 }"
                 >
                     <div class="flex flex-col items-start justify-center gap-1 w-full">
-                        <span class="text-gray-950 text-sm font-semibold">{{ transaction.transaction_type === 'deposit' ? transaction.to_meta_login : transaction.from_meta_login }}</span>
-                        <span class="text-gray-500 text-xs"> {{ formatDateTime(transaction.created_at) }}</span>
+                        <span class="text-gray-950 text-sm font-semibold">{{ transaction.transaction_type === 'deposit' || transaction.transaction_type === 'balance_in' ? transaction.to_meta_login : transaction.from_meta_login }}</span>
+                        <span class="text-gray-500 text-xs"> {{ formatDateTime(transaction.approved_at) }}</span>
                     </div>
                     <div class="w-[120px] truncate text-right font-semibold"
                          :class="{
-                            'text-success-500': transaction.transaction_type === 'deposit',
-                            'text-error-500': transaction.transaction_type === 'withdrawal'
+                            'text-success-500': transaction.transaction_type === 'deposit' || transaction.transaction_type === 'balance_in',
+                            'text-error-500': transaction.transaction_type === 'withdrawal' || transaction.transaction_type === 'balance_out',
                         }"
                     >
                         $ {{ formatAmount(transaction.transaction_type === 'deposit' ? transaction.transaction_amount : transaction.amount) }}

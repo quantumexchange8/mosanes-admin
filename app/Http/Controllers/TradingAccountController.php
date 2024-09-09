@@ -221,6 +221,7 @@ class TradingAccountController extends Controller
 
             $transaction->update([
                 'ticket' => $trade->getTicket(),
+                'approved_at' => now(),
                 'status' => 'successful',
             ]);
 
@@ -230,7 +231,10 @@ class TradingAccountController extends Controller
             ]);
         } catch (\Throwable $e) {
             // Update transaction status to failed on error
-            $transaction->update(['status' => 'failed']);
+            $transaction->update([
+                'approved_at' => now(),
+                'status' => 'failed'
+            ]);
 
             // Handle specific error cases
             if ($e->getMessage() == "Not found") {

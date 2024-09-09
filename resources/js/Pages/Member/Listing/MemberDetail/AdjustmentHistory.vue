@@ -44,7 +44,7 @@ const rowClicked = (data) => {
     </div>
 
     <!-- data table -->
-    <div v-else class="p-6 flex flex-col items-center justify-center self-stretch gap-6 bg-white shadow-toast rounded-2xl max-h-[360px] md:max-h-[372px]">
+    <div v-else class="p-6 flex flex-col items-center justify-center self-stretch gap-6 bg-white shadow-toast rounded-2xl max-h-[360px]">
         <DataTable
             :value="adjustmentHistories"
             removableSort
@@ -52,6 +52,8 @@ const rowClicked = (data) => {
             @row-click="rowClicked($event.data)"
             selectionMode="single"
             class="hidden md:block"
+            scrollable
+            scrollHeight="300px"
         >
             <template #loading>
                 <div class="flex flex-col gap-2 items-center justify-center">

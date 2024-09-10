@@ -105,8 +105,10 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::get('/getAgents', [GroupController::class, 'getAgents'])->name('group.getAgents');
         Route::get('/getGroupTransaction', [GroupController::class, 'getGroupTransaction'])->name('group.getGroupTransaction');
         Route::get('/refreshGroup', [GroupController::class, 'refreshGroup'])->name('group.refreshGroup');
+        Route::get('/getSettlementReport', [GroupController::class, 'getSettlementReport'])->name('group.getSettlementReport');
 
         Route::post('/create_group', [GroupController::class, 'createGroup'])->name('group.create');
+        Route::post('/markSettlementReport/{id}', [GroupController::class, 'markSettlementReport'])->name('group.markSettlementReport');
 
         Route::patch('/edit_group/{id}', [GroupController::class, 'editGroup'])->name('group.edit');
 

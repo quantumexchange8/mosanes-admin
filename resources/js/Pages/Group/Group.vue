@@ -11,6 +11,7 @@ import GroupMenu from '@/Pages/Group/Partials/GroupMenu.vue';
 import Vue3Autocounter from 'vue3-autocounter';
 import Empty from '@/Components/Empty.vue';
 import { usePage } from '@inertiajs/vue3';
+import SettlementReport from "@/Pages/Group/Partials/SettlementReport.vue";
 
 defineProps({
     groupCount: Number
@@ -204,7 +205,10 @@ const refreshGroup = async (groupId) => {
                             <IconX size="20" />
                         </div>
                     </div>
-                    <NewGroup />
+                    <div class="flex flex-col-reverse md:flex-row gap-3 items-center self-stretch">
+                        <SettlementReport />
+                        <NewGroup />
+                    </div>
                 </div>
 
                 <template v-if="groupCount === 0 && !groups.length">

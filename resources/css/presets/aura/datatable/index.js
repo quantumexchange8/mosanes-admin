@@ -651,7 +651,7 @@ export default {
                 'border-0 rounded-full',
 
                 // Color
-                'text-surface-500 dark:text-white/70',
+                'text-gray-500',
                 'bg-transparent',
                 'focus-visible:outline-none focus-visible:outline-offset-0',
                 'focus-visible:ring-1 focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400',
@@ -1106,7 +1106,7 @@ export default {
         ]
     }),
     rowexpansion: {
-        class: 'bg-surface-0 dark:bg-surface-900 text-surface-600 dark:text-white/80'
+        class: 'bg-white text-gray-950'
     },
     rowgroupheader: {
         class: ['sticky z-20', 'bg-surface-0 text-surface-600 dark:text-white/70', 'dark:bg-surface-900']

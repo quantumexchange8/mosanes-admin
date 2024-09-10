@@ -9,6 +9,10 @@ import {
     HideAssetMasterIcon,
     ShowAssetMasterIcon
 } from "@/Components/Icons/brand.jsx";
+
+import {
+    SettlementIcon
+} from "@/Components/Icons/solid.jsx";
 </script>
 
 <template>
@@ -23,6 +27,7 @@ import {
                             <!-- Conditionally render the icon based on actionType -->
                             <BulbIcon v-if="message.actionType === 'activate_member'" class="w-16 h-16 md:w-full md:h-auto" />
                             <ShowAssetMasterIcon v-if="message.actionType === 'show_asset_master'" class="w-16 h-16 md:w-full md:h-auto" />
+                            <SettlementIcon v-if="message.actionType === 'settlement'" class="w-16 h-16 md:w-full md:h-auto" />
                             <!-- Default icon if actionType is not specified -->
                             <BulbIcon v-if="!message.actionType" class="w-16 h-16 md:w-full md:h-auto" />
                         </div>

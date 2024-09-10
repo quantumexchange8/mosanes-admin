@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\AccountType;
+use App\Models\GroupSettlement;
 use App\Models\TradingAccount;
 use App\Models\User;
 use App\Services\CTraderService;
@@ -397,6 +398,143 @@ class GroupController extends Controller
 
         return back()->with('toast', [
             'title' => trans('public.toast_delete_group_success'),
+            'type' => 'success',
+        ]);
+    }
+
+    public function getSettlementReport(Request $request)
+    {
+        $selectedMonths = $request->query('selectedMonths');
+
+        $selectedMonthsArray = !empty($selectedMonths) ? explode(',', $selectedMonths) : [];
+
+        $monthYearFilters = array_map(function($monthYear) {
+            $date = Carbon::createFromFormat('m/Y', $monthYear);
+            return [
+                'month' => $date->month,
+                'year' => $date->year,
+            ];
+        }, $selectedMonthsArray);
+
+        $groupSettlements = GroupSettlement::with('group:id,name')
+            ->when($selectedMonthsArray, function($query) use ($monthYearFilters) {
+                foreach ($monthYearFilters as $filter) {
+                    $query->orWhere(function($query) use ($filter) {
+                        $query->whereYear('transaction_start_at', $filter['year'])
+                            ->whereMonth('transaction_start_at', $filter['month']);
+                    });
+                }
+            })
+            ->orderBy('group_deposit', 'desc')
+            ->get();
+
+        // Initialize an array to hold settlements grouped by month
+        $settlementReports = [];
+
+        foreach ($groupSettlements as $settlement) {
+            // Format the month for grouping
+            $month = $settlement->transaction_start_at->format('m/Y');
+
+            // Initialize the month array if it doesn't exist
+            if (!isset($settlementReports[$month])) {
+                $settlementReports[$month] = [
+                    'month' => $month,
+                    'total_fee' => 0,
+                    'total_balance' => 0,
+                    'group_settlements' => []
+                ];
+            }
+
+            // Add settlement details to the month array
+            $settlementReports[$month]['total_fee'] += $settlement->group_fee;
+            $settlementReports[$month]['total_balance'] += $settlement->group_balance;
+
+            $settlementReports[$month]['group_settlements'][] = [
+                'id' => $settlement->id,
+                'group_id' => $settlement->group_id,
+                'group_name' => $settlement->group->name,
+                'transaction_start_at' => $settlement->transaction_start_at->format('Y-m-d'),
+                'transaction_end_at' => $settlement->transaction_end_at->format('Y-m-d'),
+                'group_deposit' => $settlement->group_deposit,
+                'group_withdrawal' => $settlement->group_withdrawal,
+                'group_fee_percentage' => $settlement->group_fee_percentage,
+                'group_fee' => $settlement->group_fee,
+                'group_balance' => $settlement->group_balance,
+                'settled_at' => $settlement->settled_at->format('Y-m-d'),
+            ];
+        }
+
+        // Prepare the final response
+        return response()->json([
+            'settlementReports' => array_values($settlementReports) // Re-index the array to avoid key issues
+        ]);
+    }
+
+    public function markSettlementReport(Request $request, $id)
+    {
+        $group = Group::find($id);
+        $groupUserIds = GroupHasUser::where('group_id', $id)
+            ->pluck('user_id')
+            ->toArray();
+
+        // First day and last day of the previous month
+        $startDate = Carbon::now()->subMonth()->startOfMonth();
+        $endDate = Carbon::now()->subMonth()->endOfMonth();
+
+        // Check if a settlement for this group and month has already been processed
+        $existingSettlement = GroupSettlement::where('group_id', $id)
+            ->where('transaction_start_at', $startDate)
+            ->where('transaction_end_at', $endDate)
+            ->first();
+
+        // If a settlement for this period already exists, return an error
+        if ($existingSettlement) {
+            return back()->with('toast', [
+                'title' => trans('public.toast_settlement_already_exists'),
+                'type' => 'warning',
+            ]);
+        }
+
+        // Calculate total deposits for the group users in the last month
+        $total_deposit = Transaction::whereIn('user_id', $groupUserIds)
+            ->whereBetween('approved_at', [$startDate, $endDate])
+            ->where(function ($query) {
+                $query->where('transaction_type', 'deposit')
+                    ->orWhere('transaction_type', 'balance_in');
+            })
+            ->where('status', 'successful')
+            ->sum('transaction_amount');
+
+        // Calculate total withdrawals for the group users in the last month
+        $total_withdrawal = Transaction::whereIn('user_id', $groupUserIds)
+            ->whereBetween('approved_at', [$startDate, $endDate])
+            ->where(function ($query) {
+                $query->where('transaction_type', 'withdrawal')
+                    ->orWhere('transaction_type', 'balance_out')
+                    ->orWhere('transaction_type', 'rebate_out');
+            })
+            ->where('status', 'successful')
+            ->sum('amount');
+
+        // Calculate fee charges and net balance
+        $transaction_fee_charges = $total_deposit / $group->fee_charges;
+        $net_balance = $total_deposit - $transaction_fee_charges - $total_withdrawal;
+
+        // Create a new settlement record
+        GroupSettlement::create([
+            'group_id' => $id,
+            'transaction_start_at' => $startDate,
+            'transaction_end_at' => $endDate,
+            'group_deposit' => $total_deposit,
+            'group_withdrawal' => $total_withdrawal,
+            'group_fee_percentage' => $group->fee_charges,
+            'group_fee' => $transaction_fee_charges,
+            'group_balance' => $net_balance,
+            'settled_at' => now(),
+        ]);
+
+        return back()->with('toast', [
+            'title' => trans('public.toast_mark_settlement_success'),
             'type' => 'success',
         ]);
     }

@@ -15,6 +15,7 @@ use App\Http\Controllers\NetworkController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\TransactionController;
+use App\Http\Controllers\ForumController;
 
 Route::get('locale/{locale}', function ($locale) {
     App::setLocale($locale);
@@ -83,6 +84,9 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         // network
         Route::get('/network', [NetworkController::class, 'network'])->name('member.network');
         Route::get('/getDownlineData', [NetworkController::class, 'getDownlineData'])->name('member.getDownlineData');
+
+        // forum
+        Route::get('/forum', [ForumController::class, 'index'])->name('member.forum');
 
         // account listing
         Route::get('/account_listing', [TradingAccountController::class, 'index'])->name('member.account_listing');

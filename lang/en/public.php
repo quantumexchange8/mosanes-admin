@@ -496,4 +496,6 @@ return [
     "expand_all" => "Expand All",
     "collapse_all" => "Collapse All",
     "toast_settlement_already_exists" => "Settlement already has been marked as completed!",
+    "member_forum" => "Member Forum",
+    "new_post" => "New Post",
 ];

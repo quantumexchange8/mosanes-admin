@@ -95,6 +95,12 @@ watchEffect(() => {
             />
 
             <SidebarCollapsibleItem
+                :title="$t('public.member_forum')"
+                :href="route('member.forum')"
+                :active="route().current('member.forum')"
+            />
+
+            <SidebarCollapsibleItem
                 :title="$t('public.account_listing')"
                 :href="route('member.account_listing')"
                 :active="route().current('member.account_listing')"

@@ -1,0 +1,176 @@
+<script setup>
+import Button from "@/Components/Button.vue";
+import Dialog from "primevue/dialog";
+import InputError from "@/Components/InputError.vue";
+import InputLabel from "@/Components/InputLabel.vue";
+import InputText from "primevue/inputtext";
+import Textarea from "primevue/textarea";
+import {
+    IconEdit,
+    IconX
+} from "@tabler/icons-vue";
+import { ref } from "vue";
+import { useForm } from "@inertiajs/vue3";
+
+const visible = ref(false);
+
+const form = useForm({
+    display_name: '',
+    subject: '',
+    message: '',
+    attachment: ''
+})
+
+const selectedAttachment = ref(null);
+const selectedAttachmentName = ref(null);
+const handleAttachment = (event) => {
+    const attachmentInput = event.target;
+    const file = attachmentInput.files[0];
+
+    if (file) {
+        // Display the selected image
+        const reader = new FileReader();
+        reader.onload = () => {
+            selectedAttachment.value = reader.result;
+        };
+        reader.readAsDataURL(file);
+        selectedAttachmentName.value = file.name;
+        form.attachment = event.target.files[0];
+    } else {
+        selectedAttachment.value = null;
+    }
+};
+
+const removeAttachement = () => {
+    selectedAttachment.value = null;
+    form.attachment = '';
+};
+</script>
+
+<template>
+    <Button
+        type="button"
+        variant="primary-tonal"
+        class="w-full"
+        @click="visible = true"
+    >
+        <IconEdit size="20" stroke-width="1.25" />
+        {{ $t('public.new_post') }}
+    </Button>
+
+    <Dialog
+        v-model:visible="visible"
+        modal
+        :header="$t('public.new_post')"
+        class="dialog-xs md:dialog-md"
+    >
+        <form>
+            <div class="flex flex-col gap-8 items-center self-stretch">
+                <div class="flex flex-col gap-5 items-center self-stretch">
+                    <div class="flex flex-col items-start gap-1 self-stretch">
+                        <InputLabel
+                            for="display_name"
+                            :invalid="!!form.errors.display_name"
+                        >
+                            {{ $t('public.display_name') }}
+                        </InputLabel>
+                        <InputText
+                            id="display_name"
+                            type="text"
+                            class="block w-full"
+                            v-model="form.display_name"
+                            :placeholder="$t('public.eg_excellent_financial_analyst')"
+                            :invalid="!!form.errors.display_name"
+                            autofocus
+                        />
+                        <InputError :message="form.errors.display_name" />
+                        <span class="text-gray-500 text-xs">{{ $t('public.display_name_caption') }}</span>
+                    </div>
+                    
+                    <div class="flex flex-col items-start gap-1 self-stretch">
+                        <InputLabel
+                            for="subject"
+                            :invalid="!!form.errors.subject"
+                        >
+                            {{ $t('public.subject') }}
+                        </InputLabel>
+                        <InputText
+                            id="subject"
+                            type="text"
+                            class="block w-full"
+                            v-model="form.subject"
+                            :placeholder="$t('public.enter_subject')"
+                            :invalid="!!form.errors.subject"
+                        />
+                        <InputError :message="form.errors.subject" />
+                    </div>
+
+                    <div class="flex flex-col items-start gap-1 self-stretch">
+                        <InputLabel
+                            for="message"
+                            :invalid="!!form.errors.message"
+                        >
+                            {{ $t('public.message') }}
+                        </InputLabel>
+                        <Textarea
+                            id="message"
+                            type="text"
+                            class="flex flex-1 self-stretch"
+                            v-model="form.message"
+                            :placeholder="$t('public.type_your_message_here')"
+                            :invalid="!!form.errors.message"
+                            rows="5"
+                            cols="30"
+                        />
+                        <InputError :message="form.errors.message" />
+                    </div>
+                </div>
+
+                <div class="flex flex-col gap-3 items-start self-stretch">
+                    <span class="text-sm text-gray-950 font-bold">{{ $t('public.attachment') }}</span>
+                    <div class="flex flex-col gap-3 items-start self-stretch">
+                        <span class="text-xs text-gray-500">{{ $t('public.kyc_caption') }}</span>
+                        <div class="flex flex-col gap-3">
+                            <input
+                                ref="attachmentInput"
+                                id="attachment"
+                                type="file"
+                                class="hidden"
+                                accept="image/*"
+                                @change="handleAttachment"
+                            />
+                            <Button
+                                type="button"
+                                variant="primary-tonal"
+                                @click="$refs.attachmentInput.click()"
+                            >
+                                {{ $t('public.browse') }}
+                            </Button>
+                            <InputError :message="form.errors.kyc_verification" />
+                        </div>
+                        <div
+                            v-if="selectedAttachment"
+                            class="relative w-full py-3 pl-4 flex justify-between rounded-xl bg-gray-50"
+                        >
+                            <div class="inline-flex items-center gap-3">
+                                <img :src="selectedAttachment" alt="Selected Image" class="max-w-full h-9 object-contain rounded" />
+                                <div class="text-sm text-gray-950">
+                                    {{ selectedAttachmentName }}
+                                </div>
+                            </div>
+                            <Button
+                                type="button"
+                                variant="gray-text"
+                                @click="removeAttachement"
+                                pill
+                                iconOnly
+                            >
+                                <IconX class="text-gray-700 w-5 h-5" />
+                            </Button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </Dialog>
+</template>

@@ -1,8 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
-import Button from "@/Components/Button.vue";
+import CreatePost from "@/Pages/Member/Forum/Partials/CreatePost.vue";
 import {
-    IconEdit,
     IconSearch,
     IconCircleXFilled
 } from "@tabler/icons-vue";
@@ -24,14 +23,7 @@ const clearSearch = () => {
                 <!-- new post -->
                 <div class="flex flex-col items-center gap-5 p-6 self-stretch bg-white shadow-toast rounded-2xl">
                     <span class="text-left w-full text-sm text-gray-400">Share your thoughts here...</span>
-                    <Button
-                        type="button"
-                        variant="primary-tonal"
-                        class="w-full"
-                    >
-                        <IconEdit size="20" stroke-width="1.25" />
-                        {{ $t('public.new_post') }}
-                    </Button>
+                    <CreatePost />
                 </div>
 
                 <!-- manage posting permissions -->

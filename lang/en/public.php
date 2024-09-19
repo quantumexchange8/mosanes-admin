@@ -498,4 +498,12 @@ return [
     "toast_settlement_already_exists" => "Settlement already has been marked as completed!",
     "member_forum" => "Member Forum",
     "new_post" => "New Post",
+    "display_name" => "Display Name",
+    "eg_excellent_financial_analyst" => "eg. Excellent Financial Analyst",
+    "display_name_caption" => "This name will appear on your post. Choose a name that represents you well.",
+    "subject" => "Subject",
+    "enter_subject" => "Enter subject",
+    "message" => "Message",
+    "type_your_message_here" => "Type your message here...",
+    "attachment" => "Attachment"
 ];

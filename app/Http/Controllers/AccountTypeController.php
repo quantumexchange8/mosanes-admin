@@ -17,20 +17,27 @@ class AccountTypeController extends Controller
 
     public function getAccountTypes()
     {
-        $accountTypes = AccountType::all()
-        ->map(function($accountType) {
-            if ($accountType->trade_open_duration >= 60) {
-                $accountType['trade_delay'] = ($accountType->trade_open_duration / 60).' min';
-            } else {
-                $accountType['trade_delay'] = $accountType->trade_open_duration. ' sec';
-            }
-            
-            // need to change to calculate total account created for each type
-            $accountType['total_account'] = 21;
+        $accountTypes = AccountType::with('trading_accounts:id,account_type_id')
+            ->get()
+            ->map(function($accountType) {
+                $locale = app()->getLocale();
+                $translations = json_decode($accountType->descriptions, true);
 
-            return $accountType;
-        });
-        
+                if ($accountType->trade_open_duration >= 60) {
+                    $accountType['trade_delay'] = ($accountType->trade_open_duration / 60).' min';
+                } else {
+                    $accountType['trade_delay'] = $accountType->trade_open_duration. ' sec';
+                }
+
+                // need to change to calculate total account created for each type
+                $accountType['total_account'] = $accountType->trading_accounts()->count();
+                $accountType['description_locale'] = $translations[$locale] ?? '-';
+                $accountType['description_en'] = $translations['en'] ?? '-';
+                $accountType['description_tw'] = $translations['tw'] ?? '-';
+
+                return $accountType;
+            });
+
         return response()->json(['accountTypes' => $accountTypes]);
     }
 
@@ -46,8 +53,17 @@ class AccountTypeController extends Controller
 
     public function findAccountType($id)
     {
+        $accountType = AccountType::find($id);
+
+        $locale = app()->getLocale();
+        $translations = json_decode($accountType->descriptions, true);
+
+        $accountType['description_locale'] = $translations[$locale] ?? '-';
+        $accountType['description_en'] = $translations['en'] ?? '-';
+        $accountType['description_tw'] = $translations['tw'] ?? '-';
+
         return response()->json([
-            'account_type' => AccountType::find($id),
+            'account_type' => $accountType
         ]);
     }
 
@@ -62,7 +78,7 @@ class AccountTypeController extends Controller
     {
         $account_type = AccountType::find($id);
         $account_type->category = $request->category;
-        $account_type->descriptions = $request->description;
+        $account_type->descriptions = json_encode($request->descriptions);
         $account_type->leverage = $request->leverage;
         $account_type->trade_open_duration = $request->trade_delay_duration;
         $account_type->maximum_account_number = $request->max_account;

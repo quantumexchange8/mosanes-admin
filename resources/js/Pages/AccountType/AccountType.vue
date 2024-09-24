@@ -63,7 +63,8 @@ const rowClicked = (data) => {
                 </Button>
             </div>
 
-            <div class="py-6 px-4 md:p-6 flex flex-col justify-center items-center gap-6 self-stretch rounded-2xl border border-solid border-gray-200 bg-white shadow-table">
+            <div
+                class="py-6 px-4 md:p-6 flex flex-col justify-center items-center gap-6 self-stretch rounded-2xl border border-solid border-gray-200 bg-white shadow-table">
                 <DataTable
                     :value="accountTypes"
                     removableSort
@@ -71,7 +72,8 @@ const rowClicked = (data) => {
                     @row-click="rowClicked($event.data)"
                 >
                     <template #empty>
-                        <Empty :title="$t('public.no_account_type_header')" :message="$t('public.no_account_type_caption')" />
+                        <Empty :title="$t('public.no_account_type_header')"
+                               :message="$t('public.no_account_type_caption')"/>
                     </template>
 
                     <template #loading>
@@ -106,7 +108,7 @@ const rowClicked = (data) => {
                                 {{ slotProps.data.trade_delay }}
                             </template>
                         </Column>
-                        <Column field="total_acc" sortable class="w-1/3 md:w-1/5" bodyClass="text-center md:text-left" >
+                        <Column field="total_acc" sortable class="w-1/3 md:w-1/5" bodyClass="text-center md:text-left">
                             <template #header>
                                 <span class="w-14 truncate sm:w-auto">{{ $t('public.total_account') }}</span>
                             </template>
@@ -114,13 +116,13 @@ const rowClicked = (data) => {
                                 {{ slotProps.data.total_account }}
                             </template>
                         </Column>
-                        <Column field="action" style="width: 15%" >
+                        <Column field="action" style="width: 15%">
                             <template #body="slotProps">
                                 <div class="py-2 px-3 flex justify-center items-center gap-2 flex-1">
-                                    <AccountTypeStatus :accountTypeId="slotProps.data.id" />
+                                    <AccountTypeStatus :accountTypeId="slotProps.data.id"/>
 
                                     <div class="hidden md:inline-flex">
-                                        <AccountTypeSetting :accountTypeId="slotProps.data.id" />
+                                        <AccountTypeSetting :accountTypeId="slotProps.data.id"/>
                                     </div>
                                 </div>
                             </template>
@@ -142,7 +144,7 @@ const rowClicked = (data) => {
                 <div class="self-stretch text-gray-500 text-xs font-medium">
                     {{ $t('public.account_type_name') }}
                 </div>
-                <div class="self-stretch text-sm font-medium">
+                <div class="self-stretch text-sm font-medium text-gray-950">
                     {{ selected_row.name }}
                 </div>
             </div>
@@ -151,8 +153,8 @@ const rowClicked = (data) => {
                 <div class="self-stretch text-gray-500 text-xs font-medium">
                     {{ $t('public.description') }}
                 </div>
-                <div class="self-stretch text-sm font-medium">
-                    {{ selected_row.descriptions }}
+                <div class="self-stretch text-sm font-medium text-gray-950">
+                    {{ selected_row.description_locale }}
                 </div>
             </div>
 
@@ -160,8 +162,8 @@ const rowClicked = (data) => {
                 <div class="self-stretch text-gray-500 text-xs font-medium">
                     {{ $t('public.leverage') }}
                 </div>
-                <div class="self-stretch text-sm font-medium">
-                    {{ selected_row.leverage == 0 ? 'Free' : `1:${selected_row.leverage}` }}
+                <div class="self-stretch text-sm font-medium text-gray-950">
+                    {{ selected_row.leverage === 0 ? 'Free' : `1:${selected_row.leverage}` }}
                 </div>
             </div>
 
@@ -169,7 +171,7 @@ const rowClicked = (data) => {
                 <div class="self-stretch text-gray-500 text-xs font-medium">
                     {{ $t('public.trade_delay_duration') }}
                 </div>
-                <div class="self-stretch text-sm font-medium">
+                <div class="self-stretch text-sm font-medium text-gray-950">
                     {{ selected_row.trade_delay }}
                 </div>
             </div>
@@ -178,7 +180,7 @@ const rowClicked = (data) => {
                 <div class="self-stretch text-gray-500 text-xs font-medium">
                     {{ $t('public.maximum_account_creation') }}
                 </div>
-                <div class="self-stretch text-sm font-medium">
+                <div class="self-stretch text-sm font-medium text-gray-950">
                     {{ selected_row.maximum_account_number }}
                 </div>
             </div>
@@ -187,14 +189,15 @@ const rowClicked = (data) => {
                 <div class="self-stretch text-gray-500 text-xs font-medium">
                     {{ $t('public.total_account') }}
                 </div>
-                <div class="self-stretch text-sm font-medium">
+                <div class="self-stretch text-sm font-medium text-gray-950">
                     {{ selected_row.total_account }}
                 </div>
             </div>
         </div>
 
         <div class="pt-5">
-            <AccountTypeSetting :accountTypeId="selected_row.id" buttonText="Setting" @detailsVisible="visibleDetails = $event" />
+            <AccountTypeSetting :accountTypeId="selected_row.id" buttonText="Setting"
+                                @detailsVisible="visibleDetails = $event"/>
         </div>
     </Dialog>
 </template>

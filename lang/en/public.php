@@ -505,5 +505,6 @@ return [
     "enter_subject" => "Enter subject",
     "message" => "Message",
     "type_your_message_here" => "Type your message here...",
-    "attachment" => "Attachment"
+    "attachment" => "Attachment",
+    "agent_rebate_structure" => "Agent’s Rebate Structure",
 ];

@@ -95,7 +95,8 @@ class RebateController extends Controller
                     $downline->push([
                         'id' => $child->id,
                         'name' => $child->name,
-                        'profile_pic' => $child->getFirstMediaUrl('profile_pic'),
+                        'email' => $child->email,
+                        'profile_pic' => $child->getFirstMediaUrl('profile_photo'),
                     ]);
                 }
                 $downline = $downline->merge(getDownlineAgents($child));
@@ -157,6 +158,7 @@ class RebateController extends Controller
                     'id' => $agent->id,
                     'profile_photo' => $agent->getFirstMediaUrl('profile_photo'),
                     'name' => $agent->name,
+                    'email' => $agent->email,
                     'hierarchy_list' => $agent->hierarchyList,
                     'upline_id' => $agent->upline_id,
                     'level' => 1,
@@ -202,6 +204,7 @@ class RebateController extends Controller
                         'id' => $agent->id,
                         'profile_photo' => $agent->getFirstMediaUrl('profile_photo'),
                         'name' => $agent->name,
+                        'email' => $agent->email,
                         'hierarchy_list' => $agent->hierarchyList,
                         'upline_id' => $agent->upline_id,
                         'level' => $this->calculateLevel($agent->hierarchyList),
@@ -300,6 +303,7 @@ class RebateController extends Controller
                                 'id' => $same_level_agent->id,
                                 'profile_photo' => $same_level_agent->getFirstMediaUrl('profile_photo'),
                                 'name' => $same_level_agent->name,
+                                'email' => $same_level_agent->email,
                                 'hierarchy_list' => $same_level_agent->hierarchyList,
                                 'upline_id' => $same_level_agent->upline_id,
                                 'level' => $this->calculateLevel($same_level_agent->hierarchyList),
@@ -326,6 +330,7 @@ class RebateController extends Controller
                     'id' => $agent->id,
                     'profile_photo' => $agent->getFirstMediaUrl('profile_photo'),
                     'name' => $agent->name,
+                    'email' => $agent->email,
                     'hierarchy_list' => $agent->hierarchyList,
                     'upline_id' => $agent->upline_id,
                     'level' => $this->calculateLevel($agent->hierarchyList),

@@ -55,7 +55,7 @@ const getData = async () => {
 const form = useForm({
     account_type_name: '',
     category: '',
-    description: '',
+    descriptions: { en: '', tw: '' },
     leverage: '',
     trade_delay_duration: '',
     max_account: '',
@@ -64,7 +64,10 @@ const form = useForm({
 const submitForm = () => {
     form.account_type_name = account_type.value.name
     form.category = account_type.value.category
-    form.description = account_type.value.descriptions
+    form.descriptions = {
+        en: account_type.value.description_en,
+        tw: account_type.value.description_tw
+    }
     form.leverage = account_type.value.leverage
     form.trade_delay_duration = account_type.value.trade_open_duration
     form.max_account = account_type.value.maximum_account_number
@@ -163,28 +166,28 @@ const openSettingDialog = () => {
                                     {{ $t('public.description_en') }}
                                 </InputLabel>
                                 <InputText
-                                    v-model="account_type.descriptions"
+                                    v-model="account_type.description_en"
                                     id="description"
                                     type="text"
                                     class="w-full"
                                     placeholder="Tell more about this..."
                                     :disabled="disabling"
                                 />
-                                <InputError :message="form.errors.description" />
+                                <InputError :message="form.errors.descriptions" />
                             </div>
                             <div class="flex flex-col items-start gap-1 flex-1">
                                 <InputLabel for="description" :invalid="!!form.errors.description">
                                     {{ $t('public.description_zh') }}
                                 </InputLabel>
                                 <InputText
-                                    v-model="account_type.descriptions"
+                                    v-model="account_type.description_tw"
                                     id="description"
                                     type="text"
                                     class="w-full"
                                     placeholder="Tell more about this..."
                                     :disabled="disabling"
                                 />
-                                <InputError :message="form.errors.description" />
+                                <InputError :message="form.errors.descriptions" />
                             </div>
                         </div>
 

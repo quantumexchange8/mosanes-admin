@@ -1,9 +1,8 @@
 <script setup>
-import {ref, watch, watchEffect} from "vue";
+import {ref, watch} from "vue";
 import InputText from 'primevue/inputtext';
 import Button from '@/Components/Button.vue';
 import {useForm, usePage} from '@inertiajs/vue3';
-import OverlayPanel from 'primevue/overlaypanel';
 import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import {FilterMatchMode} from "primevue/api";
@@ -17,6 +16,8 @@ import {
 import { wTrans } from "laravel-vue-i18n";
 import AgentDropdown from '@/Pages/RebateAllocate/Partials/AgentDropdown.vue';
 import InputNumber from "primevue/inputnumber";
+import Dialog from "primevue/dialog";
+import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 
 const dropdownOptions = [
     {
@@ -67,22 +68,22 @@ const changeAgent = async (newAgent) => {
 }
 
 const filters = ref({
-    global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-    name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-    upline_id: { value: null, matchMode: FilterMatchMode.EQUALS },
-    level: { value: null, matchMode: FilterMatchMode.EQUALS },
-    role: { value: null, matchMode: FilterMatchMode.EQUALS },
-    status: { value: null, matchMode: FilterMatchMode.EQUALS },
+    global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+    name: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
+    upline_id: {value: null, matchMode: FilterMatchMode.EQUALS},
+    level: {value: null, matchMode: FilterMatchMode.EQUALS},
+    role: {value: null, matchMode: FilterMatchMode.EQUALS},
+    status: {value: null, matchMode: FilterMatchMode.EQUALS},
 });
 
 const clearFilter = () => {
     filters.value = {
-        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
-        name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-        upline_id: { value: null, matchMode: FilterMatchMode.EQUALS },
-        level: { value: null, matchMode: FilterMatchMode.EQUALS },
-        role: { value: null, matchMode: FilterMatchMode.EQUALS },
-        status: { value: null, matchMode: FilterMatchMode.EQUALS },
+        global: {value: null, matchMode: FilterMatchMode.CONTAINS},
+        name: {value: null, matchMode: FilterMatchMode.STARTS_WITH},
+        upline_id: {value: null, matchMode: FilterMatchMode.EQUALS},
+        level: {value: null, matchMode: FilterMatchMode.EQUALS},
+        role: {value: null, matchMode: FilterMatchMode.EQUALS},
+        status: {value: null, matchMode: FilterMatchMode.EQUALS},
     };
 
     upline_id.value = null;
@@ -94,22 +95,42 @@ const clearFilterGlobal = () => {
 }
 
 const editingRows = ref([]);
+const visible = ref(false);
+const agentRebateDetail = ref();
+const productDetails = ref();
+
+const openDialog = (agentData) => {
+    visible.value = true;
+    agentRebateDetail.value = agentData[0][0];
+    productDetails.value = agentData[1];
+}
 
 const form = useForm({
     rebates: null
 });
+
 const onRowEditSave = (event) => {
-    let { newData, index } = event;
+    let {newData, index} = event;
 
     agents.value[index] = newData;
 
     form.rebates = agents.value[index][1];
     form.post(route('rebate_allocate.updateRebateAmount'));
 };
+
+const submitForm = (submitData) => {
+    form.rebates = submitData;
+    form.post(route('rebate_allocate.updateRebateAmount'));
+};
+
+const closeDialog = () => {
+    visible.value = false;
+}
 </script>
 
 <template>
-    <div class="p-6 flex flex-col items-center justify-center self-stretch gap-6 border border-gray-200 bg-white shadow-table rounded-2xl">
+    <div
+        class="p-6 flex flex-col items-center justify-center self-stretch gap-6 border border-gray-200 bg-white shadow-table rounded-2xl">
         <DataTable
             v-model:editingRows="editingRows"
             :value="agents"
@@ -126,15 +147,16 @@ const onRowEditSave = (event) => {
                 <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:justify-between">
                     <div class="relative w-full md:w-60">
                         <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
-                            <IconSearch size="20" stroke-width="1.25" />
+                            <IconSearch size="20" stroke-width="1.25"/>
                         </div>
-                        <InputText v-model="filters['global'].value" :placeholder="$t('public.search_agent')" class="font-normal pl-12 w-full md:w-60" />
+                        <InputText v-model="filters['global'].value" :placeholder="$t('public.search_agent')"
+                                   class="font-normal pl-12 w-full md:w-60"/>
                         <div
                             v-if="filters['global'].value !== null"
                             class="absolute top-2/4 -mt-2 right-4 text-gray-300 hover:text-gray-400 select-none cursor-pointer"
                             @click="clearFilterGlobal"
                         >
-                            <IconCircleXFilled size="16" />
+                            <IconCircleXFilled size="16"/>
                         </div>
                     </div>
                     <Dropdown
@@ -146,10 +168,10 @@ const onRowEditSave = (event) => {
                     />
                 </div>
             </template>
-            <template #empty> {{ $t('public.no_user_header') }} </template>
+            <template #empty> {{ $t('public.no_user_header') }}</template>
             <template #loading>
                 <div class="flex flex-col gap-2 items-center justify-center">
-                    <Loader />
+                    <Loader/>
                     <span class="text-sm text-gray-700">{{ $t('public.loading_users_caption') }}</span>
                 </div>
             </template>
@@ -158,7 +180,7 @@ const onRowEditSave = (event) => {
                     <span>{{ $t('public.level') }}</span>
                 </template>
                 <template #body="slotProps">
-                    {{ slotProps.data[0][0].level }}
+                    <span class="px-3">{{ slotProps.data[0][0].level }}</span>
                 </template>
             </Column>
             <Column field="agent" class="w-auto">
@@ -166,7 +188,7 @@ const onRowEditSave = (event) => {
                     <span>{{ $t('public.agent') }}</span>
                 </template>
                 <template #body="slotProps">
-                    <AgentDropdown :agents="slotProps.data[0]" @update:modelValue="changeAgent($event)" class="w-full" />
+                    <AgentDropdown :agents="slotProps.data[0]" @update:modelValue="changeAgent($event)" class="w-full"/>
                 </template>
                 <template #editor="{ data }">
                     <div class="flex items-center gap-3">
@@ -270,7 +292,8 @@ const onRowEditSave = (event) => {
                     />
                 </template>
             </Column>
-            <Column :rowEditor="true" style="width: 10%; min-width: 8rem" bodyStyle="text-align:center">
+            <Column :rowEditor="true" class="hidden md:table-cell" style="width: 10%; min-width: 8rem"
+                    bodyStyle="text-align:center">
                 <template #roweditoriniticon>
                     <Button
                         variant="gray-text"
@@ -279,10 +302,186 @@ const onRowEditSave = (event) => {
                         iconOnly
                         pill
                     >
-                        <IconAdjustmentsHorizontal size="16" stroke-width="1.25" />
+                        <IconAdjustmentsHorizontal size="16" stroke-width="1.25"/>
+                    </Button>
+                </template>
+            </Column>
+            <Column field="action" style="width: 15%" class="md:hidden table-cell">
+                <template #body="slotProps">
+                    <Button
+                        variant="gray-text"
+                        type="button"
+                        size="sm"
+                        iconOnly
+                        pill
+                        @click="openDialog(slotProps.data)"
+                    >
+                        <IconAdjustmentsHorizontal size="16" stroke-width="1.25"/>
                     </Button>
                 </template>
             </Column>
         </DataTable>
     </div>
+
+    <Dialog
+        v-model:visible="visible"
+        modal
+        :header="$t('public.agent_rebate_structure')"
+        class="dialog-xs"
+    >
+        <div class="flex flex-col gap-8 items-center self-stretch">
+            <!-- agent details -->
+            <div class="flex items-center gap-3 w-full">
+                <div class="w-9 h-9 rounded-full overflow-hidden grow-0 shrink-0">
+                    <template v-if="agentRebateDetail.profile_photo">
+                        <img :src="agentRebateDetail.profile_photo" alt="profile_photo">
+                    </template>
+                    <template v-else>
+                        <DefaultProfilePhoto/>
+                    </template>
+                </div>
+                <div class="flex flex-col items-start">
+                    <div class="font-medium text-gray-950">
+                        {{ agentRebateDetail.name }}
+                    </div>
+                    <div class="text-gray-500 text-xs">
+                        {{ agentRebateDetail.email }}
+                    </div>
+                </div>
+            </div>
+
+            <!-- rebate allocation -->
+            <div class="flex flex-col items-center gap-2 w-full text-sm">
+                <div class="flex justify-between items-center py-2 self-stretch border-b border-gray-200 bg-gray-100">
+                    <div
+                        class="flex items-center w-full max-w-[104px] px-2 text-gray-950 text-xs font-semibold uppercase">
+                        {{ $t('public.product') }}
+                    </div>
+                    <div
+                        class="flex items-center px-2 w-full max-w-[64px] text-gray-950 text-xs font-semibold uppercase">
+                        {{ $t('public.upline_rebate') }}
+                    </div>
+                    <div
+                        class="flex items-center px-2 w-full max-w-[72px] text-gray-950 text-xs font-semibold uppercase">
+                        {{ $t('public.rebate') }} / Ł ($)
+                    </div>
+                </div>
+
+                <div class="flex flex-col items-center self-stretch max-h-[400px] overflow-y-auto">
+                    <div class="flex justify-between py-1 items-center self-stretch h-10 text-gray-950">
+                        <div class="px-2 w-full max-w-[104px]">
+                            {{ $t('public.forex') }}
+                        </div>
+                        <div class="px-2 w-full max-w-[64px]">
+                            {{ productDetails.upline_forex }}
+                        </div>
+                        <div class="px-2 w-full max-w-[72px]">
+                            <InputNumber
+                                v-model="productDetails['1']"
+                                :min="productDetails.downline_forex ? productDetails.downline_forex : 0"
+                                :max="productDetails.upline_forex"
+                                :minFractionDigits="2"
+                                fluid
+                                size="sm"
+                                inputClass="p-2 max-w-[64px]"
+                            />
+                        </div>
+                    </div>
+                    <div class="flex justify-between py-1 items-center self-stretch h-10 text-gray-950">
+                        <div class="px-2 w-full max-w-[104px]">
+                            {{ $t('public.stocks') }}
+                        </div>
+                        <div class="px-2 w-full max-w-[64px]">
+                            {{ productDetails.upline_stocks }}
+                        </div>
+                        <div class="px-2 w-full max-w-[72px]">
+                            <InputNumber
+                                v-model="productDetails['2']"
+                                :min="productDetails.downline_stocks ? productDetails.downline_stocks : 0"
+                                :max="productDetails.upline_stocks"
+                                :minFractionDigits="2"
+                                fluid
+                                size="sm"
+                                inputClass="p-2 max-w-[64px]"
+                            />
+                        </div>
+                    </div>
+                    <div class="flex justify-between py-1 items-center self-stretch h-10 text-gray-950">
+                        <div class="px-2 w-full max-w-[104px]">
+                            {{ $t('public.indices') }}
+                        </div>
+                        <div class="px-2 w-full max-w-[64px]">
+                            {{ productDetails.upline_indices }}
+                        </div>
+                        <div class="px-2 w-full max-w-[72px]">
+                            <InputNumber
+                                v-model="productDetails['3']"
+                                :min="productDetails.downline_indices ? productDetails.downline_indices : 0"
+                                :max="productDetails.upline_indices"
+                                :minFractionDigits="2"
+                                fluid
+                                size="sm"
+                                inputClass="p-2 max-w-[64px]"
+                            />
+                        </div>
+                    </div>
+                    <div class="flex justify-between py-1 items-center self-stretch h-10 text-gray-950">
+                        <div class="px-2 w-full max-w-[104px] truncate">
+                            {{ $t('public.commodities') }}
+                        </div>
+                        <div class="px-2 w-full max-w-[64px]">
+                            {{ productDetails.upline_commodities }}
+                        </div>
+                        <div class="px-2 w-full max-w-[72px]">
+                            <InputNumber
+                                v-model="productDetails['4']"
+                                :min="productDetails.downline_commodities ? productDetails.downline_commodities : 0"
+                                :max="productDetails.upline_commodities"
+                                :minFractionDigits="2"
+                                fluid
+                                size="sm"
+                                inputClass="p-2 max-w-[64px]"
+                            />
+                        </div>
+                    </div>
+                    <div class="flex justify-between py-1 items-center self-stretch h-10 text-gray-950">
+                        <div class="px-2 w-full max-w-[104px] truncate">
+                            {{ $t('public.cryptocurrency') }}
+                        </div>
+                        <div class="px-2 w-full max-w-[64px]">
+                            {{ productDetails.upline_cryptocurrency }}
+                        </div>
+                        <div class="px-2 w-full max-w-[72px]">
+                            <InputNumber
+                                v-model="productDetails['5']"
+                                :min="productDetails.downline_cryptocurrency ? productDetails.downline_cryptocurrency : 0"
+                                :max="productDetails.upline_cryptocurrency"
+                                :minFractionDigits="2"
+                                fluid
+                                size="sm"
+                                inputClass="p-2 max-w-[64px]"
+                            />
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="flex justify-end items-center pt-8 gap-4 self-stretch sm:p-7">
+            <Button
+                type="button"
+                variant="gray-tonal"
+                class="w-full md:w-[120px]"
+                @click="closeDialog"
+            >
+                {{ $t('public.cancel') }}
+            </Button>
+            <Button
+                variant="primary-flat"
+                class="w-full md:w-[120px]"
+                @click="submitForm(productDetails)"
+            >
+                {{ $t('public.save') }}
+            </Button>
+        </div>
+    </Dialog>
 </template>

@@ -24,7 +24,7 @@ class UpdateAccountTypeRequest extends FormRequest
         return [
             'account_type_name' => ['required'],
             'category' => ['required'],
-            'description' => ['sometimes', 'string', 'nullable'],
+            'descriptions.*' => ['sometimes', 'required'],
             'leverage' => ['required', 'numeric'],
             'trade_delay_duration' => ['required'],
             'max_account' => ['required', 'numeric'],
@@ -36,7 +36,7 @@ class UpdateAccountTypeRequest extends FormRequest
         return [
             'account_type_name' => 'account_type_name',
             'category' => 'category',
-            'description' => 'description',
+            'descriptions' => 'description',
             'leverage' => 'leverage',
             'trade_delay_duration' => 'trade_delay_duration',
             'max_account' => 'max_account',

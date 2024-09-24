@@ -128,14 +128,14 @@ class DashboardController extends Controller
 
         // Calculate total deposits
         $totalDeposit = Transaction::where('status', 'successful')
-            ->where('transaction_type', 'deposit')
+            ->whereIn('transaction_type', ['deposit', 'balance_in'])
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
             ->sum('transaction_amount');
 
         // Calculate total withdrawals
         $totalWithdrawal = Transaction::where('status', 'successful')
-            ->where('transaction_type', 'withdrawal')
+            ->whereIn('transaction_type', ['withdrawal', 'balance_out'])
             ->whereMonth('created_at', $month)
             ->whereYear('created_at', $year)
             ->sum('transaction_amount');

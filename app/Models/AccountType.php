@@ -25,4 +25,10 @@ class AccountType extends Model
         'color',
         'edited_by',
     ];
+
+    // Relations
+    public function trading_accounts(): HasMany
+    {
+        return $this->hasMany(TradingAccount::class, 'account_type_id', 'id');
+    }
 }

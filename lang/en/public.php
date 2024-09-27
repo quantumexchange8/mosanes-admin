@@ -526,5 +526,7 @@ return [
     "login" => "Log In",
     "go_to_dashboard" => "Go to Dashboard",
     "refresh_page" => "Refresh Page",
-
+    "display_avatar" => "Display Avatar",
+    "display_avatar_caption" => "Selected avatar will be displayed instead of your profile photo.",
+    "toast_create_post_success" => "You’ve successfully created a new post!",
 ];

@@ -7,14 +7,17 @@ import InputText from "primevue/inputtext";
 import Textarea from "primevue/textarea";
 import {
     IconEdit,
-    IconX
+    IconX,
+    IconCheck
 } from "@tabler/icons-vue";
-import { ref } from "vue";
+import {ref} from "vue";
 import { useForm } from "@inertiajs/vue3";
+import Avatar from 'primevue/avatar';
 
 const visible = ref(false);
 
 const form = useForm({
+    display_avatar: '',
     display_name: '',
     subject: '',
     message: '',
@@ -41,10 +44,27 @@ const handleAttachment = (event) => {
     }
 };
 
-const removeAttachement = () => {
+const removeAttachment = () => {
     selectedAttachment.value = null;
     form.attachment = '';
 };
+
+const isHovered = ref(null);
+const selectedAvatar = ref(null);
+
+const selectAvatar = (index) => {
+    selectedAvatar.value = index;
+    form.display_avatar = `/img/avatars/display_avatar_${index}.png`
+};
+
+const submitForm = () => {
+    form.post(route('member.createPost'), {
+        onSuccess: () => {
+            visible.value = false;
+            form.reset();
+        }
+    })
+}
 </script>
 
 <template>
@@ -64,16 +84,54 @@ const removeAttachement = () => {
         :header="$t('public.new_post')"
         class="dialog-xs md:dialog-md"
     >
-        <form>
+        <form @submit.prevent="submitForm()">
             <div class="flex flex-col gap-8 items-center self-stretch">
                 <div class="flex flex-col gap-5 items-center self-stretch">
                     <div class="flex flex-col items-start gap-1 self-stretch">
                         <InputLabel
-                            for="display_name"
-                            :invalid="!!form.errors.display_name"
+                            for="display_avatar"
+                            :invalid="!!form.errors.display_avatar"
                         >
-                            {{ $t('public.display_name') }}
+                            {{ $t('public.display_avatar') }}
                         </InputLabel>
+                        <div class="flex gap-3 items-center self-stretch">
+                            <div
+                                v-for="index in 6"
+                                :key="index"
+                                class="relative"
+                                @mouseenter="isHovered = index"
+                                @mouseleave="isHovered = null"
+                                @click="selectAvatar(index)"
+                            >
+                                <Avatar
+                                    :image="`/img/avatars/display_avatar_${index}.png`"
+                                    size="large"
+                                    shape="circle"
+                                />
+                                <!-- Hover layer -->
+                                <div
+                                    v-if="isHovered === index"
+                                    class="absolute inset-0 w-11 h-11 rounded-full bg-gray-900/40 cursor-pointer"
+                                ></div>
+
+                                <div
+                                    v-if="selectedAvatar === index"
+                                    class="absolute inset-0 w-11 h-11 rounded-full flex items-center justify-center bg-gray-900/40"
+                                >
+                                    <IconCheck size="28" color="white" stroke-width="1.25" />
+                                </div>
+                            </div>
+                        </div>
+                        <InputError :message="form.errors.display_avatar" />
+                        <span class="text-gray-500 text-xs">{{ $t('public.display_avatar_caption') }}</span>
+                    </div>
+
+                    <div class="flex flex-col items-start gap-1 self-stretch">
+                        <InputLabel
+                            for="display_name"
+                            :value="$t('public.display_name')"
+                            :invalid="!!form.errors.display_name"
+                        />
                         <InputText
                             id="display_name"
                             type="text"
@@ -86,7 +144,7 @@ const removeAttachement = () => {
                         <InputError :message="form.errors.display_name" />
                         <span class="text-gray-500 text-xs">{{ $t('public.display_name_caption') }}</span>
                     </div>
-                    
+
                     <div class="flex flex-col items-start gap-1 self-stretch">
                         <InputLabel
                             for="subject"
@@ -161,7 +219,7 @@ const removeAttachement = () => {
                             <Button
                                 type="button"
                                 variant="gray-text"
-                                @click="removeAttachement"
+                                @click="removeAttachment"
                                 pill
                                 iconOnly
                             >
@@ -170,6 +228,16 @@ const removeAttachement = () => {
                         </div>
                     </div>
                 </div>
+            </div>
+
+            <div class="pt-5 flex flex-col items-end self-stretch">
+                <Button
+                    variant="primary-flat"
+                    size="base"
+                    :disabled="form.processing"
+                >
+                    {{ $t('public.create') }}
+                </Button>
             </div>
         </form>
     </Dialog>

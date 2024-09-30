@@ -521,9 +521,16 @@ return [
     "be_right_back_desc" => "我們的網站正在進行維護。請稍後再來。",
     "request_timed_out" => "請求超時",
     "request_timed_out_desc" => "伺服器回應超時。請稍後再試。",
-    "login" => "登入", 
+    "login" => "登入",
     "go_to_dashboard" => "返回儀表版首頁",
     "refresh_page" => "刷新頁面",
-
-
+    "display_avatar" => "顯示頭像",
+    "display_avatar_caption" => "選擇的頭像將顯示在您的論壇個人資料照片位置.",
+    "toast_create_post_success" => "您已成功創建了新帖子!",
+    "see_more" => "展開",
+    "see_less" => "折疊",
+    "yesterday" => "昨天",
+    "no_posts_yet" => "尚未有帖子",
+    "no_posts_yet_caption" => "看來您是第一位來這裡的! 通過創建一個新帖子來開始對話吧.",
+    "at_least_one_field_required" => "至少需要一個字段",
 ];

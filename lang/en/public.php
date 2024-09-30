@@ -529,4 +529,10 @@ return [
     "display_avatar" => "Display Avatar",
     "display_avatar_caption" => "Selected avatar will be displayed instead of your profile photo.",
     "toast_create_post_success" => "You’ve successfully created a new post!",
+    "see_more" => "See more",
+    "see_less" => "See less",
+    "yesterday" => "Yesterday",
+    "no_posts_yet" => "No Posts Yet",
+    "no_posts_yet_caption" => "Looks like you're the first one here! Start the conversation by creating a new post.",
+    "at_least_one_field_required" => "At least one field are required",
 ];

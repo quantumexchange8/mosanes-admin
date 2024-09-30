@@ -6,13 +6,19 @@ use App\Models\ForumPost;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 
 class ForumController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Member/Forum/MemberForum');
+        $author = ForumPost::where('user_id', \Auth::id())->first();
+
+        return Inertia::render('Member/Forum/MemberForum', [
+            'postCounts' => ForumPost::count(),
+            'authorName' => $author?->display_name
+        ]);
     }
 
     public function createPost(Request $request)
@@ -25,6 +31,12 @@ class ForumController extends Controller
             'display_name' => trans('public.display_name'),
         ]);
         $validator->validate();
+
+        if (!$request->filled('subject') && !$request->filled('message') && !$request->hasFile('attachment')) {
+            throw ValidationException::withMessages([
+                'subject' => trans('public.at_least_one_field_required'),
+            ]);
+        }
 
         try {
             $post = ForumPost::create([

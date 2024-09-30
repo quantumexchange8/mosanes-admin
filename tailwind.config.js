@@ -1,5 +1,6 @@
 import defaultTheme from 'tailwindcss/defaultTheme';
 import forms from '@tailwindcss/forms';
+import typography from '@tailwindcss/typography';
 
 /** @type {import('tailwindcss').Config} */
 export default {
@@ -130,6 +131,34 @@ export default {
                 pink: '#FF2D58',
                 purple: '#7A5AF8',
             },
+            typography: ({ theme }) => ({
+                DEFAULT: {
+                    css: {
+                        maxWidth: '100ch',
+                        '--tw-prose-paragraphs': theme('colors.gray[950]'),
+                        '--tw-prose-headings': theme('colors.gray[950]'),
+                        '--tw-prose-counters': theme('colors.gray[950]'),
+                        '--tw-prose-bold': theme('colors.gray[950]'),
+                        '--tw-prose-bullets': theme('colors.gray[950]'),
+                        h1: {
+                            fontSize: '28px',
+                            lineHeight: '36px'
+                        },
+                        h2: {
+                            fontSize: '24px',
+                            lineHeight: '32px'
+                        },
+                        h3: {
+                            fontSize: '20px',
+                            lineHeight: '28px'
+                        },
+                        p: {
+                            fontSize: '14px',
+                            lineHeight: '20px',
+                        }
+                    },
+                },
+            }),
             boxShadow: {
                 'input': '0 1px 2px 0px rgba(12, 17, 29, 0.05)',
                 'dialog': '0 12px 24px -4px rgba(12, 17, 29, 0.10)',
@@ -161,5 +190,5 @@ export default {
         },
     },
 
-    plugins: [forms],
+    plugins: [forms, typography],
 };

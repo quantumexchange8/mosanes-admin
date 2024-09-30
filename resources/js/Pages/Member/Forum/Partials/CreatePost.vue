@@ -13,12 +13,17 @@ import {
 import {ref} from "vue";
 import { useForm } from "@inertiajs/vue3";
 import Avatar from 'primevue/avatar';
+import TipTapEditor from "@/Components/TipTapEditor.vue";
+
+const props = defineProps({
+    authorName: String,
+})
 
 const visible = ref(false);
 
 const form = useForm({
     display_avatar: '',
-    display_name: '',
+    display_name: props.authorName,
     subject: '',
     message: '',
     attachment: ''
@@ -94,7 +99,7 @@ const submitForm = () => {
                         >
                             {{ $t('public.display_avatar') }}
                         </InputLabel>
-                        <div class="flex gap-3 items-center self-stretch">
+                        <div class="flex gap-3 overflow-x-auto items-center self-stretch">
                             <div
                                 v-for="index in 6"
                                 :key="index"
@@ -170,15 +175,8 @@ const submitForm = () => {
                         >
                             {{ $t('public.message') }}
                         </InputLabel>
-                        <Textarea
-                            id="message"
-                            type="text"
-                            class="flex flex-1 self-stretch"
+                        <TipTapEditor
                             v-model="form.message"
-                            :placeholder="$t('public.type_your_message_here')"
-                            :invalid="!!form.errors.message"
-                            rows="5"
-                            cols="30"
                         />
                         <InputError :message="form.errors.message" />
                     </div>

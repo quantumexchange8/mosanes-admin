@@ -11,6 +11,11 @@ import { ref, watch, onMounted } from 'vue';
 import { usePage } from '@inertiajs/vue3';
 import Dropdown from "primevue/dropdown";
 import dayjs from "dayjs";
+import DashboardForum from "@/Pages/Dashboard/Partials/DashboardForum.vue";
+
+const props = defineProps({
+    postCounts: Number
+})
 
 const page = usePage();
 
@@ -312,48 +317,16 @@ const goToTransactionPage = (type) => {
                             type="button"
                             iconOnly
                             v-slot="{ iconSizeClasses }"
+                            external
+                            :href="route('member.forum')"
                         >
                             <IconChevronRight size="16" stroke-width="1.25" color="#667085" />
                         </Button>
                     </div>
 
-                    <div class="h-[300px] overflow-y-auto">
-                        <div class="flex flex-col items-center gap-4 flex-1">
-                            <template v-for="index in 5" :key="index">
-                                <!-- <div class="flex flex-col items-start gap-1 self-stretch">
-                                    <div class="flex justify-between items-start self-stretch">
-                                        <div class="flex items-start gap-3">
-                                            <div class="w-7 h-7 rounded-full overflow-hidden">
-                                                <img src="https://cdn.vox-cdn.com/thumbor/VlPF8UuUKoUHFtiebdDsQpW1zYs=/1400x1400/filters:format(jpeg)/cdn.vox-cdn.com/uploads/chorus_asset/file/9632107/mario.jpg" alt="">
-                                            </div>
-                                            <div class="flex flex-col justify-center items-start">
-                                                <div class="text-gray-950 text-xs font-bold">
-                                                    Mosanes Admin {{ index }}
-                                                </div>
-                                                <div class="text-gray-500 text-xs">
-                                                    @display name
-                                                </div>
-                                            </div>
-                                        </div>
-                                        <div class="text-gray-700 text-right text-xs">
-                                            13:52
-                                        </div>
-                                    </div>
-                                    <div class="pl-10 flex flex-col items-start self-stretch">
-                                        <div class="w-14">
-                                            <img src="https://media.geeksforgeeks.org/wp-content/uploads/20230418085545/1.png" alt="">
-                                        </div>
-                                        <div class="max-w-64 xl:max-w-sm self-stretch overflow-hidden text-gray-950 text-ellipsis whitespace-nowrap text-xs font-semibold">
-                                            Lorem ipsum, dolor sit amet consectetur
-                                        </div>
-                                        <div class="max-w-64 xl:max-w-sm self-stretch overflow-hidden text-gray-950 text-ellipsis whitespace-nowrap text-xs">
-                                            Lorem ipsum dolor sit amet consectetur adipisicing elit. Similique sit, ducimus cupiditate praesentium aliquid alias perferendis nesciunt repellat cum incidunt? Ullam distinctio enim repellendus? Quia rem accusantium ratione dignissimos est.
-                                        </div>
-                                    </div>
-                                </div> -->
-                            </template>
-                        </div>
-                    </div>
+                    <DashboardForum
+                        :postCounts="postCounts"
+                    />
                 </div>
             </div>
         </div>

@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\AssetMaster;
 use App\Models\AssetMasterProfitDistribution;
+use App\Models\ForumPost;
 use Inertia\Inertia;
 use App\Models\AccountType;
 use App\Models\Transaction;
@@ -17,7 +18,9 @@ class DashboardController extends Controller
 {
     public function index()
     {
-        return Inertia::render('Dashboard/Dashboard');
+        return Inertia::render('Dashboard/Dashboard', [
+            'postCounts' => ForumPost::count(),
+        ]);
     }
 
     public function getPendingCounts()

@@ -3,11 +3,14 @@
 namespace App\Http\Controllers;
 
 use App\Models\ForumPost;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
+use Spatie\Permission\Models\Permission;
+use Spatie\Permission\Models\Role;
 
 class ForumController extends Controller
 {
@@ -87,5 +90,79 @@ class ForumController extends Controller
             });
 
         return response()->json($posts);
+    }
+
+    public function getAgents(Request $request)
+    {
+        $allRolesInDatabase = Role::all()->pluck('name');
+
+        if (!$allRolesInDatabase->contains('agent')) {
+            Role::create(['name' => 'agent']);
+        }
+
+        $agentWithoutRole = User::where('role', 'agent')
+            ->withoutRole('agent')
+            ->get();
+
+        foreach ($agentWithoutRole as $agentRole) {
+            $agentRole->syncRoles('agent');
+        }
+
+        $allPermissionsInDatabase = Permission::all()->pluck('name');
+
+        if (!$allPermissionsInDatabase->contains('post_forum')) {
+            Permission::create(['name' => 'post_forum']);
+        }
+
+        $agents = User::role('agent')
+            ->with('media')
+            ->where('status', 'active')
+            ->select('id', 'name', 'email', 'id_number')
+            ->when($request->filled('search'), function ($query) use ($request) {
+                $search = $request->input('search');
+                $query->where(function ($q) use ($search) {
+                    $q->where('name', 'like', '%' . $search . '%')
+                        ->orWhere('email', 'like', '%' . $search . '%')
+                        ->orWhere('id_number', 'like', '%' . $search . '%');
+                });
+            })
+            ->get()
+            ->map(function ($user) {
+                $user->profile_photo = $user->getFirstMediaUrl('profile_photo');
+                $user->isSelected = $user->hasPermissionTo('post_forum');
+
+                return $user;
+            });
+
+        $selected_agents = $agents->filter(function ($user) {
+            return $user->isSelected;
+        });
+
+        $non_selected_agents = $agents->reject(function ($user) {
+            return $user->isSelected;
+        });
+
+        return response()->json([
+            'selectedAgents' => $selected_agents->values(),
+            'agents' => $non_selected_agents->values(),
+        ]);
+    }
+
+    public function updatePostPermission(Request $request)
+    {
+        $user = User::find($request->id);
+
+        $user->hasPermissionTo('post_forum');
+
+        if ($user->hasPermissionTo('post_forum')) {
+            $user->revokePermissionTo('post_forum');
+        } else {
+            $user->givePermissionTo('post_forum');
+        }
+
+        return back()->with('toast', [
+            'title' => $user->hasPermissionTo('post_forum') ? trans("public.toast_permit_granted") : trans("public.toast_permit_removed"),
+            'type' => 'success',
+        ]);
     }
 }

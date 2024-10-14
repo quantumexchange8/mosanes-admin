@@ -8,17 +8,12 @@ import {
 import InputText from 'primevue/inputtext';
 import {ref} from "vue";
 import ForumPost from "@/Pages/Member/Forum/ForumPost.vue"
+import ManagePostPermission from "@/Pages/Member/Forum/Partials/ManagePostPermission.vue";
 
 const props = defineProps({
     postCounts: Number,
     authorName: String,
 })
-
-const search = ref('');
-
-const clearSearch = () => {
-    search.value = '';
-}
 </script>
 
 <template>
@@ -27,35 +22,14 @@ const clearSearch = () => {
             <div class="flex w-full gap-5 sm:max-w-[280px] xl:max-w-[320px] flex-col items-center self-stretch">
                 <!-- new post -->
                 <div class="flex flex-col items-center gap-5 p-6 self-stretch bg-white shadow-toast rounded-2xl">
-                    <span class="text-left w-full text-sm text-gray-400">Share your thoughts here...</span>
+                    <span class="text-left w-full text-sm text-gray-400">{{ $t('public.share_your_thoughts_here') }}</span>
                     <CreatePost
                         :authorName="authorName"
                     />
                 </div>
 
                 <!-- manage posting permissions -->
-                <div class="pt-6 px-6 flex-col items-center self-stretch bg-white shadow-toast rounded-2xl hidden">
-                    <div class="flex flex-col items-center self-stretch gap-5 pb-3">
-                        <span class="text-left w-full text-sm font-bold text-gray-950">Manage Posting Permissions</span>
-                        <div class="relative w-full">
-                            <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
-                                <IconSearch size="20" stroke-width="1.25" />
-                            </div>
-                            <InputText
-                                v-model="search"
-                                :placeholder="$t('public.search_agent')"
-                                class="font-normal pl-12 w-full"
-                                />
-                            <div
-                                v-if="search"
-                                class="absolute top-2/4 -mt-2 right-4 text-gray-300 hover:text-gray-400 select-none cursor-pointer"
-                                @click="clearSearch"
-                            >
-                                <IconCircleXFilled size="16" />
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                <ManagePostPermission />
             </div>
 
             <!-- posts -->

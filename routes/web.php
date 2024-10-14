@@ -88,8 +88,10 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         // forum
         Route::get('/forum', [ForumController::class, 'index'])->name('member.forum');
         Route::get('/getPosts', [ForumController::class, 'getPosts'])->name('member.getPosts');
+        Route::get('/getAgents', [ForumController::class, 'getAgents'])->name('member.getAgents');
 
         Route::post('/createPost', [ForumController::class, 'createPost'])->name('member.createPost');
+        Route::post('/updatePostPermission', [ForumController::class, 'updatePostPermission'])->name('member.updatePostPermission');
 
         // account listing
         Route::get('/account_listing', [TradingAccountController::class, 'index'])->name('member.account_listing');

@@ -7,7 +7,8 @@ import {
     DeleteIcon,
     DisbandIcon,
     HideAssetMasterIcon,
-    ShowAssetMasterIcon
+    ShowAssetMasterIcon,
+    PermissionIcon
 } from "@/Components/Icons/brand.jsx";
 
 import {
@@ -28,6 +29,7 @@ import {
                             <BulbIcon v-if="message.actionType === 'activate_member'" class="w-16 h-16 md:w-full md:h-auto" />
                             <ShowAssetMasterIcon v-if="message.actionType === 'show_asset_master'" class="w-16 h-16 md:w-full md:h-auto" />
                             <SettlementIcon v-if="message.actionType === 'settlement'" class="w-16 h-16 md:w-full md:h-auto" />
+                            <PermissionIcon v-if="message.actionType === 'permission'" class="w-16 h-16 md:w-full md:h-auto" />
                             <!-- Default icon if actionType is not specified -->
                             <BulbIcon v-if="!message.actionType" class="w-16 h-16 md:w-full md:h-auto" />
                         </div>
@@ -76,7 +78,8 @@ import {
                         class="rounded-tl-3xl rounded-tr-3xl flex w-full p-1 justify-center [clip-path:polygon(0%_0%,_100%_0%,_100%_78%,_50%_100%,_0_78%)] bg-gray-900"
                     >
                         <div class="p-5 flex items-center justify-center">
-                            <SecurityIcon class="w-16 h-16 md:w-full md:h-auto" />
+                            <PermissionIcon v-if="message.actionType === 'permission'" class="w-16 h-16 md:w-full md:h-auto" />
+                            <SecurityIcon v-else class="w-16 h-16 md:w-full md:h-auto" />
                         </div>
                     </div>
                 </div>

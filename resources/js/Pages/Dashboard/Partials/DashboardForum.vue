@@ -122,7 +122,7 @@ const formatPostDate = (date) => {
                             </div>
                         </div>
                         <div class="text-gray-700 text-right text-xs">
-                            13:52
+                            {{ formatPostDate(post.created_at) }}
                         </div>
                     </div>
                     <div class="pl-10 flex flex-col gap-1 items-start self-stretch">

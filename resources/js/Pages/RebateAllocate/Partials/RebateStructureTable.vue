@@ -135,7 +135,7 @@ const closeDialog = () => {
             v-model:editingRows="editingRows"
             :value="agents"
             tableStyle="min-width: 50rem"
-            :globalFilterFields="['name']"
+            :globalFilterFields="['agent']"
             ref="dt"
             :loading="loading"
             table-style="min-width:fit-content"

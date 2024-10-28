@@ -44,8 +44,8 @@ class DashboardController extends Controller
                 ->whereDate('profit_distribution_date', '>=', today())
                 ->count();
 
-            if ($profitDistributionCount <= 4) {
-                $pendingPammAllocate += $profitDistributionCount;
+            if ($profitDistributionCount <= 3) {
+                $pendingPammAllocate += 1;
             }
         }
 

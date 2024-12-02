@@ -165,4 +165,39 @@ class ForumController extends Controller
             'type' => 'success',
         ]);
     }
+
+    public function deletePost(Request $request)
+    {
+        $post = ForumPost::find($request->id);
+        
+        if ($post->hasMedia('post_attachment')) {
+            $post->clearMediaCollection('post_attachment');
+        }
+
+        $post->delete();
+
+        return redirect()->back()->with('toast', [
+            'title' => trans('public.toast_delete_post_success'),
+            'type' => 'success',
+        ]);
+        
+    }
+
+    public function updateLikeCounts(Request $request)
+    {
+        $post = ForumPost::find($request->id);
+    
+        // Update the likes or dislikes based on the type
+        if ($request->type === 'like') {
+            $post->total_likes_count += $request->count;
+        } elseif ($request->type === 'dislike') {
+            $post->total_dislikes_count += $request->count;
+        }
+    
+        // Save the updated post
+        $post->save();
+    
+        return back();
+    }
+
 }

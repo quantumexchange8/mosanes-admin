@@ -3,16 +3,18 @@ import Button from "@/Components/Button.vue";
 import {
     IconEdit,
     IconSearch,
-    IconCircleXFilled
+    IconCircleXFilled,
+    IconTrashX,
 } from "@tabler/icons-vue";
-import {ref, watchEffect} from "vue";
+import {h, ref, watchEffect} from "vue";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import dayjs from "dayjs";
 import Image from 'primevue/image';
-import {wTrans} from "laravel-vue-i18n";
+import {wTrans, trans} from "laravel-vue-i18n";
 import Empty from "@/Components/Empty.vue";
 import Skeleton from 'primevue/skeleton';
-import {usePage} from "@inertiajs/vue3";
+import {usePage, router} from "@inertiajs/vue3";
+import { useConfirm } from "primevue/useconfirm";
 
 const props = defineProps({
     postCounts: Number,
@@ -62,6 +64,40 @@ watchEffect(() => {
         getResults();
     }
 });
+
+const confirm = useConfirm();
+
+const requireConfirmation = (action_type, postId) => {
+    const messages = {
+        delete_post: {
+            group: 'headless-error',
+            icon: h(IconTrashX),
+            header: trans('public.delete_post'),
+            message: trans('public.delete_post_desc'),
+            cancelButton: trans('public.cancel'),
+            acceptButton: trans('public.delete'),
+            action: () => {
+                router.visit(route('member.deletePost', { id: postId }), {
+                    method: 'delete',
+                });
+            }
+        },
+    };
+
+    const { group, color, icon, header, message, cancelButton, acceptButton, action } = messages[action_type];
+
+    confirm.require({
+        group,
+        color,
+        icon,
+        header,
+        message,
+        cancelButton,
+        acceptButton,
+        accept: action
+    });
+};
+
 </script>
 
 <template>
@@ -170,6 +206,50 @@ watchEffect(() => {
                     {{ expandedPosts[post.id] ? $t('public.see_less') : $t('public.see_more') }}
                 </div>
             </div>
+
+            <div class="flex justify-between items-center self-stretch">
+                <div class="flex items-center">
+                    <!-- <div class="flex justify-center items-center gap-1">
+                        <Button
+                            type="button"
+                            variant="success-text"
+                            size="sm"
+                            iconOnly
+                            pill
+                            class="hover:rotate-[-15deg]"
+                            @click="handleLikesCount(post.id, 'like')"
+                        >
+                            <IconThumbUpFilled size="16" stroke-width="1.25" />
+                        </Button>
+                        <span class="min-w-10 text-gray-700 text-sm">{{ likeCounts[post.id] > 0 ? post.total_likes_count + likeCounts[post.id] : post.total_likes_count }}</span>
+                    </div>
+                    <div class="flex justify-center items-center gap-1">
+                        <Button
+                            type="button"
+                            variant="error-text"
+                            size="sm"
+                            iconOnly
+                            pill
+                            class="hover:rotate-[-15deg]"
+                            @click="handleLikesCount(post.id, 'dislike')"
+                        >
+                            <IconThumbDownFilled size="16" stroke-width="1.25" />
+                        </Button>
+                        <span class="min-w-10 text-gray-700 text-sm">{{ dislikeCounts[post.id] > 0 ? post.total_dislikes_count + dislikeCounts[post.id] : post.total_dislikes_count }}</span>
+                    </div> -->
+                </div>
+                <Button
+                    type="button"
+                    variant="error-text"
+                    size="sm"
+                    iconOnly
+                    pill
+                    @click="requireConfirmation('delete_post', post.id);"
+                >
+                    <IconTrashX size="16" stroke-width="1.25" />
+                </Button>
+            </div>
+
         </div>
     </div>
 </template>

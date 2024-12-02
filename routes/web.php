@@ -95,6 +95,7 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
 
         Route::post('/createPost', [ForumController::class, 'createPost'])->name('member.createPost');
         Route::post('/updatePostPermission', [ForumController::class, 'updatePostPermission'])->name('member.updatePostPermission');
+        Route::delete('/deletePost', [ForumController::class, 'deletePost'])->name('member.deletePost');
 
         // account listing
         Route::get('/account_listing', [TradingAccountController::class, 'index'])->name('member.account_listing');

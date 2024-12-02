@@ -2,7 +2,9 @@
 import {
     IconDotsVertical,
     IconId,
+    IconArrowsRightLeft,
     IconUserUp,
+    IconLockCog,
     IconTrash,
     IconDeviceLaptop
 } from "@tabler/icons-vue";
@@ -14,7 +16,9 @@ import {router} from "@inertiajs/vue3";
 import {useConfirm} from "primevue/useconfirm";
 import {trans} from "laravel-vue-i18n";
 import Dialog from "primevue/dialog";
+import TransferUpline from "@/Pages/Member/Listing/Partials/TransferUpline.vue";
 import UpgradeToAgent from "@/Pages/Member/Listing/Partials/UpgradeToAgent.vue";
+import ResetPassword from "@/Pages/Member/Listing/Partials/ResetPassword.vue";
 
 const props = defineProps({
     member: Object,
@@ -40,6 +44,14 @@ const items = ref([
         },
     },
     {
+        label: 'transfer_upline',
+        icon: h(IconArrowsRightLeft),
+        command: () => {
+            visible.value = true;
+            dialogType.value = 'transfer_upline';
+        },
+    },
+    {
         label: 'upgrade_to_agent',
         icon: h(IconUserUp),
         command: () => {
@@ -47,6 +59,14 @@ const items = ref([
             dialogType.value = 'upgrade_to_agent';
         },
         role: 'member', // Add a custom property to check the role
+    },
+    {
+        label: 'reset_password',
+        icon: h(IconLockCog),
+        command: () => {
+            visible.value = true;
+            dialogType.value = 'reset_password';
+        },
     },
     {
         separator: true,
@@ -194,8 +214,20 @@ const handleMemberStatus = () => {
         :header="$t(`public.${dialogType}`)"
         class="dialog-xs sm:dialog-md"
     >
+        <template v-if="dialogType === 'transfer_upline'">
+            <TransferUpline
+                :member="member"
+                @update:visible="visible = false"
+            />
+        </template>
         <template v-if="dialogType === 'upgrade_to_agent'">
             <UpgradeToAgent
+                :member="member"
+                @update:visible="visible = false"
+            />
+        </template>
+        <template v-if="dialogType === 'reset_password'">
+            <ResetPassword
                 :member="member"
                 @update:visible="visible = false"
             />

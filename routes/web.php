@@ -59,12 +59,15 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::get('/listing', [MemberController::class, 'listing'])->name('member.listing');
         Route::get('/getMemberListingData', [MemberController::class, 'getMemberListingData'])->name('member.getMemberListingData');
         Route::get('/getFilterData', [MemberController::class, 'getFilterData'])->name('member.getFilterData');
+        Route::get('/getAvailableUplines', [MemberController::class, 'getAvailableUplines'])->name('member.getAvailableUplines');
         Route::get('/getAvailableUplineData', [MemberController::class, 'getAvailableUplineData'])->name('member.getAvailableUplineData');
         Route::get('/access_portal/{user}', [MemberController::class, 'access_portal'])->name('member.access_portal');
 
         Route::post('/addNewMember', [MemberController::class, 'addNewMember'])->name('member.addNewMember');
         Route::post('/updateMemberStatus', [MemberController::class, 'updateMemberStatus'])->name('member.updateMemberStatus');
+        Route::post('/transferUpline', [MemberController::class, 'transferUpline'])->name('member.transferUpline');
         Route::post('/upgradeAgent', [MemberController::class, 'upgradeAgent'])->name('member.upgradeAgent');
+        Route::post('/resetPassword', [MemberController::class, 'resetPassword'])->name('member.resetPassword');
         Route::post('/uploadKyc', [MemberController::class, 'uploadKyc'])->name('member.uploadKyc');
 
         Route::delete('/deleteMember', [MemberController::class, 'deleteMember'])->name('member.deleteMember');

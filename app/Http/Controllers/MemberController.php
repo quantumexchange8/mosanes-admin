@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\AssetSubscription;
-use App\Models\User;
 use Exception;
-use Illuminate\Support\Carbon;
+use App\Models\User;
 use Inertia\Inertia;
 use App\Models\Wallet;
 use App\Models\Country;
@@ -13,12 +11,15 @@ use App\Models\AccountType;
 use App\Models\TradingUser;
 use App\Models\Transaction;
 use Illuminate\Support\Str;
+use App\Models\GroupHasUser;
 use Illuminate\Http\Request;
 use App\Models\PaymentAccount;
 use App\Models\TradingAccount;
+use Illuminate\Support\Carbon;
 use Illuminate\Validation\Rule;
 use App\Models\RebateAllocation;
 use App\Services\CTraderService;
+use App\Models\AssetSubscription;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -27,6 +28,7 @@ use App\Http\Requests\AddMemberRequest;
 use App\Services\DropdownOptionService;
 use App\Services\ChangeTraderBalanceType;
 use Illuminate\Support\Facades\Validator;
+use Illuminate\Validation\Rules\Password;
 use Illuminate\Validation\ValidationException;
 
 class MemberController extends Controller
@@ -152,7 +154,118 @@ class MemberController extends Controller
         ]);
     }
 
+    public function getAvailableUplines(Request $request)
+    {
+        $role = $request->input('role', ['agent', 'member']);
+    
+        $memberId = $request->input('id');
 
+        // Fetch the member and get their children (downline) IDs
+        $member = User::findOrFail($memberId);
+        $excludedIds = $member->getChildrenIds();
+        $excludedIds[] = $memberId;
+    
+        // Fetch uplines who are not in the excluded list
+        $uplines = User::whereIn('role', (array) $role)
+            ->whereNotIn('id', $excludedIds)
+            ->get()
+            ->map(function ($user) {
+                return [
+                    'value' => $user->id,
+                    'name' => $user->name,
+                    'profile_photo' => $user->getFirstMediaUrl('profile_photo')
+                ];
+            });
+    
+        // Return the uplines as JSON
+        return response()->json([
+            'uplines' => $uplines
+        ]);
+    }
+
+    public function transferUpline(Request $request)
+    {
+        // Validate the incoming request data
+        $request->validate([
+            'user_id'   => 'required|exists:users,id',
+            'upline_id' => 'required|exists:users,id',
+            'role'      => 'required|in:agent,member',
+        ]);
+    
+        // Find the user to be transferred
+        $user = User::findOrFail($request->input('user_id'));
+    
+        // Check if the new upline is valid and not the same as the current one
+        if ($user->upline_id === $request->input('upline_id')) {
+            return back()->with('toast', [
+                'title' => trans('public.transfer_same_upline_warning'),
+                'type'  => 'warning',
+            ]);
+        }
+    
+        // Find the new upline
+        $newUpline = User::findOrFail($request->input('upline_id'));
+    
+        // Step 1: Update the user's hierarchyList to reflect the new upline's hierarchy and ID
+        $user->hierarchyList = $newUpline->hierarchyList . $newUpline->id . '-';
+        $user->upline_id = $newUpline->id;
+    
+        // Update the user's group relationship
+        if ($newUpline->groupHasUser) {
+            $user->assignedGroup($newUpline->groupHasUser->group_id);
+        }
+
+        // Save the updated hierarchyList and upline_id for the user
+        $user->save();
+
+        // Step 2: If the role is 'agent' for the transferred user, set their RebateAllocation amounts to 0
+        if ($request->input('role') === 'agent') {
+            RebateAllocation::where('user_id', $user->id)->update(['amount' => 0]);
+        }
+        
+        // Step 3: Update related users' hierarchyList and their RebateAllocation amounts if they are agents
+        $relatedUsers = User::where('hierarchyList', 'like', '%-' . $user->id . '-%')->get();
+    
+        foreach ($relatedUsers as $relatedUser) {
+            $userIdSegment = '-' . $user->id . '-';
+    
+            // Find the position of `-user_id-` in the related user's hierarchyList
+            $pos = strpos($relatedUser->hierarchyList, $userIdSegment);
+    
+            if ($pos !== false) {
+                // Extract the part after the user's ID segment (tail part)
+                $tailHierarchy = substr($relatedUser->hierarchyList, $pos + strlen($userIdSegment));
+    
+                // Prepend the user's new hierarchyList + user ID to the tail part
+                $relatedUser->hierarchyList = $user->hierarchyList . $user->id . '-' . $tailHierarchy;
+            }
+    
+            // Save the updated hierarchyList for the related user
+            $relatedUser->save();
+    
+            // Step 4: If the related user is an agent, set their RebateAllocation amounts to 0
+            if ($relatedUser->role === 'agent') {
+                RebateAllocation::where('user_id', $relatedUser->id)->update(['amount' => 0]);
+            }
+        }
+    
+        // Step 5: Update the related user group has user as transfer upline will change group as well
+        if ($group_id = $newUpline->groupHasUser->group_id ?? null) {
+            $relatedUserIds = $relatedUsers->pluck('id')->toArray();
+
+            // Perform a bulk update on the 'group_has_user' table for all related users
+            GroupHasUser::whereIn('user_id', $relatedUserIds)
+                ->where('group_id', '!=', $group_id) // Only update if the current group is different
+                ->update(['group_id' => $group_id]);
+        }
+            
+        // Return a success response
+        return back()->with('toast', [
+            'title' => trans('public.toast_transfer_upline_success'),
+            'type'  => 'success',
+        ]);
+    }
+    
     public function getAvailableUplineData(Request $request)
     {
         $user = User::with('upline')->find($request->user_id);
@@ -270,6 +383,29 @@ class MemberController extends Controller
             'title' => trans('public.upgrade_to_agent_success_alert'),
             'type' => 'success',
         ]);
+    }
+
+    public function resetPassword(Request $request)
+    {
+        $validator = Validator::make($request->all(), [
+            'password' => ['required', Password::min(8)->letters()->numbers()->symbols()->mixedCase(), 'confirmed'],
+            'password_confirmation' => ['required','same:password'],
+        ])->setAttributeNames([
+            'password' => trans('public.password'),
+            'password_confirmation' => trans('public.confirm_password')
+        ]);
+        $validator->validate();
+
+        $user = User::find($request->id);
+        $user->update([
+            'password' => Hash::make($request->password),
+        ]);
+
+        return redirect()->back()->with('toast', [
+            'title' => trans('public.toast_reset_password_success'),
+            'type' => 'success'
+        ]);
+
     }
 
     public function detail($id_number)

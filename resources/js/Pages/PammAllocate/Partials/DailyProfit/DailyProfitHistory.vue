@@ -14,7 +14,8 @@ const props = defineProps({
 const selectedMonth = ref('');
 const historyPeriodOptions = ref([]);
 const currentYear = dayjs().year();
-const generatedMonthlyGain = ref(0)
+const currentMonth = dayjs().month() + 1;
+const generatedMonthlyGain = ref(0);
 
 // Populate historyPeriodOptions with all months of the current year
 for (let month = 1; month <= 12; month++) {
@@ -23,7 +24,15 @@ for (let month = 1; month <= 12; month++) {
     });
 }
 
+// If current month is December, add next year's January
+if (currentMonth === 12) {
+    historyPeriodOptions.value.push({
+        value: dayjs().month(0).year(currentYear + 1).format('MM/YYYY') // January of next year
+    });
+}
+
 selectedMonth.value = dayjs().format('MM/YYYY');
+
 </script>
 
 <template>

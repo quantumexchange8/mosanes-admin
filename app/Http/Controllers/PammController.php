@@ -760,7 +760,11 @@ class PammController extends Controller
                 $date = \DateTime::createFromFormat('d/m', $daily_profit['date']);
 
                 if ($date) {
-                    $date->setDate(date('Y'), $date->format('m'), $date->format('d'));
+                    $currentMonth = (int) date('m');
+                    $currentYear = (int) date('Y');
+                    $nextYear = $currentMonth === 12 ? $currentYear + 1 : $currentYear;
+
+                    $date->setDate($nextYear, $date->format('m'), $date->format('d'));
 
                     AssetMasterProfitDistribution::create([
                         'asset_master_id' => $asset_master->id,

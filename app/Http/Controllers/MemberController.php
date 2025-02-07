@@ -157,14 +157,14 @@ class MemberController extends Controller
     public function getAvailableUplines(Request $request)
     {
         $role = $request->input('role', ['agent', 'member']);
-    
+
         $memberId = $request->input('id');
 
         // Fetch the member and get their children (downline) IDs
         $member = User::findOrFail($memberId);
         $excludedIds = $member->getChildrenIds();
         $excludedIds[] = $memberId;
-    
+
         // Fetch uplines who are not in the excluded list
         $uplines = User::whereIn('role', (array) $role)
             ->whereNotIn('id', $excludedIds)
@@ -176,7 +176,7 @@ class MemberController extends Controller
                     'profile_photo' => $user->getFirstMediaUrl('profile_photo')
                 ];
             });
-    
+
         // Return the uplines as JSON
         return response()->json([
             'uplines' => $uplines
@@ -191,10 +191,10 @@ class MemberController extends Controller
             'upline_id' => 'required|exists:users,id',
             'role'      => 'required|in:agent,member',
         ]);
-    
+
         // Find the user to be transferred
         $user = User::findOrFail($request->input('user_id'));
-    
+
         // Check if the new upline is valid and not the same as the current one
         if ($user->upline_id === $request->input('upline_id')) {
             return back()->with('toast', [
@@ -202,14 +202,14 @@ class MemberController extends Controller
                 'type'  => 'warning',
             ]);
         }
-    
+
         // Find the new upline
         $newUpline = User::findOrFail($request->input('upline_id'));
-    
+
         // Step 1: Update the user's hierarchyList to reflect the new upline's hierarchy and ID
         $user->hierarchyList = $newUpline->hierarchyList . $newUpline->id . '-';
         $user->upline_id = $newUpline->id;
-    
+
         // Update the user's group relationship
         if ($newUpline->groupHasUser) {
             $user->assignedGroup($newUpline->groupHasUser->group_id);
@@ -222,33 +222,33 @@ class MemberController extends Controller
         if ($request->input('role') === 'agent') {
             RebateAllocation::where('user_id', $user->id)->update(['amount' => 0]);
         }
-        
+
         // Step 3: Update related users' hierarchyList and their RebateAllocation amounts if they are agents
         $relatedUsers = User::where('hierarchyList', 'like', '%-' . $user->id . '-%')->get();
-    
+
         foreach ($relatedUsers as $relatedUser) {
             $userIdSegment = '-' . $user->id . '-';
-    
+
             // Find the position of `-user_id-` in the related user's hierarchyList
             $pos = strpos($relatedUser->hierarchyList, $userIdSegment);
-    
+
             if ($pos !== false) {
                 // Extract the part after the user's ID segment (tail part)
                 $tailHierarchy = substr($relatedUser->hierarchyList, $pos + strlen($userIdSegment));
-    
+
                 // Prepend the user's new hierarchyList + user ID to the tail part
                 $relatedUser->hierarchyList = $user->hierarchyList . $user->id . '-' . $tailHierarchy;
             }
-    
+
             // Save the updated hierarchyList for the related user
             $relatedUser->save();
-    
+
             // Step 4: If the related user is an agent, set their RebateAllocation amounts to 0
             if ($relatedUser->role === 'agent') {
                 RebateAllocation::where('user_id', $relatedUser->id)->update(['amount' => 0]);
             }
         }
-    
+
         // Step 5: Update the related user group has user as transfer upline will change group as well
         if ($group_id = $newUpline->groupHasUser->group_id ?? null) {
             $relatedUserIds = $relatedUsers->pluck('id')->toArray();
@@ -258,14 +258,14 @@ class MemberController extends Controller
                 ->where('group_id', '!=', $group_id) // Only update if the current group is different
                 ->update(['group_id' => $group_id]);
         }
-            
+
         // Return a success response
         return back()->with('toast', [
             'title' => trans('public.toast_transfer_upline_success'),
             'type'  => 'success',
         ]);
     }
-    
+
     public function getAvailableUplineData(Request $request)
     {
         $user = User::with('upline')->find($request->user_id);
@@ -477,6 +477,16 @@ class MemberController extends Controller
             'phone_number' => trans('public.phone_number'),
         ]);
         $validator->validate();
+
+        $user = User::findOrFail($request->user_id);
+
+        $user->update([
+            'name' => $request->name,
+            'email' => $request->email,
+            'dial_code' => $request->dial_code['phone_code'],
+            'phone' => $request->phone,
+            'phone_number' => $request->phone_number,
+        ]);
 
         return redirect()->back()->with('toast', [
             'title' => trans('public.update_contact_info_alert'),

@@ -24,6 +24,21 @@ class PendingController extends Controller
         return Inertia::render('Pending/Pending');
     }
 
+    public function withdrawal()
+    {
+        return Inertia::render('Pending/Withdrawal');
+    }
+
+    public function revokePamm()
+    {
+        return Inertia::render('Pending/RevokePamm');
+    }
+
+    public function bonus()
+    {
+        return Inertia::render('Pending/Bonus');
+    }
+
     public function getPendingWithdrawalData(Request $request)
     {
         $pendingWithdrawals = Transaction::with([

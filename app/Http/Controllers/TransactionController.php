@@ -227,4 +227,23 @@ class TransactionController extends Controller
         return response()->json($transactionMonths);
     }
 
+    public function deposit()
+    {
+        return Inertia::render('Transaction/Deposit');
+    }
+
+    public function withdrawal()
+    {
+        return Inertia::render('Transaction/Withdrawal');
+    }
+
+    public function Transfer()
+    {
+        return Inertia::render('Transaction/Transfer');
+    }
+    public function Payout()
+    {
+        return Inertia::render('Transaction/Payout');
+    }
+
 }

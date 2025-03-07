@@ -15,7 +15,9 @@ import {
     IconCoinMonero,
     IconBusinessplan,
     IconClockDollar,
-    IconAward
+    IconAward,
+    IconShieldCheckered,
+    IconChartArrowsVertical,
 } from '@tabler/icons-vue';
 
 const pendingWithdrawals = ref(0);
@@ -62,16 +64,33 @@ watchEffect(() => {
         </SidebarLink>
 
         <!-- Pending -->
-        <SidebarLink
+        <SidebarCollapsible
             :title="$t('public.pending')"
-            :href="route('pending')"
-            :active="route().current('pending')"
-            :pendingCounts="pendingWithdrawals"
+            :active="route().current('pending.*')"
         >
             <template #icon>
                 <IconClockDollar :size="20" stroke-width="1.25" />
             </template>
-        </SidebarLink>
+
+            <SidebarCollapsibleItem
+                :title="$t('public.withdrawal')"
+                :href="route('pending.withdrawal')"
+                :active="route().current('pending.withdrawal')"
+            />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.revoke_pamm')"
+                :href="route('pending.revoke_pamm')"
+                :active="route().current('pending.revoke_pamm')"
+            />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.bonus')"
+                :href="route('pending.bonus')"
+                :active="route().current('pending.bonus')"
+                :pendingCounts="pendingBonusWithdrawal"
+            />
+        </SidebarCollapsible>
 
         <!-- Member -->
         <SidebarCollapsible
@@ -147,7 +166,6 @@ watchEffect(() => {
             :title="$t('public.billboard')"
             :href="route('billboard')"
             :active="route().current('billboard')"
-            :pendingCounts="pendingBonusWithdrawal"
         >
             <template #icon>
                 <IconAward :size="20" stroke-width="1.25" />
@@ -155,13 +173,47 @@ watchEffect(() => {
         </SidebarLink>
 
         <!-- Transaction -->
-        <SidebarLink
+        <SidebarCollapsible
             :title="$t('public.transaction')"
-            :href="route('transaction')"
-            :active="route().current('transaction')"
+            :active="route().current('transaction.*')"
         >
             <template #icon>
                 <IconReceiptDollar :size="20" stroke-width="1.25" />
+            </template>
+
+            <SidebarCollapsibleItem
+                :title="$t('public.deposit')"
+                :href="route('transaction.deposit')"
+                :active="route().current('transaction.deposit')"
+            />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.withdrawal')"
+                :href="route('transaction.withdrawal')"
+                :active="route().current('transaction.withdrawal')"
+            />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.transfer')"
+                :href="route('transaction.transfer')"
+                :active="route().current('transaction.transfer')"
+            />
+
+            <SidebarCollapsibleItem
+                :title="$t('public.payout')"
+                :href="route('transaction.payout')"
+                :active="route().current('transaction.payout')"
+            />
+
+        </SidebarCollapsible>
+
+        <!-- Broker P&L -->
+        <SidebarLink
+            :title="$t('public.broker_pnl')"
+            
+        >
+            <template #icon>
+                <IconChartArrowsVertical :size="20" stroke-width="1.25" />
             </template>
         </SidebarLink>
 
@@ -198,6 +250,18 @@ watchEffect(() => {
 <!--            />-->
 <!--        </SidebarCollapsible>-->
 
+
+        <!-- Admin Role -->
+        <SidebarLink
+            :title="$t('public.admin_role')"
+            :href="route('adminRole')"
+            :active="route().current('adminRole')"
+
+        >
+            <template #icon>
+                <IconShieldCheckered :size="20" stroke-width="1.25" />
+            </template>
+        </SidebarLink>
 
         <!-- Profile -->
         <SidebarLink

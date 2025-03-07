@@ -38,6 +38,7 @@ const total_users = ref(999);
 const loading = ref(false);
 const dt = ref();
 const users = ref();
+const allUsers = ref();
 const counterDuration = ref(10);
 const { formatRgbaColor } = generalFormat();
 
@@ -69,10 +70,13 @@ const getResults = async () => {
 
     try {
         const response = await axios.get('/member/getMemberListingData');
-        users.value = response.data.users;
-        total_members.value = users.value.filter(user => user.role === 'member').length;
-        total_agents.value = users.value.filter(user => user.role === 'agent').length;
-        total_users.value = users.value.length;
+        allUsers.value = response.data?.users || []; // Store full user list
+        users.value = allUsers.value; // Initially display all users
+
+        // Count users based on role
+        total_members.value = allUsers.value.filter(user => user.role === 'member').length;
+        total_agents.value = allUsers.value.filter(user => user.role === 'agent').length;
+        total_users.value = allUsers.value.length;
 
         counterDuration.value = 1;
     } catch (error) {

@@ -16,6 +16,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\AccountTypeController;
 use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ForumController;
+use App\Http\Controllers\AdminRoleController;
 
 Route::get('locale/{locale}', function ($locale) {
     App::setLocale($locale);
@@ -34,6 +35,7 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
     Route::get('/getAccountData', [DashboardController::class, 'getAccountData'])->name('dashboard.getAccountData');
     Route::get('/getPendingData', [DashboardController::class, 'getPendingData'])->name('dashboard.getPendingData');
     Route::get('/getAssetData', [DashboardController::class, 'getAssetData'])->name('dashboard.getAssetData');
+    Route::get('/getDashboardData', [DashboardController::class, 'getDashboardData'])->name('dashboard.getDashboardData');
 
     /**
      * ==============================
@@ -42,6 +44,9 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
      */
     Route::prefix('pending')->group(function () {
         Route::get('/', [PendingController::class, 'index'])->name('pending');
+        Route::get('/withdrawal', [PendingController::class, 'withdrawal'])->name('pending.withdrawal');
+        Route::get('/revoke_pamm', [PendingController::class, 'revokePamm'])->name('pending.revoke_pamm');
+        Route::get('/bonus', [PendingController::class, 'bonus'])->name('pending.bonus');
         Route::get('/getPendingWithdrawalData', [PendingController::class, 'getPendingWithdrawalData'])->name('pending.getPendingWithdrawalData');
         Route::get('/getPendingRevokeData', [PendingController::class, 'getPendingRevokeData'])->name('pending.getPendingRevokeData');
 
@@ -196,6 +201,10 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::get('/', [TransactionController::class, 'listing'])->name('transaction');
         Route::get('/getTransactionListingData', [TransactionController::class, 'getTransactionListingData'])->name('transaction.getTransactionListingData');
         Route::get('/getTransactionMonths', [TransactionController::class, 'getTransactionMonths'])->name('transaction.getTransactionMonths');
+        Route::get('/deposit', [TransactionController::class, 'deposit'])->name('transaction.deposit');
+        Route::get('/withdrawal', [TransactionController::class, 'withdrawal'])->name('transaction.withdrawal');
+        Route::get('/transfer', [TransactionController::class, 'transfer'])->name('transaction.transfer');
+        Route::get('/payout', [TransactionController::class, 'payout'])->name('transaction.payout');
 
     });
 
@@ -214,6 +223,23 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::post('/update/{id}', [AccountTypeController::class, 'updateAccountType'])->name('accountType.update');
 
         Route::patch('/updateStatus/{id}', [AccountTypeController::class, 'updateStatus'])->name('accountType.updateStatus');
+    });
+
+    /**
+     * ==============================
+     *          Admin Role
+     * ==============================
+     */
+    Route::prefix('adminRole')->group(function () {
+        Route::get('/', [AdminRoleController::class, 'index'])->name('adminRole');
+        Route::get('/getAdminRole', [AdminRoleController::class, 'getAdminRole'])->name('adminRole.getAdminRole');
+
+        Route::post('/firstStep', [AdminRoleController::class, 'firstStep'])->name('adminRole.firstStep');
+        Route::post('/addNewAdmin', [AdminRoleController::class, 'addNewAdmin'])->name('adminRole.addNewAdmin');
+        Route::post('/updateAdminStatus', [AdminRoleController::class, 'updateAdminStatus'])->name('adminRole.updateAdminStatus');
+        Route::post('/adminUpdatePermissions', [AdminRoleController::class, 'adminUpdatePermissions'])->name('adminRole.adminUpdatePermissions');
+        Route::post('/editAdmin', [AdminRoleController::class, 'editAdmin'])->name('adminRole.editAdmin');
+        Route::delete('/deleteAdmin', [AdminRoleController::class, 'deleteAdmin'])->name('adminRole.deleteAdmin');
     });
 
     /**

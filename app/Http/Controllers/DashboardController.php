@@ -13,6 +13,7 @@ use App\Models\TradingAccount;
 use App\Services\CTraderService;
 use App\Models\TradeRebateSummary;
 use App\Services\DropdownOptionService;
+use App\Models\User;
 
 class DashboardController extends Controller
 {
@@ -116,10 +117,15 @@ class DashboardController extends Controller
         $pendingWithdrawals = Transaction::whereNot('category', 'bonus_wallet')
             ->where('transaction_type', 'withdrawal')
             ->where('status', 'processing');
-
+        $pendingBonus = Transaction::where('category', 'bonus')
+            ->where('transaction_type', 'credit_bonus')
+            ->where('status', 'processing');
+        
         return response()->json([
-            'pendingAmount' => $pendingWithdrawals->sum('transaction_amount'),
-            'pendingCounts' => $pendingWithdrawals->count(),
+            'pendingWithdrawal' => $pendingWithdrawals->sum('transaction_amount'),
+            'pendingWithdrawalCounts' => $pendingWithdrawals->count(),
+            'pendingBonus' => $pendingBonus->sum('transaction_amount'),
+            'pendingBonusCount' => $pendingBonus->count(),
         ]);
     }
 
@@ -161,4 +167,43 @@ class DashboardController extends Controller
         ]);
     }
 
+    public function getDashboardData()
+    {
+        $total_deposit = Transaction::whereIn('transaction_type', ['deposit', 'rebate_in', 'balance_in', 'credit_in'])
+            ->where('status', 'successful')
+            ->sum('transaction_amount');
+    
+        $total_withdrawal = Transaction::whereIn('transaction_type', ['withdrawal', 'rebate_out', 'balance_out', 'credit_out'])
+            ->where('status', 'successful')
+            ->sum('amount');
+        
+        $total_agent = User::where('role', 'agent')->count();
+
+        $total_member = User::where('role', 'member')->count();
+
+        $today_deposit = Transaction::whereIn('transaction_type', ['deposit', 'rebate_in', 'balance_in', 'credit_in'])
+        ->where('status', 'successful')
+        ->whereDate('created_at', today())
+        ->sum('transaction_amount');
+
+        $today_withdrawal = Transaction::whereIn('transaction_type', ['withdrawal', 'rebate_out', 'balance_out', 'credit_out'])
+            ->where('status', 'successful')
+            ->whereDate('created_at', today())
+            ->sum('amount');
+
+        $today_agent = User::where('role', 'agent')->whereDate('created_at', today())->count();
+
+        $today_member = User::where('role', 'member')->whereDate('created_at', today())->count();
+
+        return response()->json([
+            'totalDeposit' => $total_deposit,
+            'totalWithdrawal' => $total_withdrawal,
+            'totalAgent' => $total_agent,
+            'totalMember' => $total_member,
+            'todayDeposit' => $today_deposit,
+            'todayWithdrawal' => $today_withdrawal,    
+            'todayAgent' => $today_agent,
+            'todayMember' => $today_member,
+        ]);
+    }
 }

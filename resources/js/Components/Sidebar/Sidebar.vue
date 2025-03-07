@@ -39,10 +39,9 @@ onMounted(() => {
             transition-duration: 150ms;
         "
         :class="[
-            'fixed inset-y-0 z-20 bg-gray-25 flex flex-col border-r border-gray-200',
+            'fixed inset-y-0 z-20 bg-gray-25 flex flex-col border-r border-gray-200 overflow-y-auto max-h-screen',
             {
-                'translate-x-0 w-[252px]':
-                    sidebarState.isOpen || sidebarState.isHovered,
+                'translate-x-0 w-[252px]': sidebarState.isOpen || sidebarState.isHovered,
                 '-translate-x-full w-[252px] lg:w-[84px] lg:translate-x-0':
                     !sidebarState.isOpen && !sidebarState.isHovered,
             },
@@ -54,6 +53,19 @@ onMounted(() => {
 
         <SidebarContent />
 
-<!--        <SidebarFooter />-->
+        <!-- <SidebarFooter /> -->
     </aside>
 </template>
+
+<style>
+/* Hide scrollbar but keep scrolling */
+aside::-webkit-scrollbar {
+    width: 0px;
+    display: none;
+}
+
+aside {
+    -ms-overflow-style: none; /* Hide scrollbar for IE & Edge */
+    scrollbar-width: none; /* Hide scrollbar for Firefox */
+}
+</style>

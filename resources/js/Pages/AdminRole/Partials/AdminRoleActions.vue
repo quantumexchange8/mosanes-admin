@@ -157,9 +157,8 @@ const handleAdminStatus = () => {
 
 <template>
     <div class="flex gap-3 items-center justify-center">
-        <InputSwitch 
-            v-model="isActive"
-            readonly
+        <InputSwitch
+            v-model="checked"
             @click="handleAdminStatus"
         />
         <Button

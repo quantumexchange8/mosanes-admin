@@ -178,7 +178,7 @@ const goToTransactionPage = (type) => {
                             size="sm"
                             type="button"
                             iconOnly
-                            :href="route('pending')"
+                            :href="route('pending.withdrawal')"
                         >
                             <IconChevronRight size="16" stroke-width="1.25" color="#667085"/>
                         </Button>

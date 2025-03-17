@@ -2,7 +2,7 @@
 import Button from "@/Components/Button.vue";
 import { ref, watchEffect } from "vue";
 import { useForm } from '@inertiajs/vue3';
-// import ToggleSwitch from "primevue/toggleswitch";
+import InputSwitch from "primevue/inputswitch";
 
 const props = defineProps({
     admin: Object,
@@ -67,7 +67,7 @@ const submit = () => {
                     :key="permission.id"
                     class="flex justify-center items-center gap-3 self-stretch"
                 >
-                    <ToggleSwitch
+                    <InputSwitch
                         v-model="permissionsState[permission.name]"
                         @change="() => togglePermission(permission.name)"
                     />

@@ -150,7 +150,7 @@ const handleUpdateTotals = (data) => {
 </script>
 
 <template>
-    <AuthenticatedLayout :title="$t('public.withdrawal')">
+    <AuthenticatedLayout :title="$t('public.payout')">
         <div class="flex flex-col gap-5 md:gap-8">
             <div class="flex flex-col gap-5 self-stretch md:flex-row md:justify-between md:items-center">
                 <div> </div>

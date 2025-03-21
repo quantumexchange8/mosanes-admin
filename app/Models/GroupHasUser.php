@@ -20,4 +20,9 @@ class GroupHasUser extends Model
     {
         return $this->belongsTo(Group::class, 'group_id', 'id');
     }
+
+    public function user(): belongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id', 'id');
+    }
 }

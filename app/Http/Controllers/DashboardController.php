@@ -14,6 +14,10 @@ use App\Services\CTraderService;
 use App\Models\TradeRebateSummary;
 use App\Services\DropdownOptionService;
 use App\Models\User;
+use Illuminate\Support\Carbon;
+use App\Models\Group;
+use App\Models\GroupHasUser;
+use App\Models\TradeLotSizeVolume;
 
 class DashboardController extends Controller
 {
@@ -117,8 +121,8 @@ class DashboardController extends Controller
         $pendingWithdrawals = Transaction::whereNot('category', 'bonus_wallet')
             ->where('transaction_type', 'withdrawal')
             ->where('status', 'processing');
-        $pendingBonus = Transaction::where('category', 'bonus')
-            ->where('transaction_type', 'credit_bonus')
+        $pendingBonus = Transaction::where('category', 'bonus_wallet')
+            ->where('transaction_type', 'withdrawal')
             ->where('status', 'processing');
         
         return response()->json([
@@ -204,6 +208,169 @@ class DashboardController extends Controller
             'todayWithdrawal' => $today_withdrawal,    
             'todayAgent' => $today_agent,
             'todayMember' => $today_member,
+        ]);
+    }
+
+    public function getTradeLotVolume(Request $request)
+    {
+        // Get the selected month (in format "m/Y")
+        $monthYear = $request->input('selectedMonth');
+    
+        // Parse the month/year string into a Carbon date
+        $carbonDate = Carbon::createFromFormat('m/Y', $monthYear);
+    
+        // Get the year and month as integers
+        $year = $carbonDate->year;
+        $month = $carbonDate->month;
+    
+        // Check if any record exists where tlv_day = 0
+        $hasSummaryRecord = TradeLotSizeVolume::where('tlv_year', $year)
+                                              ->where('tlv_month', $month)
+                                              ->where('tlv_day', 0)
+                                              ->exists();
+    
+        if ($hasSummaryRecord) {
+            // Use the summary record where tlv_day = 0
+            $totalTradeLots = TradeLotSizeVolume::where('tlv_year', $year)
+                                                ->where('tlv_month', $month)
+                                                ->where('tlv_day', 0)
+                                                ->sum('tlv_lotsize');
+    
+            $totalVolume = TradeLotSizeVolume::where('tlv_year', $year)
+                                             ->where('tlv_month', $month)
+                                             ->where('tlv_day', 0)
+                                             ->sum('tlv_volume_usd');
+        } else {
+            // No summary record for this month, sum all available days
+            $totalTradeLots = TradeLotSizeVolume::where('tlv_year', $year)
+                                                ->where('tlv_month', $month)
+                                                ->sum('tlv_lotsize');
+    
+            $totalVolume = TradeLotSizeVolume::where('tlv_year', $year)
+                                             ->where('tlv_month', $month)
+                                             ->sum('tlv_volume_usd');
+        }
+    
+        // Return the total trade lots and volume as a JSON response
+        return response()->json([
+            'totalTradeLots' => $totalTradeLots,
+            'totalVolume' => $totalVolume,
+        ]);
+    }
+    
+    public function getGroupsData(Request $request)
+    {
+        
+        // Get the selected month (in format "m/Y")
+        $monthYear = $request->input('selectedMonth');
+        
+        // Parse the month/year string into a Carbon date
+        $carbonDate = Carbon::createFromFormat('m/Y', $monthYear);
+        
+        // Get the year and month as integers
+        $year = $carbonDate->year;
+        $month = $carbonDate->month;
+        
+        // Retrieve all groups and their related data
+        $groups = Group::all()->map(function ($group) use ($year, $month) {
+            // Get all user ids in the group
+            $groupUserIds = GroupHasUser::where('group_id', $group->id)
+                ->pluck('user_id')
+                ->toArray();
+    
+            // Calculate total deposit for the group (filtered by month and year)
+            $total_deposit = Transaction::whereIn('user_id', $groupUserIds)
+                ->whereYear('approved_at', $year)
+                ->whereMonth('approved_at', $month)
+                ->whereIn('transaction_type', ['deposit', 'balance_in', 'rebate_in'])
+                ->where('status', 'successful')
+                ->sum('transaction_amount');
+    
+            // Calculate total withdrawal for the group (filtered by month and year)
+            $total_withdrawal = Transaction::whereIn('user_id', $groupUserIds)
+                ->whereYear('approved_at', $year)
+                ->whereMonth('approved_at', $month)
+                ->whereIn('transaction_type', ['withdrawal', 'balance_out', 'rebate_out'])
+                ->where('status', 'successful')
+                ->sum('transaction_amount');
+    
+            // Calculate total adjustment in for the group (filtered by month and year)
+            $total_adjustment_in = Transaction::whereIn('user_id', $groupUserIds)
+                ->whereYear('approved_at', $year)
+                ->whereMonth('approved_at', $month)
+                ->whereIn('transaction_type', ['balance_in', 'rebate_in'])
+                ->where('status', 'successful')
+                ->sum('transaction_amount');
+        
+            // Calculate total adjustment out for the group (filtered by month and year)
+            $total_adjustment_out = Transaction::whereIn('user_id', $groupUserIds)
+                ->whereYear('approved_at', $year)
+                ->whereMonth('approved_at', $month)
+                ->whereIn('transaction_type', ['balance_out', 'rebate_out'])
+                ->where('status', 'successful')
+                ->sum('transaction_amount');
+    
+            // Calculate the net balance for the group
+            $transaction_fee_charges = $group->fee_charges > 0 ? $total_deposit / $group->fee_charges : 0;
+            $net_balance = $total_deposit - $transaction_fee_charges - $total_withdrawal;
+    
+            // Calculate account balance and equity
+            $groupIds = AccountType::whereNotNull('account_group_id')
+                ->pluck('account_group_id')
+                ->toArray();
+    
+            $groupBalance = 0;
+            $groupEquity = 0;
+    
+            foreach ($groupIds as $groupId) {
+                $startDateFormatted = Carbon::createFromDate($year, $month, 1)->startOfMonth()->format('Y-m-d\TH:i:s.v');
+                $endDateFormatted = Carbon::createFromDate($year, $month, 1)->endOfMonth()->format('Y-m-d\TH:i:s.v');
+                    
+                $response = (new CTraderService)->getMultipleTraders($startDateFormatted, $endDateFormatted, $groupId);
+    
+                $accountType = AccountType::where('account_group_id', $groupId)->first();
+    
+                $meta_logins = TradingAccount::where('account_type_id', $accountType->id)
+                    ->whereIn('user_id', $groupUserIds)
+                    ->pluck('meta_login')
+                    ->toArray();
+    
+                if (isset($response['trader']) && is_array($response['trader'])) {
+                    foreach ($response['trader'] as $trader) {
+                        if (in_array($trader['login'], $meta_logins)) {
+                            $moneyDigits = isset($trader['moneyDigits']) ? (int)$trader['moneyDigits'] : 0;
+                            $divisor = $moneyDigits > 0 ? pow(10, $moneyDigits) : 1;
+    
+                            $groupBalance += $trader['balance'] / $divisor;
+                            $groupEquity += $trader['equity'] / $divisor;
+                        }
+                    }
+                }
+            }
+    
+            // Return the group data
+            return [
+                'id' => $group->id,
+                'name' => $group->name,
+                'fee_charges' => $group->fee_charges,
+                'color' => $group->color,
+                'leader_name' => $group->leader->name,
+                'leader_email' => $group->leader->email,
+                'profile_photo' => $group->leader->getFirstMediaUrl('profile_photo'),
+                'member_count' => $group->group_has_user->count(),
+                'deposit' => $total_deposit,
+                'withdrawal' => $total_withdrawal,
+                'transaction_fee_charges' => $transaction_fee_charges,
+                'net_balance' => $net_balance,
+                'adjustment_in' => $total_adjustment_in,
+                'adjustment_out' => $total_adjustment_out,
+                'account_balance' => $groupBalance,
+                'account_equity' => $groupEquity,
+            ];
+        });
+    
+        return response()->json([
+            'groups' => $groups,
         ]);
     }
 }

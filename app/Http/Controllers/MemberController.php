@@ -33,15 +33,20 @@ use Illuminate\Validation\ValidationException;
 
 class MemberController extends Controller
 {
-    public function listing()
+    public function listing(Request $request)
     {
-        return Inertia::render('Member/Listing/MemberListing');
+        $userRole = $request->query('user_role'); // Get the user_type from the query string
+
+        return Inertia::render('Member/Listing/MemberListing',[
+            'user_role' => $userRole, // Pass the user_role to the frontend
+            'users' => User::all(), // Pass the user data
+        ]);
     }
 
     public function getMemberListingData()
     {
         $query = User::with(['groupHasUser'])
-            ->whereNot('role', 'super-admin')
+            ->whereNotIn('role', ['super-admin','admin'])
             ->latest()
             ->get()->map(function ($user) {
                 return [

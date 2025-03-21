@@ -37,14 +37,24 @@ const total_agents = ref(999);
 const total_users = ref(999);
 const loading = ref(false);
 const dt = ref();
-const users = ref();
-const allUsers = ref();
+const users = ref([]);
+const allUsers = ref([]);
 const counterDuration = ref(10);
 const { formatRgbaColor } = generalFormat();
 
+const page = usePage();
+
 onMounted(() => {
     getResults();
-})
+    console.log('User Role:', page.props.user_role);
+
+    // Check for route parameter and apply filter
+    if (page.props.user_role === 'agent') {
+        filters.value.role.value = 'agent'; // Apply the agent filter
+    } else if (page.props.user_role === 'member') {
+        filters.value.role.value = 'member'; // Apply the member filter
+    }
+});
 
 // data overview
 const dataOverviews = computed(() => [
@@ -179,6 +189,26 @@ const clearFilterGlobal = () => {
 watchEffect(() => {
     if (usePage().props.toast !== null) {
         getResults();
+    }
+});
+
+watchEffect(() => {
+    if (allUsers.value) {
+        // Apply filters to the users
+        users.value = allUsers.value.filter(user => {
+            return (
+                (!filters.value.name.value || user.name.startsWith(filters.value.name.value)) &&
+                (!filters.value.upline_id.value || user.upline_id === filters.value.upline_id.value) &&
+                (!filters.value.group_id.value || user.group_id === filters.value.group_id.value) &&
+                (!filters.value.role.value || user.role === filters.value.role.value) &&
+                (!filters.value.status.value || user.status === filters.value.status.value)
+            );
+        });
+
+        // Recalculate totals based on the filtered users
+        total_members.value = users.value.filter(user => user.role === 'member').length;
+        total_agents.value = users.value.filter(user => user.role === 'agent').length;
+        total_users.value = users.value.length;
     }
 });
 

@@ -37,6 +37,8 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
     Route::get('/getPendingData', [DashboardController::class, 'getPendingData'])->name('dashboard.getPendingData');
     Route::get('/getAssetData', [DashboardController::class, 'getAssetData'])->name('dashboard.getAssetData');
     Route::get('/getDashboardData', [DashboardController::class, 'getDashboardData'])->name('dashboard.getDashboardData');
+    Route::get('/getTradeLotVolume', [DashboardController::class, 'getTradeLotVolume'])->name('dashboard.getTradeLotVolume');
+    Route::get('/getGroupsData', [DashboardController::class, 'getGroupsData'])->name('dashboard.getGroupsData');
 
     /**
      * ==============================

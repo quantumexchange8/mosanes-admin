@@ -46,7 +46,6 @@ const page = usePage();
 
 onMounted(() => {
     getResults();
-    console.log('User Role:', page.props.user_role);
 
     // Check for route parameter and apply filter
     if (page.props.user_role === 'agent') {

@@ -11,7 +11,7 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import {FilterMatchMode} from "primevue/api";
-import { transactionFormat } from '@/Composables/index.js';
+import { transactionFormat, generalFormat } from '@/Composables/index.js';
 import Empty from '@/Components/Empty.vue';
 import Loader from "@/Components/Loader.vue";
 import Badge from '@/Components/Badge.vue';
@@ -19,11 +19,13 @@ import {IconSearch, IconCircleXFilled, IconAdjustments, IconX} from '@tabler/ico
 import Slider from 'primevue/slider';
 
 const { formatDateTime, formatAmount } = transactionFormat();
+const { formatRgbaColor } = generalFormat();
 
 const props = defineProps({
   selectedMonths: Array,
   selectedType: String,
   copyToClipboard: Function,
+  groups: Array,
 });
 
 watch(() => props.selectedMonths, () => {
@@ -80,6 +82,7 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
     role: { value: null, matchMode: FilterMatchMode.EQUALS },
+    group_name: { value: null, matchMode: FilterMatchMode.EQUALS },
     amount: { value: [minFilterAmount.value, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
 });
@@ -112,6 +115,7 @@ const recalculateTotals = () => {
         return (
             (!filters.value.name?.value || transaction.name.startsWith(filters.value.name.value)) &&
             (!filters.value.role?.value || transaction.role === filters.value.role.value) &&
+            (!filters.value.group_name?.value || transaction.group_name === filters.value.group_name.value) &&
             (!filters.value.amount?.value[0] || !filters.value.amount?.value[1] || (transaction.transaction_amount >= filters.value.amount.value[0] && transaction.transaction_amount <= filters.value.amount.value[1])) &&
             (!filters.value.status?.value || transaction.status === filters.value.status.value)
         );
@@ -145,6 +149,7 @@ const clearFilter = () => {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
         role: { value: null, matchMode: FilterMatchMode.EQUALS },
+        group_name: { value: null, matchMode: FilterMatchMode.EQUALS },
         amount: { value: [null, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
         status: { value: null, matchMode: FilterMatchMode.EQUALS },
     };
@@ -301,6 +306,31 @@ const handleFilter = (e) => {
                     </div>
                 </template>
             </Column>
+            <Column 
+                field="group_name" 
+                :header="$t('public.group')" 
+                style="width: 15%" 
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    <div class="flex items-center">
+                        <div
+                            v-if="slotProps.data.group_name"
+                            class="flex justify-center items-center gap-2 rounded-sm py-1 px-2"
+                            :style="{ backgroundColor: formatRgbaColor(slotProps.data.group_color, 1) }"
+                        >
+                            <div
+                                class="text-white text-xs text-center"
+                            >
+                                {{ slotProps.data.group_name }}
+                            </div>
+                        </div>
+                        <div v-else>
+                            -
+                        </div>
+                    </div>
+                </template>
+            </Column>
             <Column
                 field="to_meta_login"
                 :header="$t('public.account')"
@@ -362,7 +392,7 @@ const handleFilter = (e) => {
     </DataTable>
 
     <OverlayPanel ref="op">
-        <div class="flex flex-col gap-8 w-60 py-5 px-4">
+        <div class="flex flex-col gap-5 w-60 py-5 px-4">
             <!-- Filter Role-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
@@ -376,6 +406,27 @@ const handleFilter = (e) => {
                     <div class="flex items-center gap-2 text-sm text-gray-950">
                         <RadioButton v-model="filters['role'].value" inputId="role_agent" value="agent" class="w-4 h-4" />
                         <label for="role_agent">{{ $t('public.agent') }}</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Group -->
+            <div class="flex flex-col gap-2 items-center self-stretch">
+                <div class="flex self-stretch text-xs text-gray-950 font-semibold">
+                    {{ $t('public.filter_group') }}
+                </div>
+                <div class="flex flex-col gap-1 self-stretch">
+                    <div v-for="group in groups" :key="group.id" class="flex items-center gap-2 text-sm text-gray-950">
+                        <RadioButton 
+                            v-model="filters.group_name.value" 
+                            :inputId="`group_${group.id}`" 
+                            :value="group.name" 
+                            class="w-4 h-4" 
+                        />
+                        <label :for="`group_${group.id}`" class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded-full overflow-hidden" :style="{ backgroundColor: `#${group.color}` }"></div>
+                            <span>{{ group.name }}</span>
+                        </label>
                     </div>
                 </div>
             </div>

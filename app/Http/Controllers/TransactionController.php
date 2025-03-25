@@ -10,6 +10,7 @@ use Illuminate\Support\Carbon;
 use App\Models\RebateAllocation;
 use App\Models\TradeRebateSummary;
 use App\Services\DropdownOptionService;
+use App\Models\Group;
 
 class TransactionController extends Controller
 {
@@ -186,9 +187,11 @@ class TransactionController extends Controller
                 $result['email'] = $transaction->user ? $transaction->user->email : null;
                 $result['role'] = $transaction->user ? $transaction->user->role : null;
                 $result['profile_photo'] = $transaction->user ? $transaction->user->getFirstMediaUrl('profile_photo') : null;
+                $result['group_name'] = $transaction->user->groupHasUser->group->name ?? null;
+                $result['group_color'] = $transaction->user->groupHasUser->group->color ?? null;
 
                 // Add type-specific fields
-                if ($type === 'deposit') {
+                if ($type === 'deposit') {   
                     $result['from_wallet_address'] = $transaction->from_wallet_address;
                     $result['to_wallet_address'] = $transaction->to_wallet_address;
                     $result['to_meta_login'] = $transaction->to_meta_login;
@@ -229,21 +232,28 @@ class TransactionController extends Controller
 
     public function deposit()
     {
-        return Inertia::render('Transaction/Deposit');
+        $groups = Group::select('name', 'color')->get();
+        return Inertia::render('Transaction/Deposit/Deposit',[
+            'groups' => $groups->toArray(),
+        ]);
+       
     }
 
     public function withdrawal()
     {
-        return Inertia::render('Transaction/Withdrawal');
+        $groups = Group::select('name', 'color')->get();
+        return Inertia::render('Transaction/Withdrawal/Withdrawal',[
+            'groups' => $groups->toArray(),
+        ]);
     }
 
-    public function Transfer()
+    public function transfer()
     {
-        return Inertia::render('Transaction/Transfer');
+        return Inertia::render('Transaction/Transfer/Transfer');
     }
     public function Payout()
     {
-        return Inertia::render('Transaction/Payout');
+        return Inertia::render('Transaction/Payout/Payout');
     }
 
 }

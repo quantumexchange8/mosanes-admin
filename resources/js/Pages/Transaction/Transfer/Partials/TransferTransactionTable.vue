@@ -23,7 +23,6 @@ const { formatDateTime, formatAmount } = transactionFormat();
 const props = defineProps({
   selectedMonths: Array,
   selectedType: String,
-  copyToClipboard: Function,
 });
 
 watch(() => props.selectedMonths, () => {
@@ -66,7 +65,6 @@ const getResults = async (type, selectedMonths = []) => {
         totalTransactionAmount.value = transactions.value.filter(item => ['successful'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
         maxAmount.value = transactions.value?.length ? Math.max(...transactions.value.map(item => parseFloat(item.transaction_amount || 0))) : 0;
         maxFilterAmount.value = maxAmount.value;
-
     } catch (error) {
         console.error('Error fetching transactions:', error);
     } finally {
@@ -83,17 +81,9 @@ const filters = ref({
     name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
     role: { value: null, matchMode: FilterMatchMode.EQUALS },
     amount: { value: [minFilterAmount.value, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
-    category: { value: null, matchMode: FilterMatchMode.EQUALS },
+    transaction_type: { value: null, matchMode: FilterMatchMode.EQUALS },
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
 });
-
-// overlay panel
-const op = ref();
-const filterCount = ref(0);
-
-const toggle = (event) => {
-    op.value.toggle(event);
-}
 
 // Watch minFilterAmount and maxFilterAmount to update the amount filter
 watch([minFilterAmount, maxFilterAmount], ([newMin, newMax]) => {
@@ -110,20 +100,27 @@ watch(() => filters.value.amount.value[0], (newMin) => {
     filters.value.amount.value[0] = newMin === 0 ? null : newMin;
 }, { immediate: true });
 
+// overlay panel
+const op = ref();
+const filterCount = ref(0);
+
+const toggle = (event) => {
+    op.value.toggle(event);
+}
+
 const recalculateTotals = () => {
     const filtered = transactions.value.filter(transaction => {
         return (
             (!filters.value.name?.value || transaction.name.startsWith(filters.value.name.value)) &&
             (!filters.value.role?.value || transaction.role === filters.value.role.value) &&
             (!filters.value.amount?.value[0] || !filters.value.amount?.value[1] || (transaction.transaction_amount >= filters.value.amount.value[0] && transaction.transaction_amount <= filters.value.amount.value[1])) &&
-            (!filters.value.category?.value || transaction.category === filters.value.category.value) &&
+            (!filters.value.transaction_type?.value || transaction.transaction_type === filters.value.transaction_type.value) &&
             (!filters.value.status?.value || transaction.status === filters.value.status.value)
         );
     });
     totalTransaction.value = filtered.length;
     totalTransactionAmount.value = filtered.filter(item => ['successful'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
     maxAmount.value = filtered.length ? Math.max(...filtered.map(item => parseFloat(item.transaction_amount || 0))) : 0;
-
 };
 
 watch(filters, () => {
@@ -144,13 +141,14 @@ watch(filters, () => {
     }, 0);
 }, { deep: true });
 
+
 const clearFilter = () => {
     filters.value = {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
         role: { value: null, matchMode: FilterMatchMode.EQUALS },
         amount: { value: [null, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
-        category: { value: null, matchMode: FilterMatchMode.EQUALS },
+        transaction_type: { value: null, matchMode: FilterMatchMode.EQUALS },
         status: { value: null, matchMode: FilterMatchMode.EQUALS },
     };
 };
@@ -161,9 +159,10 @@ const clearFilterGlobal = () => {
 
 watchEffect(() => {
     if (usePage().props.toast !== null) {
-        getResults(selectedType.value, selectedMonths.value);
+        getResults(props.selectedType, props.selectedMonths);
     }
 });
+
 
 // dialog
 const data = ref({});
@@ -187,7 +186,6 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
 const handleFilter = (e) => {
     filteredValueCount.value = e.filteredValue.length;
 };
-
 </script>
 
 <template>
@@ -250,7 +248,7 @@ const handleFilter = (e) => {
                 </div>
             </div>
         </template>
-        <template #empty><Empty :title="$t('public.empty_withdrawal_title')" :message="$t('public.empty_withdrawal_message')"/></template>
+        <template #empty><Empty :title="$t('public.empty_transfer_title')" :message="$t('public.empty_transfer_message')"/></template>
         <template #loading>
             <div class="flex flex-col gap-2 items-center justify-center">
                 <Loader />
@@ -265,7 +263,7 @@ const handleFilter = (e) => {
                 class="hidden md:table-cell"
             >
                 <template #body="slotProps">
-                    {{ formatDateTime(slotProps.data.approved_at) }}
+                    {{ formatDateTime(slotProps.data.created_at) }}
                 </template>
             </Column>
             <Column
@@ -311,7 +309,16 @@ const handleFilter = (e) => {
                 class="hidden md:table-cell"
             >
                 <template #body="slotProps">
-                    {{ slotProps.data.from_meta_login ? slotProps.data.from_meta_login : slotProps.data ? $t(`public.${slotProps.data.from_wallet_name}`) : '' }}
+                    {{ slotProps.data.transaction_type === 'transfer_to_account'  ? $t('public.rebate')  : slotProps.data.from_meta_login  }}
+                </template>
+            </Column>
+            <Column
+                :field="(transactions && transactions.to_meta_login) ? 'to_meta_login' : 'to_wallet_name'"
+                :header="$t('public.to')"
+                class="hidden md:table-cell">
+                <template #body="slotProps"
+            >
+                    {{ slotProps.data.to_meta_login ? slotProps.data.to_meta_login : slotProps.data ? slotProps.data.to_wallet_name : '' }}
                 </template>
             </Column>
             <Column
@@ -322,18 +329,6 @@ const handleFilter = (e) => {
             >
                 <template #body="slotProps">
                     {{ formatAmount(slotProps.data.transaction_amount) }}
-                </template>
-            </Column>
-            <Column
-                field="status"
-                :header="$t('public.status')"
-                class="hidden md:table-cell"
-            >
-                <template #body="slotProps">
-                    <StatusBadge class="w-fit" :value="slotProps.data.status">
-                        <span v-if="slotProps.data.status === 'successful'">{{ $t('public.approved') }}</span>
-                        <span v-else>{{ $t('public.rejected') }}</span>
-                    </StatusBadge>
                 </template>
             </Column>
             <Column class="md:hidden">
@@ -353,7 +348,7 @@ const handleFilter = (e) => {
                                     {{ slotProps.data.name }}
                                 </div>
                                 <div class="text-gray-500 text-xs">
-                                    {{ formatDateTime(slotProps.data.approved_at) }}
+                                    {{ formatDateTime(slotProps.data.created_at) }}
                                 </div>
                             </div>
                         </div>
@@ -367,7 +362,7 @@ const handleFilter = (e) => {
     </DataTable>
 
     <OverlayPanel ref="op">
-        <div class="flex flex-col gap-8 w-60 py-5 px-4">
+        <div class="flex flex-col gap-5 w-60 py-5 px-4">
             <!-- Filter Role-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
@@ -401,36 +396,19 @@ const handleFilter = (e) => {
                 </div>
             </div>
 
-            <!-- Filter Withdrawal From -->
+            <!-- Filter Transfer Type -->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    {{ $t('public.filter_withdrawal_from') }}
+                    {{ $t('public.filter_transfer_type') }}
                 </div>
                 <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['category'].value" inputId="withdrawal_rebate" value="rebate_wallet" class="w-4 h-4" />
-                        <label for="withdrawal_rebate">{{ $t('public.rebate') }}</label>
+                        <RadioButton v-model="filters['transaction_type'].value" inputId="transfer_to_account" value="transfer_to_account" class="w-4 h-4" />
+                        <label for="transfer_to_account">{{ $t('public.account_to_account') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['category'].value" inputId="withdrawal_account" value="trading_account" class="w-4 h-4" />
-                        <label for="withdrawal_account">{{ $t('public.accounts') }}</label>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Filter Status-->
-            <div class="flex flex-col gap-2 items-center self-stretch">
-                <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    {{ $t('public.filter_status') }}
-                </div>
-                <div class="flex flex-col gap-1 self-stretch">
-                    <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_approved" value="successful" class="w-4 h-4" />
-                        <label for="status_approved">{{ $t('public.approved') }}</label>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_rejected" value="rejected" class="w-4 h-4" />
-                        <label for="status_rejected">{{ $t('public.rejected') }}</label>
+                        <RadioButton v-model="filters['transaction_type'].value" inputId="account_to_account" value="account_to_account" class="w-4 h-4" />
+                        <label for="account_to_account">{{ $t('public.rebate_to_account') }}</label>
                     </div>
                 </div>
             </div>
@@ -448,7 +426,7 @@ const handleFilter = (e) => {
         </div>
     </OverlayPanel>
 
-    <Dialog v-model:visible="visible" modal :header="$t('public.withdrawal_details')" class="dialog-xs md:dialog-md">
+    <Dialog v-model:visible="visible" modal :header="$t('public.transfer_details')" class="dialog-xs md:dialog-md">
         <div class="flex flex-col justify-center items-start pb-4 gap-3 self-stretch border-b border-gray-200 md:flex-row md:pt-4 md:justify-between">
             <!-- below md -->
             <span class="md:hidden self-stretch text-gray-950 text-xl font-semibold">{{ data.transaction_amount }}</span>
@@ -471,43 +449,23 @@ const handleFilter = (e) => {
                 <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.transaction_number }}</span>
             </div>
             <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.requested_date') }}</span>
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.transaction_date') }}</span>
                 <span class="self-stretch text-gray-950 text-sm font-medium">{{ formatDateTime(data.created_at) }}</span>
             </div>
             <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.approval_date') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium">{{ formatDateTime(data.approved_at) }}</span>
-            </div>
-            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.from') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium"> {{ data.from_meta_login ? data.from_meta_login : data ? $t(`public.${data.from_wallet_name}`) : '' }}</span>
-            </div>
-            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                 <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.status') }}</span>
-                <StatusBadge :value="data.status">
-                    <span v-if="data.status === 'successful'">{{ $t('public.approved') }}</span>
-                    <span v-else>{{ $t('public.rejected') }}</span>
-                </StatusBadge>
-            </div>
-        </div>
-
-        <div class="flex flex-col items-center py-4 gap-3 self-stretch border-b border-gray-200">
-            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.wallet_name') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.to_wallet_name }}</span>
-            </div>
-            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.receiving_address') }}</span>
-                <div class="flex justify-center items-center self-stretch" @click="copyToClipboard(data.to_wallet_address)">
-                    <span class="flex-grow overflow-hidden text-gray-950 text-ellipsis text-sm font-medium break-words">{{ data.to_wallet_address }}</span>
-                </div>
+                <StatusBadge :value="data.status">{{ $t(`public.${data.status}`) }}</StatusBadge>
             </div>
         </div>
 
         <div class="flex flex-col items-center py-4 gap-3 self-stretch">
-            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.remarks') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.remarks }}</span>
+            <div v-if="['transfer'].includes(selectedType)" class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.from') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.transaction_type === 'transfer_to_account'  ? $t('public.rebate') : data.from_meta_login }}</span>
+            </div>
+            <div v-if="['transfer'].includes(selectedType)" class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.to') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.to_wallet_id ? data.to_wallet_name : data.to_meta_login }}</span>
             </div>
         </div>
     </Dialog>

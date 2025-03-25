@@ -2,23 +2,24 @@
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import { CalendarIcon } from '@/Components/Icons/outline'
 import { HandIcon, CoinsIcon, RocketIcon } from '@/Components/Icons/solid';
-import { ref, h, watch, computed, onMounted } from "vue";
-import TabView from 'primevue/tabview';
-import TabPanel from 'primevue/tabpanel';
+import { ref, computed, onMounted } from "vue";
 import MultiSelect from 'primevue/multiselect';
 import IconField from 'primevue/iconfield';
 import Vue3Autocounter from 'vue3-autocounter';
-import DepositTransactionTable from "@/Pages/Transaction/Partials/DepositTransactionTable.vue";
-import WithdrawalTransactionTable from "@/Pages/Transaction/Partials/WithdrawalTransactionTable.vue";
-import TransferTransactionTable from "@/Pages/Transaction/Partials/TransferTransactionTable.vue";
-import PayoutTransactionTable from "@/Pages/Transaction/Partials/PayoutTransactionTable.vue";
-import {wTrans} from "laravel-vue-i18n";
+import DepositTransactionTable from "@/Pages/Transaction/Deposit/Partials/DepositTransactionTable.vue";
 
 const totalTransaction = ref(999);
 const totalTransactionAmount = ref(999);
 const maxAmount = ref(999);
 const counterDuration = ref(10);
 const months = ref([]);
+const selectedType = ref('deposit');
+
+const props = defineProps({
+  groups: Array,
+});
+
+const groups = computed(() => props.groups);
 
 const getTransactionMonths = async () => {
     try {
@@ -31,62 +32,7 @@ const getTransactionMonths = async () => {
 
 onMounted(() => {
     getTransactionMonths();
-    // Extract the type from the URL directly
-    const queryString = window.location.search;
-    const urlParams = new URLSearchParams(queryString);
-    const type = urlParams.get('type');
-
-    // Check if the type is valid and set selectedType
-    if (type && tabs.value.some(tab => tab.type === type)) {
-        selectedType.value = type;
-    }
-
-})
-
-const tabs = ref([
-    {   
-        title: wTrans('public.deposit'),
-        component: h(DepositTransactionTable, 
-        { copyToClipboard: copyToClipboard }), 
-        type: 'deposit' 
-    },
-    {   
-        title: wTrans('public.withdrawal'),
-        component: h(WithdrawalTransactionTable, 
-        { copyToClipboard: copyToClipboard }), 
-        type: 'withdrawal' 
-    },
-    {   
-        title: wTrans('public.transfer'),
-        component: h(TransferTransactionTable), 
-        type: 'transfer' 
-    },
-    {   
-        title: wTrans('public.payout'),
-        component: h(PayoutTransactionTable), 
-        type: 'payout' 
-    },
-]);
-
-const selectedType = ref('withdrawal');
-const activeIndex = ref(tabs.value.findIndex(tab => tab.type === selectedType.value));
-
-// Watch for changes in selectedType and update the activeIndex accordingly
-watch(selectedType, (newType) => {
-    const index = tabs.value.findIndex(tab => tab.type === newType);
-    if (index >= 0) {
-        activeIndex.value = index;
-    }
 });
-
-function updateType(event) {
-    const selectedTab = tabs.value[event.index];
-    selectedType.value = selectedTab.type;
-    totalTransaction.value = 999;
-    totalTransactionAmount.value = 999;
-    maxAmount.value = 999;
-    counterDuration.value = 10;
-}
 
 // data overview
 const dataOverviews = computed(() => [
@@ -98,7 +44,7 @@ const dataOverviews = computed(() => [
     {
         icon: CoinsIcon,
         total: totalTransactionAmount.value,
-        label: selectedType.value !== 'payout' ? 'total_approved_amount' : 'total_payout_amount',
+        label: 'total_approved_amount',
     },
     {
         icon: RocketIcon,
@@ -106,6 +52,7 @@ const dataOverviews = computed(() => [
         label: 'maximum_amount',
     },
 ]);
+
 // Function to get the current month and year as a string
 const getCurrentMonthYear = () => {
   const date = new Date();
@@ -150,7 +97,7 @@ const handleUpdateTotals = (data) => {
 </script>
 
 <template>
-    <AuthenticatedLayout :title="$t('public.withdrawal')">
+    <AuthenticatedLayout :title="$t('public.deposit')">
         <div class="flex flex-col gap-5 md:gap-8">
             <div class="flex flex-col gap-5 self-stretch md:flex-row md:justify-between md:items-center">
                 <div> </div>
@@ -177,7 +124,7 @@ const handleUpdateTotals = (data) => {
                 </div>
             </div>
             <div class="flex flex-col items-center py-6 px-4 gap-5 self-stretch rounded-2xl border border-gray-200 bg-white shadow-table md:py-6 md:gap-6">
-                <component :is="tabs[activeIndex]?.component" :selectedMonths="selectedMonths" :selectedType="selectedType" @update-totals="handleUpdateTotals" />
+                <DepositTransactionTable :selectedMonths="selectedMonths" :selectedType="selectedType" :groups="groups" :copyToClipboard="copyToClipboard" @update-totals="handleUpdateTotals" />
             </div>
         </div>
     </AuthenticatedLayout>

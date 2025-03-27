@@ -45,8 +45,8 @@ getPendingData();
 const getDashboardData = async () => {
     try {
         const response = await axios.get('/getDashboardData');
-        totalDeposit.value = response.data.totalDeposit;
-        totalWithdrawal.value = response.data.totalWithdrawal;
+        totalDeposit.value = Number(response.data.totalDeposit);
+        totalWithdrawal.value = Number(response.data.totalWithdrawal);
         totalAgent.value = response.data.totalAgent;
         totalMember.value = response.data.totalMember;
         todayDeposit.value = response.data.todayDeposit;

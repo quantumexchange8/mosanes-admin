@@ -266,7 +266,9 @@ const handleFilter = (e) => {
                 class="hidden md:table-cell"
             >
                 <template #body="slotProps">
-                    {{ formatDateTime(slotProps.data.created_at) }}
+                    <span v-if="slotProps.data.status === 'processing'">{{ formatDateTime(slotProps.data.approved_at) }}</span>
+                    <span v-else-if="slotProps.data.approved_at">{{ formatDateTime(slotProps.data.approved_at) }}</span>
+                    <span v-else>-</span>
                 </template>
             </Column>
             <Column
@@ -504,8 +506,12 @@ const handleFilter = (e) => {
                 <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.transaction_number }}</span>
             </div>
             <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.transaction_date') }}</span>
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.requested_date') }}</span>
                 <span class="self-stretch text-gray-950 text-sm font-medium">{{ formatDateTime(data.created_at) }}</span>
+            </div>
+            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.approval_date') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.approved_at ? formatDateTime(data.approved_at) : '-'}}</span>
             </div>
             <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                 <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.account') }}</span>

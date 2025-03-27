@@ -40,6 +40,7 @@ class TransactionController extends Controller
             'status',
             'remarks',
             'created_at',
+            'approved_at',
         ];
 
         if (empty($selectedMonthsArray)) {
@@ -160,7 +161,12 @@ class TransactionController extends Controller
                         $endDate = date("Y-m-t", strtotime($startDate)); // Last day of the month
 
                         // Add a condition to match transactions for this specific month-year
-                        $q->orWhereBetween('created_at', [$startDate, $endDate]);
+                        $status = request('status');
+                        if ($status === 'processing') {
+                            $q->orWhereBetween('created_at', [$startDate, $endDate]);
+                        } else {
+                            $q->orWhereBetween('approved_at', [$startDate, $endDate]);
+                        }
                     }
                 });
             }
@@ -178,7 +184,11 @@ class TransactionController extends Controller
             }
 
             // Fetch data
-            $data = $query->latest()->get()->map(function ($transaction) use ($commonFields, $type) {
+            $data = $query
+                ->orderByRaw('CASE WHEN approved_at IS NULL THEN 1 ELSE 0 END')
+                ->orderByDesc('approved_at')
+                ->orderByDesc('created_at')
+                ->latest()->get()->map(function ($transaction) use ($commonFields, $type) {
                 // Initialize result array with common fields
                 $result = $transaction->only($commonFields);
 

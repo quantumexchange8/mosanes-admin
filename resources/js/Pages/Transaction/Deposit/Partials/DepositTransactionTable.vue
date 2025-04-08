@@ -266,7 +266,7 @@ const handleFilter = (e) => {
                 class="hidden md:table-cell"
             >
                 <template #body="slotProps">
-                    <span v-if="slotProps.data.status === 'processing'">{{ formatDateTime(slotProps.data.approved_at) }}</span>
+                    <span v-if="slotProps.data.status === 'processing'">{{ formatDateTime(slotProps.data.created_at) }}</span>
                     <span v-else-if="slotProps.data.approved_at">{{ formatDateTime(slotProps.data.approved_at) }}</span>
                     <span v-else>-</span>
                 </template>

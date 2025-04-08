@@ -7,6 +7,7 @@ import DataOverview from './Partials/DataOverview.vue';
 import AccountData from './Partials/AccountData.vue';
 import TradeLotVolume from './Partials/TradeLotVolume.vue';
 import GroupOverview from './Partials/GroupOverview.vue';
+import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
     postCounts: Number,
@@ -39,7 +40,9 @@ const props = defineProps({
             <DataOverview/>
             
             <div class="w-full flex flex-col md:flex-row justify-center items-center gap-5 self-stretch">
-                <div class="p-4 md:py-6 md:px-8 flex flex-col gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white">
+                <div class="p-4 md:py-6 md:px-8 flex flex-col gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white cursor-pointer"
+                    @click="router.visit(route('member.account_listing'))"
+                >
                     <div class="flex items-center gap-6 w-full">
                         <div class="flex flex-col">
                             <div class="text-gray-950 font-semibold text-sm md:text-base">
@@ -59,7 +62,9 @@ const props = defineProps({
                         </Button>
                     </div>
                 </div>
-                <div class="p-4 md:py-6 md:px-8 flex flex-col items-start gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white">
+                <div class="p-4 md:py-6 md:px-8 flex flex-col items-start gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white cursor-pointer"
+                    @click="router.visit(route('member.forum'))"
+                >
                     <div class="flex items-center gap-6 w-full">
                         <div class="flex flex-col">
                             <div class="text-gray-950 font-semibold text-sm md:text-base">

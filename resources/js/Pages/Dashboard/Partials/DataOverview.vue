@@ -5,6 +5,7 @@ import { DepositIcon, WithdrawalIcon, MemberIcon, AgentIcon } from '@/Components
 import Badge from '@/Components/Badge.vue';
 import Vue3Autocounter from 'vue3-autocounter';
 import {ref} from 'vue';
+import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
     postCounts: Number,
@@ -66,9 +67,11 @@ getDashboardData();
 
 <template>
     <div class="w-full flex flex-col md:flex-row justify-center items-center gap-5 self-stretch">
-        <div class="p-4 md:py-6 md:px-8 flex flex-col items-start gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white">
+        <div class="p-6 md:py-6 md:px-8 flex flex-col items-start gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white cursor-pointer"
+            @click="router.visit(route('pending.withdrawal'))"
+            >
             <div class="flex items-center self-stretch">
-                <div class="flex-1 text-gray-950 font-semibold text-sm md:text-base">
+                <div class="flex-1 text-gray-950 font-semibold text-base">
                     {{ $t('public.dashboard_withdrawal_request') }}
                 </div>
                 <Button
@@ -83,23 +86,25 @@ getDashboardData();
                 </Button>
             </div>
 
-            <div class="self-stretch text-gray-950 text-xl md:text-xxl font-semibold">
-                <vue3-autocounter ref="counter" :startAmount="0" :endAmount="pendingWithdrawal" :duration="1" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+            <div class="self-stretch text-gray-950 text-lg md:text-xxl font-semibold">
+                $ <vue3-autocounter ref="counter" :startAmount="0" :endAmount="pendingWithdrawal" :duration="1" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
             </div>
 
             <div class="flex items-center gap-2">
-                <Badge class="text-white text-sm">
+                <Badge class="text-white  text-xxs md:text-sm">
                     {{ pendingWithdrawalCount }}
                 </Badge>
-                <div class="text-gray-500 text-xs md:text-sm">
+                <div class="text-gray-500 text-xxs md:text-sm">
                     {{ $t('public.pending_withdrawal_caption') }}
                 </div>
             </div>
         </div>
 
-        <div class="p-4 md:py-6 md:px-8 flex flex-col items-start gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white">
+        <div class="p-6 md:py-6 md:px-8 flex flex-col items-start gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white cursor-pointer"
+            @click="router.visit(route('pending.bonus'))"
+        >
             <div class="flex items-center self-stretch">
-                <div class="flex-1 text-gray-950 font-semibold text-sm md:text-base">
+                <div class="flex-1 text-gray-950 font-semibold text-base">
                     {{ $t('public.dashboard_bonus_request') }}
                 </div>
                 <Button
@@ -114,40 +119,42 @@ getDashboardData();
                 </Button>
             </div>
 
-            <div class="self-stretch text-gray-950 text-xl md:text-xxl font-semibold">
-                <vue3-autocounter ref="counter" :startAmount="0" :endAmount="pendingBonus" :duration="1" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+            <div class="self-stretch text-gray-950 text-lg md:text-xxl font-semibold">
+                $ <vue3-autocounter ref="counter" :startAmount="0" :endAmount="pendingBonus" :duration="1" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
             </div>
 
             <div class="flex items-center gap-2">
-                <Badge class="text-white text-sm">
+                <Badge class="text-white text-xxs md:text-sm">
                     {{ pendingBonusCount }}
                 </Badge>
-                <div class="text-gray-500 text-xs md:text-sm">
+                <div class="text-gray-500 text-xxs md:text-sm">
                     {{ $t('public.pending_withdrawal_caption') }}
                 </div>
             </div>
         </div>
     </div>
 
-    <div class="w-full flex flex-col md:flex-row justify-center items-center gap-5 self-stretch">
-        <div class="p-4 md:py-6 md:px-8 flex flex-col items-start gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white">
-            <div class="flex items-center gap-6 w-full">
-                <AgentIcon class="w-12 h-12" />
-                <div class="flex flex-col">
-                    <div class="text-gray-950 font-semibold text-sm md:text-base">
+    <div class="grid grid-cols-2 w-full gap-3 md:gap-5">
+        <div class="p-3 md:py-6 md:px-8 flex flex-1 self-stretch rounded-2xl shadow-toast bg-white cursor-pointer"
+            @click="router.visit(route('member.listing', { user_role: 'agent' }))"
+        >
+            <div class="flex items-center gap-2 md:gap-6 w-full">
+                <AgentIcon class="w-10 h-10 md:w-12 md:h-12" />
+                <div class="flex flex-col truncate">
+                    <div class="text-gray-950 font-semibold text-sm md:text-base truncate">
                         {{ $t('public.total_agent') }}
                     </div>
-                    <div class="text-gray-950 text-xl md:text-xxl font-semibold">
+                    <div class="text-gray-950 text-base md:text-xxl font-semibold">
                         <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalAgent" :duration="1" separator="," decimalSeparator="." :decimals="0" :autoinit="true" />
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 text-sm md:text-base">
                         <IconCaretUpFilled 
-                            class="w-3 h-3 md:w-4 md:h-4"
-                            :class="{'text-success-500': todayAgent > 0, 'text-gray-950': todayAgent <= 0}"
+                            class="w-3 h-3 md:w-4 md:h-4 text-sm md:text-base"
+                            :class="{'text-success-500 ': todayAgent > 0, 'text-gray-950': todayAgent <= 0}"
                         />
                             {{ todayAgent }}
 
-                        <div class="text-gray-500 text-xs md:text-sm">
+                        <div class="text-gray-500 text-xxs md:text-sm">
                             {{ $t('public.today') }}
                         </div>
                     </div>
@@ -166,24 +173,26 @@ getDashboardData();
             </div>
         </div>
 
-        <div class="p-4 md:py-6 md:px-8 flex flex-col items-start gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white">
-            <div class="flex items-center gap-6 w-full">
-                <MemberIcon class="w-12 h-12"/>
-                <div class="flex flex-col">
-                    <div class="text-gray-950 font-semibold text-sm md:text-base">
+        <div class="p-3 md:py-6 md:px-8 flex flex-1 self-stretch rounded-2xl shadow-toast bg-white cursor-pointer"
+            @click="router.visit(route('member.listing', { user_role: 'member' }))"
+            >
+            <div class="flex items-center gap-2 md:gap-6 w-full">
+                <MemberIcon class="w-10 h-10 md:w-12 md:h-12"/>
+                <div class="flex flex-col truncate">
+                    <div class="text-gray-950 font-semibold text-sm md:text-base truncate">
                         {{ $t('public.total_member') }}
                     </div>
-                    <div class="text-gray-950 text-xl md:text-xxl font-semibold">
+                    <div class="text-gray-950 text-base md:text-xxl font-semibold">
                         <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalMember" :duration="1" separator="," decimalSeparator="." :decimals="0" :autoinit="true" />
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 text-sm md:text-base">
                         <IconCaretUpFilled 
                             class="w-3 h-3 md:w-4 md:h-4"
                             :class="{'text-success-500': todayMember > 0, 'text-gray-950': todayMember <= 0}"
                         />
                             {{ todayMember }}
 
-                        <div class="text-gray-500 text-xs md:text-sm">
+                        <div class="text-gray-500 text-xxs md:text-sm">
                             {{ $t('public.today') }}
                         </div>
                     </div>
@@ -201,27 +210,27 @@ getDashboardData();
                 </Button>
             </div>
         </div>
-    </div>
 
-    <div class="w-full flex flex-col md:flex-row justify-center items-center gap-5 self-stretch">
-        <div class="p-4 md:py-6 md:px-8 flex flex-col gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white">
-            <div class="flex items-center gap-6 w-full">
-                <DepositIcon class="w-12 h-12"/>
-                <div class="flex flex-col">
-                    <div class="text-gray-950 font-semibold text-sm md:text-base">
-                        {{ $t('public.total_deposit') }} ($)
+        <div class="p-3 md:py-6 md:px-8 flex flex-1 self-stretch rounded-2xl shadow-toast bg-white cursor-pointer"
+            @click="router.visit(route('transaction.deposit'))"
+            >
+            <div class="flex items-center gap-2 md:gap-6 w-full">
+                <DepositIcon class="w-10 h-10 md:w-12 md:h-12"/>
+                <div class="flex flex-col truncate">
+                    <div class="text-gray-950 font-semibold text-sm md:text-base truncate">
+                        {{ $t('public.total_deposit') }}
                     </div>
-                    <div class="text-gray-950 text-xl md:text-xxl font-semibold">
-                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalDeposit" :duration="1" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                    <div class="text-gray-950 text-base md:text-xxl font-semibold truncate">
+                        $ <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalDeposit" :duration="1" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 text-sm md:text-base">
                         <IconCaretUpFilled 
                             class="w-3 h-3 md:w-4 md:h-4"
                             :class="{'text-success-500': todayDeposit > 0, 'text-gray-950': todayDeposit <= 0}"
                         />
                             {{ todayDeposit }}
 
-                        <div class="text-gray-500 text-xs md:text-sm">
+                        <div class="text-gray-500 text-xxs md:text-sm">
                             {{ $t('public.today') }}
                         </div>
                     </div>
@@ -239,24 +248,26 @@ getDashboardData();
                 </Button>
             </div>
         </div>
-        <div class="p-4 md:py-6 md:px-8 flex flex-col items-start gap-4 flex-1 self-stretch rounded-2xl shadow-toast bg-white">
-            <div class="flex items-center gap-6 w-full">
-                <WithdrawalIcon class="w-12 h-12"/>
-                <div class="flex flex-col">
-                    <div class="text-gray-950 font-semibold text-sm md:text-base">
-                        {{ $t('public.total_withdrawal') }} ($)
+        <div class="p-3 md:py-6 md:px-8 flex flex-1 self-stretch rounded-2xl shadow-toast bg-white cursor-pointer"
+            @click="router.visit(route('transaction.withdrawal'))"
+            >
+            <div class="flex items-center gap-2 md:gap-6 w-full">
+                <WithdrawalIcon class="w-10 h-10 md:w-12 md:h-12"/>
+                <div class="flex flex-col truncate">
+                    <div class="text-gray-950 font-semibold text-sm md:text-base truncate">
+                        {{ $t('public.total_withdrawal') }}
                     </div>
-                    <div class="text-gray-950 text-xl md:text-xxl font-semibold">
-                        <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalWithdrawal" :duration="1" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
+                    <div class="text-gray-950 text-base md:text-xxl font-semibold truncate">
+                        $ <vue3-autocounter ref="counter" :startAmount="0" :endAmount="totalWithdrawal" :duration="1" separator="," decimalSeparator="." :decimals="2" :autoinit="true" />
                     </div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 text-sm md:text-base">
                         <IconCaretUpFilled 
-                            class="w-3 h-3 md:w-4 md:h-4"
-                            :class="{'text-success-500': todayWithdrawal > 0, 'text-gray-950': todayWithdrawal <= 0}"
+                            class="w-3 h-3 md:w-4 md:h-4 "
+                            :class="{'text-success-500': todayWithdrawal > 0, 'text-gray-950 ': todayWithdrawal <= 0}"
                         />
                             {{ todayWithdrawal }}
 
-                        <div class="text-gray-500 text-xs md:text-sm">
+                        <div class="text-gray-500 text-xxs md:text-sm">
                             {{ $t('public.today') }}
                         </div>
                     </div>

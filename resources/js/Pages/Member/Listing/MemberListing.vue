@@ -120,6 +120,8 @@ const filters = ref({
     group_id: { value: null, matchMode: FilterMatchMode.EQUALS },
     role: { value: null, matchMode: FilterMatchMode.EQUALS },
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
+    id_number: { value: null, matchMode: FilterMatchMode.EQUALS },
+    email: { value: null, matchMode: FilterMatchMode.EQUALS },
 });
 
 // overlay panel
@@ -151,7 +153,9 @@ const recalculateTotals = () => {
             (!filters.value.upline_id.value || user.upline_id === filters.value.upline_id.value) &&
             (!filters.value.group_id.value || user.group_id === filters.value.group_id.value) &&
             (!filters.value.role.value || user.role === filters.value.role.value) &&
-            (!filters.value.status.value || user.status === filters.value.status.value)
+            (!filters.value.status.value || user.status === filters.value.status.value)&&
+            (!filters.value.id_number.value || user.id_number === filters.value.id_number.value)&&
+            (!filters.value.email.value || user.email === filters.value.email.value)
         );
     });
 
@@ -175,6 +179,8 @@ const clearFilter = () => {
         group_id: { value: null, matchMode: FilterMatchMode.EQUALS },
         role: { value: null, matchMode: FilterMatchMode.EQUALS },
         status: { value: null, matchMode: FilterMatchMode.EQUALS },
+        id_number: { value: null, matchMode: FilterMatchMode.EQUALS },
+        email: { value: null, matchMode: FilterMatchMode.EQUALS },
     };
 
     upline_id.value = null;
@@ -200,7 +206,9 @@ watchEffect(() => {
                 (!filters.value.upline_id.value || user.upline_id === filters.value.upline_id.value) &&
                 (!filters.value.group_id.value || user.group_id === filters.value.group_id.value) &&
                 (!filters.value.role.value || user.role === filters.value.role.value) &&
-                (!filters.value.status.value || user.status === filters.value.status.value)
+                (!filters.value.status.value || user.status === filters.value.status.value)&&
+                (!filters.value.id_number.value || user.id_number === filters.value.id_number.value)&&
+                (!filters.value.email.value || user.email === filters.value.email.value)
             );
         });
 
@@ -217,7 +225,7 @@ const paginator_caption = wTrans('public.paginator_caption');
 <template>
     <AuthenticatedLayout :title="$t('public.member_listing')">
         <div class="flex flex-col gap-5 items-center">
-            <div class="flex justify-end w-full">
+            <div class="flex justify-end w-full md:hidden">
                 <AddMember />
             </div>
 
@@ -250,7 +258,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                     tableStyle="md:min-width: 50rem"
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
                     :currentPageReportTemplate="paginator_caption"
-                    :globalFilterFields="['name']"
+                    :globalFilterFields="['id_number','name','email']"
                     ref="dt"
                     :loading="loading"
                 >
@@ -284,7 +292,10 @@ const paginator_caption = wTrans('public.paginator_caption');
                                         {{ filterCount }}
                                     </Badge>
                                 </Button>
-                                <div class="w-full flex justify-end">
+                                <div class="flex flex-1 flex-col xs:flex-row justify-end gap-3 min-w-0">
+                                    <div class="hidden md:flex">
+                                        <AddMember />
+                                    </div>
                                     <Button
                                         variant="primary-outlined"
                                         @click="exportCSV($event)"

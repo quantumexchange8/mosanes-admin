@@ -52,7 +52,7 @@ const refreshAll = () => {
     <AuthenticatedLayout :title="$t('public.account_listing')">
         <div class="flex flex-col gap-5 items-center self-stretch">
             <div class="flex justify-end w-full">
-                <div class="flex flex-col gap-1 items-center md:items-end w-full md:w-auto">
+                <div class="flex flex-col gap-1 items-center md:hidden w-full">
                     <Button
                         type="button"
                         variant="primary-flat"
@@ -66,19 +66,37 @@ const refreshAll = () => {
                 </div>
             </div>
             <div class="py-6 px-4 md:p-6 flex flex-col items-center self-stretch border border-gray-200 bg-white shadow-table rounded-2xl">
-                <TabView
-                    class="flex flex-col w-full gap-6"
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center w-full gap-4 mb-4">
+                    <TabView
+                    class="flex-1 w-full"
                     :activeIndex="activeIndex"
                     @tab-change="updateType"
-                >
-                    <TabPanel
-                        v-for="(tab, index) in tabs"
-                        :key="index"
-                        :header="$t(`public.${tab.title}`)"
                     >
-                        <component :is="tabs[activeIndex]?.component" />
-                    </TabPanel>
-                </TabView>
+                        <TabPanel
+                            v-for="(tab, index) in tabs"
+                            :key="index"
+                            :header="$t(`public.${tab.title}`)"
+                        >
+                        </TabPanel>
+                    </TabView>
+
+                    <div class="hidden md:flex flex-col items-end gap-2 w-full md:w-auto">
+                        <Button
+                            type="button"
+                            variant="primary-flat"
+                            class="flex items-center justify-center gap-2 w-full md:w-auto"
+                            @click="refreshAll"
+                        >
+                            <IconRefresh color="white" size="20" stroke-width="1.25" />
+                            <span>{{ $t('public.refresh_all') }}</span>
+                        </Button>
+                        <span class="text-gray-500 text-sm">
+                            {{ $t('public.last_refreshed') }}: 
+                            {{ last_refresh_datetime ? dayjs(last_refresh_datetime).format('YYYY/MM/DD HH:mm:ss') : '-' }}
+                        </span>
+                    </div>
+                </div>
+                <component :is="tabs[activeIndex]?.component" class="w-full" />
             </div>
         </div>
     </AuthenticatedLayout>

@@ -17,16 +17,14 @@ import Loader from "@/Components/Loader.vue";
 import Badge from '@/Components/Badge.vue';
 import {IconSearch, IconCircleXFilled, IconAdjustments, IconX} from '@tabler/icons-vue';
 import Slider from 'primevue/slider';
+import MultiSelect from 'primevue/multiselect';
+import IconField from 'primevue/iconfield';
+import { CalendarIcon } from '@/Components/Icons/outline'
 
 const { formatDateTime, formatAmount } = transactionFormat();
 
 const props = defineProps({
-  selectedMonths: Array,
   selectedType: String,
-});
-
-watch(() => props.selectedMonths, () => {
-    getResults(props.selectedType, props.selectedMonths);
 });
 
 const visible = ref(false);
@@ -39,10 +37,32 @@ const minFilterAmount = ref(0);
 const maxFilterAmount = ref(0);
 const maxAmount = ref(null);
 const filteredValueCount = ref(0);
+const months = ref([]);
+
+// Function to get the current month and year as a string
+const getCurrentMonthYear = () => {
+  const date = new Date();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${month}/${year}`;
+};
+
+// Reactive variables
+const selectedMonths = ref([getCurrentMonthYear()]);
+
+const getTransactionMonths = async () => {
+    try {
+        const monthsResponse = await axios.get('/transaction/getTransactionMonths');
+        months.value = monthsResponse.data;
+    } catch (error) {
+        console.error('Error transaction months:', error);
+    }
+};
 
 onMounted(() => {
-    getResults(props.selectedType, props.selectedMonths);
-})
+    getTransactionMonths();
+    getResults(props.selectedType, selectedMonths.value);
+});
 
 const getResults = async (type, selectedMonths = []) => {
     loading.value = true;
@@ -199,7 +219,7 @@ const handleFilter = (e) => {
         tableStyle="md:min-width: 50rem"
         paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-        :globalFilterFields="['name']"
+        :globalFilterFields="['name','transaction_number','email','to_meta_login']"
         ref="dt"
         selectionMode="single"
         @row-click="(event) => openDialog(event.data)"
@@ -208,6 +228,23 @@ const handleFilter = (e) => {
     >
         <template #header>
             <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
+                <div class="flex flex-col gap-5 self-stretch md:flex-row md:justify-between md:items-center">
+                    <div> </div>
+                    <IconField iconPosition="left" class="relative flex items-center w-full md:w-60">
+                        <CalendarIcon class="z-10 w-5 h-5 text-gray-400" />
+                        <MultiSelect 
+                            v-model="selectedMonths" 
+                            filter 
+                            :options="months" 
+                            :placeholder="$t('public.month_placeholder')" 
+                            :maxSelectedLabels="1" 
+                            :selectedItemsLabel="`${selectedMonths.length} ${$t('public.months_selected')}`" 
+                            class="font-normal pl-12 w-full md:w-60"
+                            >
+                            <template #filtericon>{{ $t('public.select_all') }}</template>
+                        </MultiSelect>
+                    </IconField>
+                </div>
                 <div class="relative w-full md:w-60">
                     <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                         <IconSearch size="20" stroke-width="1.25" />
@@ -426,7 +463,7 @@ const handleFilter = (e) => {
         </div>
     </OverlayPanel>
 
-    <Dialog v-model:visible="visible" modal :header="$t('public.transfer_details')" class="dialog-xs md:dialog-md">
+    <Dialog v-model:visible="visible" modal :header="$t('public.transfer_details')" class="dialog-xs md:dialog-md" :dismissableMask="true">
         <div class="flex flex-col justify-center items-start pb-4 gap-3 self-stretch border-b border-gray-200 md:flex-row md:pt-4 md:justify-between">
             <!-- below md -->
             <span class="md:hidden self-stretch text-gray-950 text-xl font-semibold">{{ data.transaction_amount }}</span>

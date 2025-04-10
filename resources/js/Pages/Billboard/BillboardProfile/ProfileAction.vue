@@ -102,6 +102,7 @@ const items = ref([
         modal
         :header="$t(`public.${dialogType}`)"
         class="dialog-xs md:dialog-md"
+        :dismissableMask="true"
     >
         <template
             v-if="dialogType === 'edit_bonus_profile'"

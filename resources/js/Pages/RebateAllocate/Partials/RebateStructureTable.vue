@@ -328,6 +328,7 @@ const closeDialog = () => {
         modal
         :header="$t('public.agent_rebate_structure')"
         class="dialog-xs"
+        :dismissableMask="true"
     >
         <div class="flex flex-col gap-8 items-center self-stretch">
             <!-- agent details -->

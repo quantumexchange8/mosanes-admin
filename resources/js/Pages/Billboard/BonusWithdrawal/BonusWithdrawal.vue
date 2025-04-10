@@ -264,6 +264,7 @@ const handleFilter = (e) => {
         modal
         :header="$t('public.withdrawal_request', {action: ''})"
         class="dialog-xs md:dialog-md"
+        :dismissableMask="true"
     >
         <template
             v-if="!approvalAction"

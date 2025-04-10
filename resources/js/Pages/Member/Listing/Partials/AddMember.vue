@@ -79,6 +79,7 @@ watchEffect(() => {
         modal
         :header="$t('public.new_member')"
         class="dialog-xs md:dialog-md"
+        :dismissableMask="true"
     >
         <form @submit.prevent="submitForm()">
             <div class="flex flex-col items-center gap-8 self-stretch">

@@ -74,6 +74,7 @@ const submitForm = () => {
         modal
         header="New Group"
         class="dialog-xs sm:dialog-md"
+        :dismissableMask="true"
     >
         <form @submit.prevent="submitForm()">
             <div class="flex flex-col items-center gap-8 self-stretch">

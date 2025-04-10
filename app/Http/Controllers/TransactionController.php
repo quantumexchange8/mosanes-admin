@@ -14,10 +14,6 @@ use App\Models\Group;
 
 class TransactionController extends Controller
 {
-    public function listing()
-    {
-        return Inertia::render('Transaction/Transaction');
-    }
 
     public function getTransactionListingData(Request $request)
     {

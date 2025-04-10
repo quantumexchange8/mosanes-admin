@@ -95,6 +95,7 @@ const submitForm = () => {
         modal
         :header="$t('public.new_bonus_profile')"
         class="dialog-xs md:dialog-md"
+        :dismissableMask="true"
     >
         <form>
             <div class="flex flex-col gap-8 items-center self-stretch">

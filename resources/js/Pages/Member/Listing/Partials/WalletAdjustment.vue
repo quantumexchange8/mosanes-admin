@@ -82,6 +82,7 @@ const handleChipClick = (label) => {
         modal
         :header="$t('public.rebate_adjustment')"
         class="dialog-xs md:dialog-sm"
+        :dismissableMask="true"
     >
         <form>
             <div class="flex flex-col gap-5">

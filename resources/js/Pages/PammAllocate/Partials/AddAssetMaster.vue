@@ -196,7 +196,7 @@ const removeMasterProfilePhoto = () => {
         {{ $t('public.new_asset_master') }}
     </Button>
 
-    <Dialog v-model:visible="visible" modal :header="$t('public.new_asset_master')" class="dialog-xs md:dialog-md">
+    <Dialog v-model:visible="visible" modal :header="$t('public.new_asset_master')" class="dialog-xs md:dialog-md" :dismissableMask="true">
         <div class="flex flex-col items-center gap-8 self-stretch">
             <!-- Stepper -->
             <div class="flex justify-center items-center gap-2 self-stretch">

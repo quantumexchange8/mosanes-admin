@@ -213,6 +213,7 @@ const handleMemberStatus = () => {
         modal
         :header="$t(`public.${dialogType}`)"
         class="dialog-xs sm:dialog-md"
+        :dismissableMask="true"
     >
         <template v-if="dialogType === 'transfer_upline'">
             <TransferUpline

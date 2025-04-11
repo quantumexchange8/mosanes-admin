@@ -185,7 +185,7 @@ const clearFilterGlobal = () => {
 
 watchEffect(() => {
     if (usePage().props.toast !== null) {
-        getResults(props.selectedType, props.selectedMonths);
+        getResults(props.selectedType, selectedMonths.value);
     }
 });
 
@@ -248,6 +248,16 @@ const handleFilter = (e) => {
                             class="font-normal pl-12 w-full md:w-60"
                             >
                             <template #filtericon>{{ $t('public.select_all') }}</template>
+                            <template #option="{ option }">
+                                <span class="text-sm">
+                                    <template v-if="option.startsWith('last_')">
+                                        {{ $t(`public.${option}`) }}
+                                    </template>
+                                    <template v-else>
+                                        {{ option }}
+                                    </template>
+                                </span>
+                            </template>
                         </MultiSelect>
                     </IconField>
                 </div>

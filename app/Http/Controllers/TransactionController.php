@@ -152,9 +152,17 @@ class TransactionController extends Controller
             if (!empty($selectedMonthsArray)) {
                 $query->where(function ($q) use ($selectedMonthsArray) {
                     foreach ($selectedMonthsArray as $range) {
-                        [$month, $year] = explode('/', $range);
-                        $startDate = "$year-$month-01";
-                        $endDate = date("Y-m-t", strtotime($startDate)); // Last day of the month
+                        if (str_starts_with($range, 'last_')) {
+                            preg_match('/last_(\d+)_week/', $range, $matches);
+                            $weeks = $matches[1] ?? 1;
+            
+                            $startDate = Carbon::now()->subWeeks($weeks)->startOfWeek();
+                            $endDate = Carbon::now()->subWeek($weeks)->endOfWeek();
+                        } else {
+                            [$month, $year] = explode('/', $range);
+                            $startDate = "$year-$month-01";
+                            $endDate = date("Y-m-t", strtotime($startDate)); // Last day of the month
+                        }
 
                         // Add a condition to match transactions for this specific month-year
                         $status = request('status');

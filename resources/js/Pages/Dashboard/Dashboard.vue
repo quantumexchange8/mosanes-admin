@@ -11,7 +11,6 @@ import { router } from '@inertiajs/vue3'
 
 const props = defineProps({
     postCounts: Number,
-    groupMonths: Array,
 })
 
 </script>

@@ -8,7 +8,6 @@ import dayjs from "dayjs";
 
 const props = defineProps({
     postCounts: Number,
-    groupMonths: Array,
 })
 
 const { formatAmount } = transactionFormat();
@@ -22,9 +21,17 @@ const counterGroup = ref(null);
 const groupLoading = ref(false);
 const groupDuration = ref(10);
 
+groupMonths.value = [
+    {label: "Last Week", value: "last_1_week" }, 
+    {label: "Last 2 Week", value: "last_2_week" }, 
+    {label: "Last 3 Week", value: "last_3_week" }
+];
+
 for (let month = 1; month <= 12; month++) {
+    const monthFormat = dayjs().month(month - 1).year(currentYear).format('MM/YYYY');
     groupMonths.value.push({
-        value: dayjs().month(month - 1).year(currentYear).format('MM/YYYY')
+        label: monthFormat,
+        value: monthFormat
     });
 }
 
@@ -78,7 +85,7 @@ const updateGroupsData = () => {
                 <Dropdown
                     v-model="selectedGroupMonth"
                     :options="groupMonths"
-                    optionLabel="value"
+                    optionLabel="label"
                     optionValue="value"
                     :placeholder="$t('public.month_placeholder')"
                     scroll-height="236px"

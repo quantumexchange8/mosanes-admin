@@ -29,12 +29,18 @@ const trade_lot = ref(0);
 const volume = ref(0);
 const tradeLotVolumeLoading = ref(false);
 
-// Populate historyPeriodOptions with all months of the current year
-for (let month = 1; month <= 12; month++) {
-    transactionMonth.value.push({
-        value: dayjs().month(month - 1).year(currentYear).format('MM/YYYY')
-    });
-}
+// Populate historyPeriodOptions with time period options
+transactionMonth.value = [
+    // Weekly options
+    { value: 'Last Week' },
+    { value: 'Last 2 Week' },
+    { value: 'Last 3 Week' },
+    
+    // Monthly options for current year
+    ...Array.from({ length: 12 }, (_, i) => ({
+        value: dayjs().month(i).year(currentYear).format('MM/YYYY'),
+    }))
+];
 
 selectedMonth.value = dayjs().format('MM/YYYY');
 

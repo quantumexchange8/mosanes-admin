@@ -214,7 +214,7 @@ const handleFilter = (e) => {
         :value="transactions"
         :paginator="transactions?.length > 0 && filteredValueCount > 0"
         removableSort
-        :rows="10"
+        :rows="50"
         :rowsPerPageOptions="[10, 20, 50, 100]"
         tableStyle="md:min-width: 50rem"
         paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
@@ -242,6 +242,16 @@ const handleFilter = (e) => {
                             class="font-normal pl-12 w-full md:w-60"
                             >
                             <template #filtericon>{{ $t('public.select_all') }}</template>
+                            <template #option="{ option }">
+                                <span class="text-sm">
+                                    <template v-if="option.startsWith('last_')">
+                                        {{ $t(`public.${option}`) }}
+                                    </template>
+                                    <template v-else>
+                                        {{ option }}
+                                    </template>
+                                </span>
+                            </template>
                         </MultiSelect>
                     </IconField>
                 </div>

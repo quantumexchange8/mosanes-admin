@@ -9,6 +9,7 @@ use App\Models\Transaction;
 use App\Models\GroupHasUser;
 use App\Models\SettingLeverage;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Carbon;
 
 class DropdownOptionService
 {
@@ -90,11 +91,28 @@ class DropdownOptionService
         // Map the dates to the desired format and remove duplicates
         $months = $transactionDates
             ->map(function ($date) {
-                return \Carbon\Carbon::parse($date)->format('m/Y');
+                // Extract only the "F Y" format for uniqueness
+                return Carbon::parse($date)->format('m/Y');
             })
+            ->reverse()
             ->unique()
             ->values();
+    
+        // Add the current month at the end if it's not already in the list
+        $currentMonth = Carbon::now()->format('m/Y');
+        if (!$months->contains($currentMonth)) {
+            $months->prepend($currentMonth);
+        }
 
+        // Add custom date ranges at the top
+        $additionalRanges = collect([
+            'last_week', 
+            'last_2_week', 
+            'last_3_week', 
+        ]);
+
+        $months = $additionalRanges->merge($months);
+    
         return $months;
     }
 

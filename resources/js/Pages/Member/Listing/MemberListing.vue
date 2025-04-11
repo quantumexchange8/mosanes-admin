@@ -253,7 +253,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                     :value="users"
                     :paginator="users?.length > 0 && total_users > 0"
                     removableSort
-                    :rows="10"
+                    :rows="50"
                     :rowsPerPageOptions="[10, 20, 50, 100]"
                     tableStyle="md:min-width: 50rem"
                     paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
@@ -277,7 +277,7 @@ const paginator_caption = wTrans('public.paginator_caption');
                                     <IconCircleXFilled size="16" />
                                 </div>
                             </div>
-                            <div class="grid grid-cols-2 w-full gap-3">
+                            <div class="grid grid-cols-2 md:flex w-full gap-3">
                                 <Button
                                     variant="gray-outlined"
                                     @click="toggle"
@@ -293,9 +293,6 @@ const paginator_caption = wTrans('public.paginator_caption');
                                     </Badge>
                                 </Button>
                                 <div class="flex flex-1 flex-col xs:flex-row justify-end gap-3 min-w-0">
-                                    <div class="hidden md:flex">
-                                        <AddMember />
-                                    </div>
                                     <Button
                                         variant="primary-outlined"
                                         @click="exportCSV($event)"
@@ -303,6 +300,9 @@ const paginator_caption = wTrans('public.paginator_caption');
                                     >
                                         {{ $t('public.export') }}
                                     </Button>
+                                    <div class="hidden md:flex">
+                                        <AddMember />
+                                    </div>
                                 </div>
                             </div>
                         </div>

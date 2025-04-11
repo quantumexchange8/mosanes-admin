@@ -617,4 +617,8 @@ return [
     'total_agent' => "平臺代理總人數",
     'total_member' => "平臺會員總人數",
     'edit_forum' => "編輯論壇",
+    'select_all' => "全選",
+    'last_week' => '上週',
+    'last_2_week' => '上兩週',
+    'last_3_week' => '上三週',
 ];

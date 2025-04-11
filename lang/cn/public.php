@@ -617,4 +617,8 @@ return [
     'total_agent' => "平台代理总人数",
     'total_member' => "平台会员总人数",
     'edit_forum' => "编辑论坛",
+    'select_all' => "全选",
+    'last_week' => '上周',
+    'last_2_week' => '上两周',
+    'last_3_week' => '上三周',
 ];

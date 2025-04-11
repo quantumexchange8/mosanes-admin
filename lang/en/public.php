@@ -618,4 +618,8 @@ return [
     'total_agent' => "Total Agent",
     'total_member' => "Total Member",
     'edit_forum' => "Edit Forum",
+    'select_all' => "Select All",
+    'last_week' => 'Last Week',
+    'last_2_week' => 'Last 2 Week',
+    'last_3_week' => 'Last 3 Week',
 ];

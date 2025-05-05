@@ -44,6 +44,7 @@ class PendingController extends Controller
         $pendingWithdrawals = Transaction::with([
             'user:id,email,name',
             'payment_account:id,payment_account_name,account_no',
+            'from_account:id,meta_login,balance',
         ])
             ->where('transaction_type', 'withdrawal')
             ->where('status', 'processing')
@@ -58,7 +59,7 @@ class PendingController extends Controller
                     'user_email' => $transaction->user->email,
                     'user_profile_photo' => $transaction->user->getFirstMediaUrl('profile_photo'),
                     'from' => $transaction->category == 'trading_account' ? $transaction->from_meta_login : 'rebate_wallet',
-                    'balance' => $transaction->category == 'trading_account' ? $transaction->from_meta_login->balance : $transaction->from_wallet->balance,
+                    'balance' => $transaction->category == 'trading_account' ? $transaction->from_account->balance : $transaction->from_wallet->balance,
                     'amount' => $transaction->amount,
                     'transaction_charges' => $transaction->transaction_charges,
                     'transaction_amount' => $transaction->transaction_amount,

@@ -10,13 +10,10 @@ use Illuminate\Support\Carbon;
 use App\Models\RebateAllocation;
 use App\Models\TradeRebateSummary;
 use App\Services\DropdownOptionService;
+use App\Models\Group;
 
 class TransactionController extends Controller
 {
-    public function listing()
-    {
-        return Inertia::render('Transaction/Transaction');
-    }
 
     public function getTransactionListingData(Request $request)
     {
@@ -39,6 +36,7 @@ class TransactionController extends Controller
             'status',
             'remarks',
             'created_at',
+            'approved_at',
         ];
 
         if (empty($selectedMonthsArray)) {
@@ -154,12 +152,25 @@ class TransactionController extends Controller
             if (!empty($selectedMonthsArray)) {
                 $query->where(function ($q) use ($selectedMonthsArray) {
                     foreach ($selectedMonthsArray as $range) {
-                        [$month, $year] = explode('/', $range);
-                        $startDate = "$year-$month-01";
-                        $endDate = date("Y-m-t", strtotime($startDate)); // Last day of the month
+                        if (str_starts_with($range, 'last_')) {
+                            preg_match('/last_(\d+)_week/', $range, $matches);
+                            $weeks = $matches[1] ?? 1;
+            
+                            $startDate = Carbon::now()->subWeeks($weeks)->startOfWeek();
+                            $endDate = Carbon::now()->subWeek($weeks)->endOfWeek();
+                        } else {
+                            [$month, $year] = explode('/', $range);
+                            $startDate = "$year-$month-01";
+                            $endDate = date("Y-m-t", strtotime($startDate)); // Last day of the month
+                        }
 
                         // Add a condition to match transactions for this specific month-year
-                        $q->orWhereBetween('created_at', [$startDate, $endDate]);
+                        $status = request('status');
+                        if ($status === 'processing') {
+                            $q->orWhereBetween('created_at', [$startDate, $endDate]);
+                        } else {
+                            $q->orWhereBetween('approved_at', [$startDate, $endDate]);
+                        }
                     }
                 });
             }
@@ -177,7 +188,11 @@ class TransactionController extends Controller
             }
 
             // Fetch data
-            $data = $query->latest()->get()->map(function ($transaction) use ($commonFields, $type) {
+            $data = $query
+                ->orderByRaw('CASE WHEN approved_at IS NULL THEN 1 ELSE 0 END')
+                ->orderByDesc('approved_at')
+                ->orderByDesc('created_at')
+                ->latest()->get()->map(function ($transaction) use ($commonFields, $type) {
                 // Initialize result array with common fields
                 $result = $transaction->only($commonFields);
 
@@ -186,9 +201,11 @@ class TransactionController extends Controller
                 $result['email'] = $transaction->user ? $transaction->user->email : null;
                 $result['role'] = $transaction->user ? $transaction->user->role : null;
                 $result['profile_photo'] = $transaction->user ? $transaction->user->getFirstMediaUrl('profile_photo') : null;
+                $result['group_name'] = $transaction->user->groupHasUser->group->name ?? null;
+                $result['group_color'] = $transaction->user->groupHasUser->group->color ?? null;
 
                 // Add type-specific fields
-                if ($type === 'deposit') {
+                if ($type === 'deposit') {   
                     $result['from_wallet_address'] = $transaction->from_wallet_address;
                     $result['to_wallet_address'] = $transaction->to_wallet_address;
                     $result['to_meta_login'] = $transaction->to_meta_login;
@@ -229,21 +246,28 @@ class TransactionController extends Controller
 
     public function deposit()
     {
-        return Inertia::render('Transaction/Deposit');
+        $groups = Group::select('name', 'color')->get();
+        return Inertia::render('Transaction/Deposit/Deposit',[
+            'groups' => $groups->toArray(),
+        ]);
+       
     }
 
     public function withdrawal()
     {
-        return Inertia::render('Transaction/Withdrawal');
+        $groups = Group::select('name', 'color')->get();
+        return Inertia::render('Transaction/Withdrawal/Withdrawal',[
+            'groups' => $groups->toArray(),
+        ]);
     }
 
-    public function Transfer()
+    public function transfer()
     {
-        return Inertia::render('Transaction/Transfer');
+        return Inertia::render('Transaction/Transfer/Transfer');
     }
     public function Payout()
     {
-        return Inertia::render('Transaction/Payout');
+        return Inertia::render('Transaction/Payout/Payout');
     }
 
 }

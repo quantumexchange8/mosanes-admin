@@ -119,6 +119,7 @@ const requireConfirmation = (action_type) => {
         modal
         :header="$t(`public.${dialogType + '_adjustment'}`)"
         class="dialog-xs sm:dialog-sm"
+        :dismissableMask="true"
     >
         <template v-if="dialogType === 'account_balance'|| dialogType === 'account_credit' ">
             <AccountAdjustment

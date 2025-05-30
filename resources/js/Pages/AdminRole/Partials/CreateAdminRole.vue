@@ -6,18 +6,10 @@ import InputError from '@/Components/InputError.vue';
 import InputLabel from '@/Components/InputLabel.vue';
 import InputText from 'primevue/inputtext';
 import {useForm, usePage} from '@inertiajs/vue3';
-// import Select from 'primevue/select';
-import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
-import Password from 'primevue/password';
-import FileUpload from 'primevue/fileupload';
-import ProgressBar from 'primevue/progressbar';
 import { IconPlus, IconUpload, IconX } from "@tabler/icons-vue";
 import Stepper from 'primevue/stepper';
-// import StepList from 'primevue/steplist';
-// import StepPanels from 'primevue/steppanels';
-// import Step from 'primevue/step';
-// import StepPanel from 'primevue/steppanel';
-// import ToggleSwitch from 'primevue/toggleswitch';
+import StepperPanel from 'primevue/stepperpanel';
+import InputSwitch from "primevue/inputswitch";
 
 const props = defineProps({
     permissionsList: Array,
@@ -33,13 +25,12 @@ const closeDialog = () => {
 }
 
 const form = useForm({
-    first_name: '',
+    name: '',
     email: '',
     role: '',
     profile_photo: '',
     permissions: props.permissionsList.map(permission => permission.name),  // Extract permission names
 });
-
 
 const permissionsState = ref({});
 
@@ -94,14 +85,13 @@ const removeAttachment = () => {
     form.profile_photo = '';
 };
 
-const validate = (activateCallback) => {
+const validate = (nextCallback) => {
     form.post(route('adminRole.firstStep'), {
         onSuccess: () => {
-            activateCallback(2);
+            nextCallback();
         },
     });
 }
-
 
 const submit = () => {
     form.post(route('adminRole.addNewAdmin'), {
@@ -133,30 +123,26 @@ const submit = () => {
         :dismissableMask="true"
     >
         <form>
-            <div class="flex flex-col items-center pt-4 self-stretch md:pt-6">
-                <Stepper v-model:value="activeStep" linear>
-                    <StepList class="w-full">
-                        <Step :value="1">{{$t('public.basic_info')}}</Step>
-                        <Step :value="2">{{$t('public.permissions')}}</Step>
-                    </StepList>
-                    <StepPanels>
-                        <StepPanel v-slot="{ activateCallback }" :value="1">
-                            <div class="grid pt-6 pb-4 gap-6 md:pt-8 md:pb-6 md:gap-8">
+            <div class="flex flex-col items-center pt-4 self-stretch md:pt-1 text-sm">
+                <Stepper linear class="w-full">
+                    <StepperPanel header="Basic Info">
+                        <template #content="{ nextCallback }">
+                            <div class="grid pt-2 pb-4 gap-5">
                                 <!-- Basic Information -->
                                 <div class="flex flex-col gap-3 items-center self-stretch md:gap-5">
                                     <div class="grid grid-cols-1 gap-3 md:gap-5 w-full">
                                         <div class="space-y-2">
-                                            <InputLabel for="first_name" :value="$t('public.name')" :invalid="!!form.errors.first_name" />
+                                            <InputLabel for="name" :value="$t('public.name')" :invalid="!!form.errors.name" />
                                             <InputText
-                                                id="first_name"
+                                                id="name"
                                                 type="text"
                                                 class="block w-full"
-                                                v-model="form.first_name"
+                                                v-model="form.name"
                                                 placeholder="eg. John Doe"
-                                                :invalid="!!form.errors.first_name"
+                                                :invalid="!!form.errors.name"
                                                 autofocus
                                             />
-                                            <InputError :message="form.errors.first_name" />
+                                            <InputError :message="form.errors.name" />
                                         </div>
                                         <div class="space-y-2">
                                             <InputLabel for="email" :value="$t('public.email')" :invalid="!!form.errors.email" />
@@ -184,7 +170,6 @@ const submit = () => {
                                         </div>
                                     </div>
                                 </div>
-
                                 <div class="flex flex-col items-center gap-3 self-stretch">
                                     <span class="self-stretch text-gray-950 text-sm font-bold">{{ $t('public.upload_profile_photo') }}</span>
                                     <div class="flex flex-col items-start gap-3 self-stretch">
@@ -231,7 +216,6 @@ const submit = () => {
                                         </div>
                                     </div>
                                 </div>
-
                             </div>
                             <div class="w-full flex justify-end items-center gap-4 pt-6 self-stretch">
                                 <Button
@@ -247,14 +231,16 @@ const submit = () => {
                                     variant="primary-flat"
                                     size="base"
                                     class="w-full"
-                                    @click="() => validate(activateCallback)"
+                                    @click="validate(nextCallback)"
                                     :disabled="form.processing"
                                 >
                                     {{ $t('public.next') }}
                                 </Button>
                             </div>
-                        </StepPanel>
-                        <StepPanel v-slot="{ activateCallback }" :value="2">
+                        </template>
+                    </StepperPanel>
+                    <StepperPanel header="Permissions">
+                        <template #content="{ nextCallback }">
                             <div class="grid pt-6 pb-4 gap-6 md:pt-8 md:pb-6 md:gap-8">
                                 <!-- Permissions -->
                                 <div class="flex flex-col items-center gap-5 self-stretch">
@@ -263,9 +249,9 @@ const submit = () => {
                                         :key="permission.id"
                                         class="flex justify-center items-center gap-3 self-stretch"
                                     >
-                                        <ToggleSwitch
+                                        <InputSwitch
                                             v-model="permissionsState[permission.name]"
-                                            @change="() => togglePermission(permission.name)"
+                                            @change="togglePermission(permission.name)"
                                         />
                                         <span class="w-full text-gray-700 text-sm font-medium">{{ $t('public.allow_permission', {permission: $t(`public.${permission.name}`)})}}</span>
                                     </div>
@@ -291,8 +277,8 @@ const submit = () => {
                                     {{ $t('public.create') }}
                                 </Button>
                             </div>
-                        </StepPanel>
-                    </StepPanels>
+                        </template>
+                    </StepperPanel>
                 </Stepper>
             </div>
         </form>

@@ -80,11 +80,11 @@ watchEffect(() => {
                             <span class="text-sm text-gray-700">{{ $t('public.loading') }}</span>
                         </div>
                     </template>
-                    <Column field="first_name" :header="$t('public.name')" sortable class="w-full md:w-[25%] max-w-0 px-3" headerClass="text-nowrap">
+                    <Column field="name" :header="$t('public.name')" sortable class="w-full md:w-[25%] max-w-0 px-3" headerClass="text-nowrap">
                         <template #body="slotProps">
                             <div class="flex flex-col items-start max-w-full">
                                 <div class="text-gray-950 text-sm font-semibold truncate max-w-full">
-                                    {{ slotProps.data.first_name }}
+                                    {{ slotProps.data.name }}
                                 </div>
                                 <div class="text-gray-500 text-xs truncate max-w-full">
                                     {{ slotProps.data.email }}

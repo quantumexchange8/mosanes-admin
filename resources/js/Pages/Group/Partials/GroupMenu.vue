@@ -145,6 +145,7 @@ const requireConfirmation = (action_type) => {
             {'sm:dialog-md': dialogTitle === 'edit_group'},
             {'sm:dialog-lg': dialogTitle === 'view_group_transactions'},
         ]"
+        :dismissableMask="true"
     >
         <template v-if="dialogTitle === 'edit_group'">
             <EditGroup

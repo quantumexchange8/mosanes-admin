@@ -99,7 +99,7 @@ watchEffect(() => {
         :value="accounts"
         :paginator="accounts?.length > 0"
         removableSort
-        :rows="10"
+        :rows="50"
         :rowsPerPageOptions="[10, 20, 50, 100]"
         tableStyle="md:min-width: 50rem"
         paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
@@ -274,6 +274,7 @@ watchEffect(() => {
         modal
         :header="$t('public.account_details')"
         class="dialog-xs md:dialog-sm"
+        :dismissableMask="true"
     >
         <div
             class="flex flex-col justify-center items-start pb-4 gap-3 self-stretch border-b border-gray-200 md:flex-row md:pt-4 md:justify-between">

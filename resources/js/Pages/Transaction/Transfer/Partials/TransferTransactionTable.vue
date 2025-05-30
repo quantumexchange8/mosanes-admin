@@ -17,17 +17,14 @@ import Loader from "@/Components/Loader.vue";
 import Badge from '@/Components/Badge.vue';
 import {IconSearch, IconCircleXFilled, IconAdjustments, IconX} from '@tabler/icons-vue';
 import Slider from 'primevue/slider';
+import MultiSelect from 'primevue/multiselect';
+import IconField from 'primevue/iconfield';
+import { CalendarIcon } from '@/Components/Icons/outline'
 
 const { formatDateTime, formatAmount } = transactionFormat();
 
 const props = defineProps({
-  selectedMonths: Array,
   selectedType: String,
-  copyToClipboard: Function,
-});
-
-watch(() => props.selectedMonths, () => {
-    getResults(props.selectedType, props.selectedMonths);
 });
 
 const visible = ref(false);
@@ -40,10 +37,32 @@ const minFilterAmount = ref(0);
 const maxFilterAmount = ref(0);
 const maxAmount = ref(null);
 const filteredValueCount = ref(0);
+const months = ref([]);
+
+// Function to get the current month and year as a string
+const getCurrentMonthYear = () => {
+  const date = new Date();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${month}/${year}`;
+};
+
+// Reactive variables
+const selectedMonths = ref([getCurrentMonthYear()]);
+
+const getTransactionMonths = async () => {
+    try {
+        const monthsResponse = await axios.get('/transaction/getTransactionMonths');
+        months.value = monthsResponse.data;
+    } catch (error) {
+        console.error('Error transaction months:', error);
+    }
+};
 
 onMounted(() => {
-    getResults(props.selectedType, props.selectedMonths);
-})
+    getTransactionMonths();
+    getResults(props.selectedType, selectedMonths.value);
+});
 
 const getResults = async (type, selectedMonths = []) => {
     loading.value = true;
@@ -51,7 +70,7 @@ const getResults = async (type, selectedMonths = []) => {
     try {
         let response;
 
-        let url = `/transaction/getTransactionListingData?type=${type}`;
+        let url = `/transaction/getTransactionListingData?type=transfer`;
 
         // Convert the array to a comma-separated string if not empty
         if (selectedMonths && selectedMonths.length > 0) {
@@ -61,6 +80,7 @@ const getResults = async (type, selectedMonths = []) => {
 
         response = await axios.get(url);
         transactions.value = response.data.transactions;
+
         totalTransaction.value = transactions.value?.length;
         totalTransactionAmount.value = transactions.value.filter(item => ['successful'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
         maxAmount.value = transactions.value?.length ? Math.max(...transactions.value.map(item => parseFloat(item.transaction_amount || 0))) : 0;
@@ -81,6 +101,7 @@ const filters = ref({
     name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
     role: { value: null, matchMode: FilterMatchMode.EQUALS },
     amount: { value: [minFilterAmount.value, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
+    transaction_type: { value: null, matchMode: FilterMatchMode.EQUALS },
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
 });
 
@@ -113,10 +134,10 @@ const recalculateTotals = () => {
             (!filters.value.name?.value || transaction.name.startsWith(filters.value.name.value)) &&
             (!filters.value.role?.value || transaction.role === filters.value.role.value) &&
             (!filters.value.amount?.value[0] || !filters.value.amount?.value[1] || (transaction.transaction_amount >= filters.value.amount.value[0] && transaction.transaction_amount <= filters.value.amount.value[1])) &&
+            (!filters.value.transaction_type?.value || transaction.transaction_type === filters.value.transaction_type.value) &&
             (!filters.value.status?.value || transaction.status === filters.value.status.value)
         );
     });
-
     totalTransaction.value = filtered.length;
     totalTransactionAmount.value = filtered.filter(item => ['successful'].includes(item.status)).reduce((acc, item) => acc + parseFloat(item.transaction_amount || 0), 0);
     maxAmount.value = filtered.length ? Math.max(...filtered.map(item => parseFloat(item.transaction_amount || 0))) : 0;
@@ -140,12 +161,14 @@ watch(filters, () => {
     }, 0);
 }, { deep: true });
 
+
 const clearFilter = () => {
     filters.value = {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
         role: { value: null, matchMode: FilterMatchMode.EQUALS },
         amount: { value: [null, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
+        transaction_type: { value: null, matchMode: FilterMatchMode.EQUALS },
         status: { value: null, matchMode: FilterMatchMode.EQUALS },
     };
 };
@@ -183,7 +206,6 @@ watch([totalTransaction, totalTransactionAmount, maxAmount], () => {
 const handleFilter = (e) => {
     filteredValueCount.value = e.filteredValue.length;
 };
-
 </script>
 
 <template>
@@ -192,12 +214,12 @@ const handleFilter = (e) => {
         :value="transactions"
         :paginator="transactions?.length > 0 && filteredValueCount > 0"
         removableSort
-        :rows="10"
+        :rows="50"
         :rowsPerPageOptions="[10, 20, 50, 100]"
         tableStyle="md:min-width: 50rem"
         paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-        :globalFilterFields="['name']"
+        :globalFilterFields="['name','transaction_number','email','to_meta_login']"
         ref="dt"
         selectionMode="single"
         @row-click="(event) => openDialog(event.data)"
@@ -206,6 +228,33 @@ const handleFilter = (e) => {
     >
         <template #header>
             <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
+                <div class="flex flex-col gap-5 self-stretch md:flex-row md:justify-between md:items-center">
+                    <div> </div>
+                    <IconField iconPosition="left" class="relative flex items-center w-full md:w-60">
+                        <CalendarIcon class="z-10 w-5 h-5 text-gray-400" />
+                        <MultiSelect 
+                            v-model="selectedMonths" 
+                            filter 
+                            :options="months" 
+                            :placeholder="$t('public.month_placeholder')" 
+                            :maxSelectedLabels="1" 
+                            :selectedItemsLabel="`${selectedMonths.length} ${$t('public.months_selected')}`" 
+                            class="font-normal pl-12 w-full md:w-60"
+                            >
+                            <template #filtericon>{{ $t('public.select_all') }}</template>
+                            <template #option="{ option }">
+                                <span class="text-sm">
+                                    <template v-if="option.startsWith('last_')">
+                                        {{ $t(`public.${option}`) }}
+                                    </template>
+                                    <template v-else>
+                                        {{ option }}
+                                    </template>
+                                </span>
+                            </template>
+                        </MultiSelect>
+                    </IconField>
+                </div>
                 <div class="relative w-full md:w-60">
                     <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                         <IconSearch size="20" stroke-width="1.25" />
@@ -246,7 +295,7 @@ const handleFilter = (e) => {
                 </div>
             </div>
         </template>
-        <template #empty><Empty :title="$t('public.empty_deposit_title')" :message="$t('public.empty_deposit_message')"/></template>
+        <template #empty><Empty :title="$t('public.empty_transfer_title')" :message="$t('public.empty_transfer_message')"/></template>
         <template #loading>
             <div class="flex flex-col gap-2 items-center justify-center">
                 <Loader />
@@ -265,7 +314,7 @@ const handleFilter = (e) => {
                 </template>
             </Column>
             <Column
-                field="id_number"
+                field="transaction_number"
                 sortable
                 :header="$t('public.id')"
                 class="hidden md:table-cell"
@@ -302,33 +351,31 @@ const handleFilter = (e) => {
                 </template>
             </Column>
             <Column
-                field="to_meta_login"
-                :header="$t('public.account')"
-                class="hidden md:table-cell">
-                <template #body="slotProps"
+                :field="(transactions && transactions.from_meta_login) ? 'from_meta_login' : 'from_wallet_name'"
+                :header="$t('public.from')"
+                class="hidden md:table-cell"
             >
-                    {{ slotProps.data.to_meta_login }}
+                <template #body="slotProps">
+                    {{ slotProps.data.transaction_type === 'transfer_to_account'  ? $t('public.rebate')  : slotProps.data.from_meta_login  }}
                 </template>
             </Column>
             <Column
-                field="transaction_amount"
+                :field="(transactions && transactions.to_meta_login) ? 'to_meta_login' : 'to_wallet_name'"
+                :header="$t('public.to')"
+                class="hidden md:table-cell">
+                <template #body="slotProps"
+            >
+                    {{ slotProps.data.to_meta_login ? slotProps.data.to_meta_login : slotProps.data ? slotProps.data.to_wallet_name : '' }}
+                </template>
+            </Column>
+            <Column
+                field="amount"
                 sortable
                 :header="$t('public.amount') + '&nbsp;($)'"
                 class="hidden md:table-cell"
             >
                 <template #body="slotProps">
-                    {{ slotProps.data.transaction_amount ? formatAmount(slotProps.data.transaction_amount) : '-' }}
-                </template>
-            </Column>
-            <Column
-                field="status"
-                :header="$t('public.status')"
-                class="hidden md:table-cell"
-            >
-                <template #body="slotProps">
-                    <StatusBadge class="w-fit" :value="slotProps.data.status">
-                        {{ $t('public.' + slotProps.data.status) }}
-                    </StatusBadge>
+                    {{ formatAmount(slotProps.data.transaction_amount) }}
                 </template>
             </Column>
             <Column class="md:hidden">
@@ -353,7 +400,7 @@ const handleFilter = (e) => {
                             </div>
                         </div>
                         <div class="overflow-hidden text-right text-ellipsis font-semibold">
-                        {{ slotProps.data.transaction_amount ?  '$&nbsp;' + formatAmount(slotProps.data.transaction_amount) : '-' }}
+                            $&nbsp;{{ formatAmount(slotProps.data.transaction_amount) }}
                         </div>
                     </div>
                 </template>
@@ -362,7 +409,7 @@ const handleFilter = (e) => {
     </DataTable>
 
     <OverlayPanel ref="op">
-        <div class="flex flex-col gap-8 w-60 py-5 px-4">
+        <div class="flex flex-col gap-5 w-60 py-5 px-4">
             <!-- Filter Role-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
@@ -396,23 +443,19 @@ const handleFilter = (e) => {
                 </div>
             </div>
 
-            <!-- Filter Status-->
+            <!-- Filter Transfer Type -->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
-                    {{ $t('public.filter_status') }}
+                    {{ $t('public.filter_transfer_type') }}
                 </div>
-                <div  class="flex flex-col gap-1 self-stretch">
+                <div class="flex flex-col gap-1 self-stretch">
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_active" value="successful" class="w-4 h-4" />
-                        <label for="status_active">{{ $t('public.successful') }}</label>
+                        <RadioButton v-model="filters['transaction_type'].value" inputId="transfer_to_account" value="transfer_to_account" class="w-4 h-4" />
+                        <label for="transfer_to_account">{{ $t('public.account_to_account') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_processing" value="processing" class="w-4 h-4" />
-                        <label for="status_processing">{{ $t('public.processing') }}</label>
-                    </div>
-                    <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_inactive" value="rejected" class="w-4 h-4" />
-                        <label for="status_inactive">{{ $t('public.failed') }}</label>
+                        <RadioButton v-model="filters['transaction_type'].value" inputId="account_to_account" value="account_to_account" class="w-4 h-4" />
+                        <label for="account_to_account">{{ $t('public.rebate_to_account') }}</label>
                     </div>
                 </div>
             </div>
@@ -430,7 +473,7 @@ const handleFilter = (e) => {
         </div>
     </OverlayPanel>
 
-    <Dialog v-model:visible="visible" modal :header="$t('public.deposit_details')" class="dialog-xs md:dialog-md">
+    <Dialog v-model:visible="visible" modal :header="$t('public.transfer_details')" class="dialog-xs md:dialog-md" :dismissableMask="true">
         <div class="flex flex-col justify-center items-start pb-4 gap-3 self-stretch border-b border-gray-200 md:flex-row md:pt-4 md:justify-between">
             <!-- below md -->
             <span class="md:hidden self-stretch text-gray-950 text-xl font-semibold">{{ data.transaction_amount }}</span>
@@ -457,37 +500,21 @@ const handleFilter = (e) => {
                 <span class="self-stretch text-gray-950 text-sm font-medium">{{ formatDateTime(data.created_at) }}</span>
             </div>
             <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.account') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.to_meta_login }}</span>
-            </div>
-            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
                 <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.status') }}</span>
-                <StatusBadge :value="data.status">{{ $t('public.' + data.status) }}</StatusBadge>
-            </div>
-        </div>
-
-        <div class="flex flex-col items-center py-4 gap-3 self-stretch border-b border-gray-200">
-            <div v-if="data.status != 'failed'" class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.sent_address') }}</span>
-                <div class="flex justify-center items-center self-stretch" @click="copyToClipboard(data.from_wallet_address)">
-                    <span class="flex-grow overflow-hidden text-gray-950 text-ellipsis text-sm font-medium break-words">{{ data.from_wallet_address }}</span>
-                </div>
-            </div>
-            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.receiving_address') }}</span>
-                <div class="flex justify-center items-center self-stretch" @click="copyToClipboard(data.to_wallet_address)">
-                    <span class="flex-grow overflow-hidden text-gray-950 text-ellipsis text-sm font-medium break-words">{{ data.to_wallet_address }}</span>
-                </div>
+                <StatusBadge :value="data.status">{{ $t(`public.${data.status}`) }}</StatusBadge>
             </div>
         </div>
 
         <div class="flex flex-col items-center py-4 gap-3 self-stretch">
-            <div class="flex flex-col md:flex-row items-start gap-1 self-stretch">
-                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.remarks') }}</span>
-                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.remarks }}</span>
+            <div v-if="['transfer'].includes(selectedType)" class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.from') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.transaction_type === 'transfer_to_account'  ? $t('public.rebate') : data.from_meta_login }}</span>
+            </div>
+            <div v-if="['transfer'].includes(selectedType)" class="flex flex-col md:flex-row items-start gap-1 self-stretch">
+                <span class="self-stretch md:w-[140px] text-gray-500 text-xs">{{ $t('public.to') }}</span>
+                <span class="self-stretch text-gray-950 text-sm font-medium">{{ data.to_wallet_id ? data.to_wallet_name : data.to_meta_login }}</span>
             </div>
         </div>
-
     </Dialog>
 
 </template>

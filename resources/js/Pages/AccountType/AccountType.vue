@@ -138,6 +138,7 @@ const rowClicked = (data) => {
         modal
         :header="$t('public.account_type_details')"
         class="dialog-xs"
+        :dismissableMask="true"
     >
         <div class="flex flex-col items-center gap-3 self-stretch">
             <div class="flex flex-col items-start gap-1 self-stretch">

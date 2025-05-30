@@ -7,6 +7,9 @@ import InputText from 'primevue/inputtext';
 import { Head, Link, useForm } from '@inertiajs/vue3';
 import ApplicationLogo from '@/Components/ApplicationLogo.vue';
 import Button from '@/Components/Button.vue';
+import { h, ref, watch } from "vue";
+import ConfirmDialog from 'primevue/confirmdialog';
+import { IconUserCancel } from '@tabler/icons-vue';
 
 defineProps({
     canResetPassword: {
@@ -17,6 +20,12 @@ defineProps({
     },
 });
 
+const visible = ref(false);
+
+const openConfirmDialog = () => {
+    visible.value = true;
+}; 
+
 const form = useForm({
     email: '',
     password: '',
@@ -25,6 +34,12 @@ const form = useForm({
 
 const submit = () => {
     form.post(route('login'), {
+        onError: (response) => {
+            // Check if the user is inactive
+            if (response.inactive) {
+                openConfirmDialog();
+            }
+        },
         onFinish: () => form.reset('password'),
     });
 };
@@ -110,4 +125,32 @@ const submit = () => {
             </form>
         </div>
     </GuestLayout>
+
+    <ConfirmDialog
+        group="headless-primary"
+        v-model:visible="visible"
+    >
+        <template #container>
+            <div class="flex flex-col justify-center items-center px-4 pt-[60px] pb-6 gap-8 bg-white rounded shadow-dialog w-[90vw] md:w-[500px] md:px-6">
+                <div class="flex flex-col items-center gap-2 self-stretch">
+                    <span class="self-stretch text-gray-950 text-center font-bold md:text-lg">{{ $t('public.inactive_account_header') }}</span>
+                    <span class="self-stretch text-gray-700 text-center text-sm">{{ $t('public.inactive_account_message') }}</span>
+                </div>
+                <div class="grid grid-cols-1 justify-items-end items-center gap-4 self-stretch">
+                    <Button
+                        type="button"
+                        variant="primary-flat"
+                        @click="visible = false"
+                        class="w-full"
+                        size="base"
+                    >
+                        {{ $t('public.alright') }}
+                    </Button>
+                </div>
+                <div class="flex w-[84px] h-[84px] p-6 justify-center items-center absolute -top-[42px] rounded-full grow-0 shrink-0 bg-primary-600">
+                    <IconUserCancel size="36" stroke-width="1.25" color="#FFFFFF" />
+                </div>
+            </div>
+        </template>
+    </ConfirmDialog>
 </template>

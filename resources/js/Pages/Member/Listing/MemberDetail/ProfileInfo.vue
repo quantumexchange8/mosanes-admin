@@ -296,6 +296,7 @@ const handleMemberStatus = () => {
         modal
         :header="$t('public.contact_information')"
         class="dialog-xs md:dialog-sm"
+        :dismissableMask="true"
     >
         <form>
             <div class="flex flex-col gap-5">

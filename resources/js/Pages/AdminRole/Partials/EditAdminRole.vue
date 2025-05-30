@@ -20,7 +20,7 @@ const closeDialog = () => {
 
 const form = useForm({
     id: props.admin.id,
-    first_name: props.admin.first_name,
+    name: props.admin.name,
     email: props.admin.email,
     role: props.admin.role,
     profile_photo: props.admin.profile_photo,
@@ -68,17 +68,17 @@ const submit = () => {
             <div class="flex flex-col gap-3 items-center self-stretch md:gap-5">
                 <div class="grid grid-cols-1 gap-3 md:gap-5 w-full">
                     <div class="space-y-2">
-                        <InputLabel for="first_name" :value="$t('public.name')" :invalid="!!form.errors.first_name" />
+                        <InputLabel for="name" :value="$t('public.name')" :invalid="!!form.errors.name" />
                         <InputText
-                            id="first_name"
+                            id="name"
                             type="text"
                             class="block w-full"
-                            v-model="form.first_name"
+                            v-model="form.name"
                             placeholder="eg. John Doe"
-                            :invalid="!!form.errors.first_name"
+                            :invalid="!!form.errors.name"
                             autofocus
                         />
-                        <InputError :message="form.errors.first_name" />
+                        <InputError :message="form.errors.name" />
                     </div>
                     <div class="space-y-2">
                         <InputLabel for="email" :value="$t('public.email')" :invalid="!!form.errors.email" />

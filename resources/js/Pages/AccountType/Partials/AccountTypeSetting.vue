@@ -128,6 +128,7 @@ const openSettingDialog = () => {
         modal
         :header="$t('public.account_type_setting')"
         class="dialog-xs md:dialog-md"
+        :dismissableMask="true"
     >
         <form @submit.prevent="submitForm()">
             <div class="flex flex-col items-center gap-8 self-stretch">

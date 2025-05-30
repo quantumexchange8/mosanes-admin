@@ -62,7 +62,7 @@ class TradingAccountController extends Controller
                         'user_email' => $account->user->email,
                         'user_profile_photo' => $account->user->getFirstMediaUrl('profile_photo'),
                         'balance' => $account->balance,
-                        'equity' => $account->trading_account->equity,
+                        'equity' => $account->trading_account->equity ?? 0,
                         'credit' => $account->credit,
                         'leverage' => $account->leverage,
                         'last_login' => $account->last_access,

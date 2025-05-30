@@ -65,13 +65,13 @@ class AdminRoleController extends Controller
     public function firstStep(Request $request)
     {
         $rules = [
-            'first_name' => 'required|string|max:255|unique:' . User::class,
+            'name' => 'required|string|max:255|unique:' . User::class,
             'email' => 'required|string|email|max:255|unique:' . User::class,
             'role' => 'nullable|string',
         ];
 
         $attributes = [
-            'first_name' => trans('public.name'),
+            'name' => trans('public.name'),
             'email' => trans('public.email'),
             'role' => trans('public.role'),
         ];
@@ -96,7 +96,7 @@ class AdminRoleController extends Controller
         $role = $request->role ? Str::lower($request->role) : 'admin'; // Default to 'admin' if not provided
 
         $admin = User::create([
-            'first_name' => $request->first_name,
+            'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($password),
             'role' => Str::slug($role),
@@ -152,13 +152,13 @@ class AdminRoleController extends Controller
     public function editAdmin(Request $request)
     {
         $rules = [
-            'first_name' => 'required|string|max:255|unique:' . User::class . ',first_name,' . $request->id,
+            'name' => 'required|string|max:255|unique:' . User::class . ',name,' . $request->id,
             'email' => 'required|string|email|max:255|unique:' . User::class . ',email,' . $request->id,
             'role' => 'nullable|string',
         ];
 
         $attributes = [
-            'first_name' => trans('public.name'),
+            'name' => trans('public.name'),
             'email' => trans('public.email'),
             'role' => trans('public.role'),
         ];
@@ -172,7 +172,7 @@ class AdminRoleController extends Controller
 
         // Update the admin user's data
         $admin->update([
-            'first_name' => $request->first_name,
+            'name' => $request->name,
             'email' => $request->email,
             'role' => $request->role ? Str::lower($request->role) : 'admin',
         ]);

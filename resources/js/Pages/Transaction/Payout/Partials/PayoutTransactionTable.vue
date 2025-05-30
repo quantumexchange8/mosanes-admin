@@ -14,16 +14,13 @@ import Empty from '@/Components/Empty.vue';
 import Loader from "@/Components/Loader.vue";
 import {IconSearch, IconCircleXFilled, IconAdjustments, IconX} from '@tabler/icons-vue';
 import Calendar from 'primevue/calendar';
+import MultiSelect from 'primevue/multiselect';
+import IconField from 'primevue/iconfield';
 
 const { formatDate, formatDateTime, formatAmount } = transactionFormat();
 
 const props = defineProps({
-  selectedMonths: Array,
   selectedType: String,
-});
-
-watch(() => props.selectedMonths, () => {
-    getResults(props.selectedType, props.selectedMonths, selectedDate.value);
 });
 
 const visible = ref(false);
@@ -34,7 +31,35 @@ const totalTransaction = ref(null);
 const totalTransactionAmount = ref(null);
 const maxAmount = ref(null);
 const filteredValueCount = ref(0);
+const months = ref([]);
 
+// Function to get the current month and year as a string
+const getCurrentMonthYear = () => {
+  const date = new Date();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${month}/${year}`;
+};
+
+// Reactive variables
+const selectedMonths = ref([getCurrentMonthYear()]);
+
+watch(selectedMonths, () => {
+    getResults(props.selectedType, selectedMonths.value, selectedDate.value);
+});
+
+const getTransactionMonths = async () => {
+    try {
+        const monthsResponse = await axios.get('/transaction/getTransactionMonths');
+        months.value = monthsResponse.data;
+    } catch (error) {
+        console.error('Error transaction months:', error);
+    }
+};
+
+onMounted(() => {
+    getTransactionMonths();
+});
 const getResults = async (type, selectedMonths = [], selectedDate = []) => {
     loading.value = true;
 
@@ -43,11 +68,11 @@ const getResults = async (type, selectedMonths = [], selectedDate = []) => {
         const [startDate, endDate] = selectedDate;
 
         // Fetch data for payout type from a different endpoint or table
-        let url = `/transaction/getTransactionListingData?type=${type}`;
+        let url = `/transaction/getTransactionListingData?type=payout`;
 
         // Convert the array to a comma-separated string if not empty
-        if (props.selectedMonths && props.selectedMonths.length > 0) {
-            url += `&selectedMonths=${props.selectedMonths.join(',')}`;
+        if (selectedMonths.value && selectedMonths.value.length > 0) {
+            url += `&selectedMonths=${selectedMonths.value.join(',')}`;
         }
 
         // Add selectedDate parameter if type is 'payout'
@@ -94,7 +119,7 @@ const clearDate = () => {
     selectedDate.value = [];
 };
 
-watch(() => props.selectedMonths, (newValue) => {
+watch(() => selectedMonths.value, (newValue) => {
     let computedMinDate = new Date(today.getFullYear(), today.getMonth(), 1); // Default to start of current month
 
     if (newValue.length > 0) {
@@ -120,11 +145,11 @@ watch(selectedDate, (newDateRange) => {
         const [startDate, endDate] = newDateRange;
 
         if (startDate && endDate) {
-            getResults(props.selectedType, props.selectedMonths, [startDate, endDate]);
+            getResults(props.selectedType, selectedMonths.value, [startDate, endDate]);
         } else if (startDate || endDate) {
-            getResults(props.selectedType, props.selectedMonths, [startDate || endDate, endDate || startDate]);
+            getResults(props.selectedType, selectedMonths.value, [startDate || endDate, endDate || startDate]);
         } else {
-            getResults(props.selectedType, props.selectedMonths, []);
+            getResults(props.selectedType, selectedMonths.value, []);
         }
     } else {
         console.warn('Invalid date range format:', newDateRange);
@@ -157,7 +182,7 @@ const clearFilterGlobal = () => {
 
 watchEffect(() => {
     if (usePage().props.toast !== null) {
-        getResults(props.selectedType, props.selectedMonths, selectedDate.value);
+        getResults(props.selectedType, selectedMonths.value, selectedDate.value);
     }
 });
 
@@ -191,7 +216,7 @@ const handleFilter = (e) => {
         :value="transactions"
         :paginator="transactions?.length > 0 && filteredValueCount > 0"
         removableSort
-        :rows="10"
+        :rows="50"
         :rowsPerPageOptions="[10, 20, 50, 100]"
         tableStyle="md:min-width: 50rem"
         paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
@@ -205,6 +230,32 @@ const handleFilter = (e) => {
     >
         <template #header>
             <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
+                <div class="flex flex-col gap-5 self-stretch md:flex-row md:justify-between md:items-center">
+                    <IconField iconPosition="left" class="relative flex items-center w-full md:w-60">
+                        <CalendarIcon class="z-10 w-5 h-5 text-gray-400" />
+                        <MultiSelect 
+                            v-model="selectedMonths" 
+                            filter 
+                            :options="months" 
+                            :placeholder="$t('public.month_placeholder')" 
+                            :maxSelectedLabels="1" 
+                            :selectedItemsLabel="`${selectedMonths.length} ${$t('public.months_selected')}`" 
+                            class="font-normal pl-12 w-full md:w-60"
+                            >
+                            <template #filtericon>{{ $t('public.select_all') }}</template>
+                            <template #option="{ option }">
+                                <span class="text-sm">
+                                    <template v-if="option.startsWith('last_')">
+                                        {{ $t(`public.${option}`) }}
+                                    </template>
+                                    <template v-else>
+                                        {{ option }}
+                                    </template>
+                                </span>
+                            </template>
+                        </MultiSelect>
+                    </IconField>
+                </div>
                 <div class="relative w-full md:w-60">
                     <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                         <IconSearch size="20" stroke-width="1.25" />
@@ -218,7 +269,7 @@ const handleFilter = (e) => {
                         <IconCircleXFilled size="16" />
                     </div>
                 </div>
-                <div class="w-full flex flex-col gap-3 md:flex-row">
+                <!-- <div class="w-full flex flex-col gap-3 md:flex-row">
                     <div class="relative w-full md:w-[272px]">
                         <Calendar
                             v-model="selectedDate"
@@ -249,7 +300,7 @@ const handleFilter = (e) => {
                             {{ $t('public.export') }}
                         </Button>
                     </div>
-                </div>
+                </div> -->
             </div>
         </template>
         <template #empty><Empty :title="$t('public.empty_payout_title')" :message="$t('public.empty_payout_message')"/></template>
@@ -356,7 +407,7 @@ const handleFilter = (e) => {
         </template>
     </DataTable>
 
-    <Dialog v-model:visible="visible" modal :header="$t('public.payout_details')" class="dialog-xs md:dialog-md">
+    <Dialog v-model:visible="visible" modal :header="$t('public.payout_details')" class="dialog-xs md:dialog-md" :dismissableMask="true">
         <div class="flex flex-col justify-center items-start pb-4 gap-3 self-stretch border-b border-gray-200 md:flex-row md:pt-4 md:justify-between">
             <!-- below md -->
             <span class="md:hidden self-stretch text-gray-950 text-xl font-semibold">$&nbsp;{{ data.rebate }}</span>

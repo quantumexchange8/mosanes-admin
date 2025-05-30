@@ -137,6 +137,7 @@ const rowClicked = (data) => {
             modal
             :header="$t('public.details')"
             class="dialog-xs md:dialog-sm"
+            :dismissableMask="true"
         >
             <div class="flex flex-col items-center gap-3 self-stretch">
                 <div class="flex items-center gap-1 self-stretch">

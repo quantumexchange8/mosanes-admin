@@ -11,19 +11,23 @@ import DataTable from "primevue/datatable";
 import Column from "primevue/column";
 import DefaultProfilePhoto from "@/Components/DefaultProfilePhoto.vue";
 import {FilterMatchMode} from "primevue/api";
-import { transactionFormat } from '@/Composables/index.js';
+import { transactionFormat, generalFormat } from '@/Composables/index.js';
 import Empty from '@/Components/Empty.vue';
 import Loader from "@/Components/Loader.vue";
 import Badge from '@/Components/Badge.vue';
 import {IconSearch, IconCircleXFilled, IconAdjustments, IconX} from '@tabler/icons-vue';
 import Slider from 'primevue/slider';
+import MultiSelect from 'primevue/multiselect';
+import IconField from 'primevue/iconfield';
+import { CalendarIcon } from '@/Components/Icons/outline'
 
 const { formatDateTime, formatAmount } = transactionFormat();
+const { formatRgbaColor } = generalFormat();
 
 const props = defineProps({
-  selectedMonths: Array,
   selectedType: String,
   copyToClipboard: Function,
+  groups: Array,
 });
 
 watch(() => props.selectedMonths, () => {
@@ -40,10 +44,37 @@ const minFilterAmount = ref(0);
 const maxFilterAmount = ref(0);
 const maxAmount = ref(null);
 const filteredValueCount = ref(0);
+const months = ref([]);
+
+// Function to get the current month and year as a string
+const getCurrentMonthYear = () => {
+  const date = new Date();
+  const month = String(date.getMonth() + 1).padStart(2, '0');
+  const year = date.getFullYear();
+  return `${month}/${year}`;
+};
+
+// Reactive variables
+const selectedMonths = ref([getCurrentMonthYear()]);
+
+const getTransactionMonths = async () => {
+    try {
+        const monthsResponse = await axios.get('/transaction/getTransactionMonths');
+        months.value = monthsResponse.data;
+    } catch (error) {
+        console.error('Error transaction months:', error);
+    }
+};
 
 onMounted(() => {
-    getResults(props.selectedType, props.selectedMonths);
-})
+    getTransactionMonths();
+    getResults(props.selectedType, selectedMonths.value);
+});
+
+// Update watch for selectedMonths
+watch(selectedMonths, () => {
+    getResults(props.selectedType, selectedMonths.value);
+});
 
 const getResults = async (type, selectedMonths = []) => {
     loading.value = true;
@@ -51,7 +82,7 @@ const getResults = async (type, selectedMonths = []) => {
     try {
         let response;
 
-        let url = `/transaction/getTransactionListingData?type=${type}`;
+        let url = `/transaction/getTransactionListingData?type=withdrawal`;
 
         // Convert the array to a comma-separated string if not empty
         if (selectedMonths && selectedMonths.length > 0) {
@@ -82,6 +113,7 @@ const filters = ref({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
     role: { value: null, matchMode: FilterMatchMode.EQUALS },
+    group_name: { value: null, matchMode: FilterMatchMode.EQUALS },
     amount: { value: [minFilterAmount.value, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
     category: { value: null, matchMode: FilterMatchMode.EQUALS },
     status: { value: null, matchMode: FilterMatchMode.EQUALS },
@@ -115,6 +147,7 @@ const recalculateTotals = () => {
         return (
             (!filters.value.name?.value || transaction.name.startsWith(filters.value.name.value)) &&
             (!filters.value.role?.value || transaction.role === filters.value.role.value) &&
+            (!filters.value.group_name?.value || transaction.group_name === filters.value.group_name.value) &&
             (!filters.value.amount?.value[0] || !filters.value.amount?.value[1] || (transaction.transaction_amount >= filters.value.amount.value[0] && transaction.transaction_amount <= filters.value.amount.value[1])) &&
             (!filters.value.category?.value || transaction.category === filters.value.category.value) &&
             (!filters.value.status?.value || transaction.status === filters.value.status.value)
@@ -149,6 +182,7 @@ const clearFilter = () => {
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
         name: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
         role: { value: null, matchMode: FilterMatchMode.EQUALS },
+        group_name: { value: null, matchMode: FilterMatchMode.EQUALS },
         amount: { value: [null, maxFilterAmount.value], matchMode: FilterMatchMode.BETWEEN },
         category: { value: null, matchMode: FilterMatchMode.EQUALS },
         status: { value: null, matchMode: FilterMatchMode.EQUALS },
@@ -196,12 +230,12 @@ const handleFilter = (e) => {
         :value="transactions"
         :paginator="transactions?.length > 0 && filteredValueCount > 0"
         removableSort
-        :rows="10"
+        :rows="50"
         :rowsPerPageOptions="[10, 20, 50, 100]"
         tableStyle="md:min-width: 50rem"
         paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
         currentPageReportTemplate="Showing {first} to {last} of {totalRecords} entries"
-        :globalFilterFields="['name']"
+        :globalFilterFields="['name','email','transaction_number']"
         ref="dt"
         selectionMode="single"
         @row-click="(event) => openDialog(event.data)"
@@ -210,6 +244,32 @@ const handleFilter = (e) => {
     >
         <template #header>
             <div class="flex flex-col md:flex-row gap-3 items-center self-stretch md:pb-6">
+                <div class="flex flex-col gap-5 self-stretch md:flex-row md:justify-between md:items-center">
+                    <IconField iconPosition="left" class="relative flex items-center w-full md:w-60">
+                        <CalendarIcon class="z-10 w-5 h-5 text-gray-400" />
+                        <MultiSelect 
+                            v-model="selectedMonths" 
+                            filter 
+                            :options="months" 
+                            :placeholder="$t('public.month_placeholder')" 
+                            :maxSelectedLabels="1" 
+                            :selectedItemsLabel="`${selectedMonths.length} ${$t('public.months_selected')}`" 
+                            class="font-normal pl-12 w-full md:w-60"
+                            >
+                            <template #filtericon>{{ $t('public.select_all') }}</template>
+                            <template #option="{ option }">
+                                <span class="text-sm">
+                                    <template v-if="option.startsWith('last_')">
+                                        {{ $t(`public.${option}`) }}
+                                    </template>
+                                    <template v-else>
+                                        {{ option }}
+                                    </template>
+                                </span>
+                            </template>
+                        </MultiSelect>
+                    </IconField>
+                </div>
                 <div class="relative w-full md:w-60">
                     <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                         <IconSearch size="20" stroke-width="1.25" />
@@ -305,6 +365,31 @@ const handleFilter = (e) => {
                     </div>
                 </template>
             </Column>
+            <Column 
+                field="group_name" 
+                :header="$t('public.group')" 
+                style="width: 15%" 
+                class="hidden md:table-cell"
+            >
+                <template #body="slotProps">
+                    <div class="flex items-center">
+                        <div
+                            v-if="slotProps.data.group_name"
+                            class="flex justify-center items-center gap-2 rounded-sm py-1 px-2"
+                            :style="{ backgroundColor: formatRgbaColor(slotProps.data.group_color, 1) }"
+                        >
+                            <div
+                                class="text-white text-xs text-center"
+                            >
+                                {{ slotProps.data.group_name }}
+                            </div>
+                        </div>
+                        <div v-else>
+                            -
+                        </div>
+                    </div>
+                </template>
+            </Column>
             <Column
                 :field="(transactions && transactions.from_meta_login) ? 'from_meta_login' : 'from_wallet_name'"
                 :header="$t('public.from')"
@@ -367,7 +452,7 @@ const handleFilter = (e) => {
     </DataTable>
 
     <OverlayPanel ref="op">
-        <div class="flex flex-col gap-8 w-60 py-5 px-4">
+        <div class="flex flex-col gap-5 w-60 py-5 px-4">
             <!-- Filter Role-->
             <div class="flex flex-col gap-2 items-center self-stretch">
                 <div class="flex self-stretch text-xs text-gray-950 font-semibold">
@@ -381,6 +466,27 @@ const handleFilter = (e) => {
                     <div class="flex items-center gap-2 text-sm text-gray-950">
                         <RadioButton v-model="filters['role'].value" inputId="role_agent" value="agent" class="w-4 h-4" />
                         <label for="role_agent">{{ $t('public.agent') }}</label>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Filter Group -->
+            <div class="flex flex-col gap-2 items-center self-stretch">
+                <div class="flex self-stretch text-xs text-gray-950 font-semibold">
+                    {{ $t('public.filter_group') }}
+                </div>
+                <div class="flex flex-col gap-1 self-stretch">
+                    <div v-for="group in groups" :key="group.id" class="flex items-center gap-2 text-sm text-gray-950">
+                        <RadioButton 
+                            v-model="filters.group_name.value" 
+                            :inputId="`group_${group.id}`" 
+                            :value="group.name" 
+                            class="w-4 h-4" 
+                        />
+                        <label :for="`group_${group.id}`" class="flex items-center gap-2">
+                            <div class="w-4 h-4 rounded-full overflow-hidden" :style="{ backgroundColor: `#${group.color}` }"></div>
+                            <span>{{ group.name }}</span>
+                        </label>
                     </div>
                 </div>
             </div>
@@ -429,7 +535,7 @@ const handleFilter = (e) => {
                         <label for="status_approved">{{ $t('public.approved') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_rejected" value="rejected" class="w-4 h-4" />
+                        <RadioButton v-model="filters['status'].value" inputId="status_rejected" value="failed" class="w-4 h-4" />
                         <label for="status_rejected">{{ $t('public.rejected') }}</label>
                     </div>
                 </div>
@@ -448,7 +554,7 @@ const handleFilter = (e) => {
         </div>
     </OverlayPanel>
 
-    <Dialog v-model:visible="visible" modal :header="$t('public.withdrawal_details')" class="dialog-xs md:dialog-md">
+    <Dialog v-model:visible="visible" modal :header="$t('public.withdrawal_details')" class="dialog-xs md:dialog-md" :dismissableMask="true">
         <div class="flex flex-col justify-center items-start pb-4 gap-3 self-stretch border-b border-gray-200 md:flex-row md:pt-4 md:justify-between">
             <!-- below md -->
             <span class="md:hidden self-stretch text-gray-950 text-xl font-semibold">{{ data.transaction_amount }}</span>

@@ -132,11 +132,6 @@ watchEffect(() => {
     <AuthenticatedLayout :title="$t('public.pamm_allocate')">
         <div class="flex flex-col items-center gap-5 md:gap-8">
 
-            <!-- Add Master -->
-            <div class="flex justify-end items-center self-stretch">
-                <AddAssetMaster :groupsOptions="groupsOptions" />
-            </div>
-
             <!-- Overview -->
             <div class="w-full flex flex-col md:flex-row gap-5 self-stretch">
                 <div class="w-full flex flex-col items-center py-5 px-4 md:px-8 md:py-6 gap-5 md:gap-8 rounded-2xl bg-white shadow-toast">

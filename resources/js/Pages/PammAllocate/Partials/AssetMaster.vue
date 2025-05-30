@@ -29,6 +29,7 @@ import Paginator from 'primevue/paginator';
 import Loader from "@/Components/Loader.vue";
 import debounce from "lodash/debounce.js";
 import Checkbox from "primevue/checkbox";
+import AddAssetMaster from "./AddAssetMaster.vue";
 
 const { formatAmount } = transactionFormat();
 
@@ -233,6 +234,10 @@ const saveLikesDebounced = debounce((masterId) => {
 <template>
     <!-- toolbar -->
     <div class="flex flex-col md:flex-row gap-3 items-center self-stretch">
+         <!-- Add Master (small screen) -->
+        <div class="flex items-center self-stretch md:hidden">
+            <AddAssetMaster :groupsOptions="groupsOptions" />
+        </div>
         <div class="relative w-full md:w-60">
             <div class="absolute top-2/4 -mt-[9px] left-4 text-gray-400">
                 <IconSearch size="20" stroke-width="1.25" />
@@ -261,24 +266,30 @@ const saveLikesDebounced = debounce((masterId) => {
                     {{ filterCount }}
                 </Badge>
             </Button>
-            <Dropdown
-                v-model="sortType"
-                :options="sortOptions"
-                optionLabel="name"
-                class="w-full md:w-40"
-                scroll-height="236px"
-            >
-                <template #value="slotProps">
-                    <div v-if="slotProps.value" class="flex items-center gap-3">
-                        <div class="flex items-center gap-2">
-                            <div>{{ $t('public.' + slotProps.value.name) }}</div>
+            <div class="flex justify-end items-center self-stretch gap-3">
+                <Dropdown
+                    v-model="sortType"
+                    :options="sortOptions"
+                    optionLabel="name"
+                    class="w-full md:w-40"
+                    scroll-height="236px"
+                >
+                    <template #value="slotProps">
+                        <div v-if="slotProps.value" class="flex items-center gap-3">
+                            <div class="flex items-center gap-2">
+                                <div>{{ $t('public.' + slotProps.value.name) }}</div>
+                            </div>
                         </div>
-                    </div>
-                </template>
-                <template #option="slotProps">
-                    {{ $t('public.' + slotProps.option.name) }}
-                </template>
-            </Dropdown>
+                    </template>
+                    <template #option="slotProps">
+                        {{ $t('public.' + slotProps.option.name) }}
+                    </template>
+                </Dropdown>
+                <!-- Add Master -->
+                <div class="hidden md:flex items-center ">
+                    <AddAssetMaster :groupsOptions="groupsOptions"/>
+                </div>
+            </div>
         </div>
     </div>
 

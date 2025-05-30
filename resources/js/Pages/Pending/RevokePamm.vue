@@ -131,7 +131,7 @@ const handleFilter = (e) => {
                 :value="pendingRevokes"
                 :paginator="pendingRevokes?.length > 0 && filteredValueCount > 0"
                 removableSort
-                :rows="10"
+                :rows="50"
                 :rowsPerPageOptions="[10, 20, 50, 100]"
                 paginatorTemplate="RowsPerPageDropdown FirstPageLink PrevPageLink PageLinks NextPageLink LastPageLink CurrentPageReport"
                 :currentPageReportTemplate="paginator_caption"
@@ -269,6 +269,7 @@ const handleFilter = (e) => {
         modal
         :header="$t('public.revoke_pamm_request', {action: ''})"
         class="dialog-xs md:dialog-md"
+        :dismissableMask="true"
     >
         <template
             v-if="!approvalAction"

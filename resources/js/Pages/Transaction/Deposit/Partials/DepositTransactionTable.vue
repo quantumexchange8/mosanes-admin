@@ -73,7 +73,8 @@ watch(selectedMonths, () => {
 
 const getResults = async (type, selectedMonths = []) => {
     loading.value = true;
-
+    type = 'deposit'
+    
     try {
         let response;
 
@@ -514,7 +515,7 @@ const handleFilter = (e) => {
                         <label for="status_processing">{{ $t('public.processing') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_inactive" value="rejected" class="w-4 h-4" />
+                        <RadioButton v-model="filters['status'].value" inputId="status_inactive" value="failed" class="w-4 h-4" />
                         <label for="status_inactive">{{ $t('public.failed') }}</label>
                     </div>
                 </div>

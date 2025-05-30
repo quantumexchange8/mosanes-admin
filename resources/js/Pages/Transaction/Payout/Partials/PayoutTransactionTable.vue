@@ -68,7 +68,7 @@ const getResults = async (type, selectedMonths = [], selectedDate = []) => {
         const [startDate, endDate] = selectedDate;
 
         // Fetch data for payout type from a different endpoint or table
-        let url = `/transaction/getTransactionListingData?type=${type}`;
+        let url = `/transaction/getTransactionListingData?type=payout`;
 
         // Convert the array to a comma-separated string if not empty
         if (selectedMonths.value && selectedMonths.value.length > 0) {

@@ -82,7 +82,7 @@ const getResults = async (type, selectedMonths = []) => {
     try {
         let response;
 
-        let url = `/transaction/getTransactionListingData?type=${type}`;
+        let url = `/transaction/getTransactionListingData?type=withdrawal`;
 
         // Convert the array to a comma-separated string if not empty
         if (selectedMonths && selectedMonths.length > 0) {
@@ -535,7 +535,7 @@ const handleFilter = (e) => {
                         <label for="status_approved">{{ $t('public.approved') }}</label>
                     </div>
                     <div class="flex items-center gap-2 text-sm text-gray-950">
-                        <RadioButton v-model="filters['status'].value" inputId="status_rejected" value="rejected" class="w-4 h-4" />
+                        <RadioButton v-model="filters['status'].value" inputId="status_rejected" value="failed" class="w-4 h-4" />
                         <label for="status_rejected">{{ $t('public.rejected') }}</label>
                     </div>
                 </div>

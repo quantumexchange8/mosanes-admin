@@ -70,7 +70,7 @@ const getResults = async (type, selectedMonths = []) => {
     try {
         let response;
 
-        let url = `/transaction/getTransactionListingData?type=${type}`;
+        let url = `/transaction/getTransactionListingData?type=transfer`;
 
         // Convert the array to a comma-separated string if not empty
         if (selectedMonths && selectedMonths.length > 0) {

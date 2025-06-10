@@ -622,4 +622,5 @@ return [
     'last_week' => 'Last Week',
     'last_2_week' => 'Last 2 Week',
     'last_3_week' => 'Last 3 Week',
+    "toast_reject_revoke_request" => "You’ve successfully rejected a revoke PAMM request.",
 ];

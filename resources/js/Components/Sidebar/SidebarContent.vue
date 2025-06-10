@@ -26,12 +26,14 @@ const { hasRole, hasPermission } = usePermission();
 const pendingWithdrawals = ref(0);
 const pendingPammAllocate = ref(0);
 const pendingBonusWithdrawal = ref(0);
+const pendingPammRequest = ref(0);
 
 const getPendingCounts = async () => {
     try {
         const response = await axios.get('/getPendingCounts');
         pendingWithdrawals.value = response.data.pendingWithdrawals
         pendingPammAllocate.value = response.data.pendingPammAllocate
+        pendingPammRequest.value = response.data.pendingPammRequest
         pendingBonusWithdrawal.value = response.data.pendingBonusWithdrawal
     } catch (error) {
         console.error('Error pending counts:', error);
@@ -71,6 +73,11 @@ watchEffect(() => {
         <SidebarCollapsible
             :title="$t('public.pending')"
             :active="route().current('pending.*')"
+            :pendingCounts="[
+                pendingPammRequest,
+                pendingBonusWithdrawal,
+                pendingWithdrawals
+            ]"
             v-if="hasRole('super-admin') || hasPermission([
                 'access_withdrawal_request',
                 'access_bonus_request',
@@ -91,6 +98,7 @@ watchEffect(() => {
                 :title="$t('public.revoke_pamm')"
                 :href="route('pending.revoke_pamm')"
                 :active="route().current('pending.revoke_pamm')"
+                :pendingCounts="pendingPammRequest"
                 v-if="hasRole('super-admin') || hasPermission('access_pamm_request')"
             />
 

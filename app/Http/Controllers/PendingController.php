@@ -195,6 +195,7 @@ class PendingController extends Controller
         $request->validate([
             'id' => 'required|integer|exists:asset_revokes,id',
             'remarks' => 'required|string|max:255',
+            'status' => 'required',
         ]);
 
         // Check connection status
@@ -211,19 +212,25 @@ class PendingController extends Controller
 
         // Update the AssetRevoke record
         $assetRevoke->update([
-            'status' => 'revoked',
+            'status' => $request->status,
             'remarks' => $request->remarks,
             'approval_at' => now(),
             'handle_by' => Auth::id(),
         ]);
 
         // Update the related AssetSubscription record using the relationship
-        $assetRevoke->asset_subscription()->update([
-            'status' => 'revoked',
+        $subscriptionUpdate = [
             'remarks' => $request->remarks,
-            'revoked_at' => now(),
-        ]);
+        ];
 
+        if ($request->status === 'successful') {
+            $subscriptionUpdate['status'] = 'revoked';
+            $subscriptionUpdate['revoked_at'] = now();
+        } else {
+            $subscriptionUpdate['status'] = 'ongoing';
+        }
+        $assetRevoke->asset_subscription()->update($subscriptionUpdate);
+        
         // Create a trade using CTraderService
         try {
             $trade = (new CTraderService)->createTrade($assetRevoke->meta_login,$assetRevoke->penalty_fee,$request->remarks,ChangeTraderBalanceType::WITHDRAW);
@@ -238,8 +245,8 @@ class PendingController extends Controller
                 'transaction_number' => RunningNumberService::getID('transaction'),
                 'amount' => $assetRevoke->penalty_fee,
                 'transaction_amount' => $assetRevoke->penalty_fee,
-                'status' => 'successful',
-                'remarks' => 'System Approval',
+                'status' => $assetRevoke->status,
+                'remarks' => $assetRevoke->remarks,
                 'approved_at' => now(),
                 'handle_by' => Auth::id(),
             ]);
@@ -259,7 +266,7 @@ class PendingController extends Controller
 
         // Return a success response
         return redirect()->back()->with('toast', [
-            'title' => trans('public.toast_approve_revoke_request'),
+            'title' => trans($request->status === 'successful' ? 'public.toast_approve_revoke_request' : 'public.toast_reject_revoke_request'),
             'type' => 'success'
         ]);
     }

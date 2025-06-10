@@ -21,6 +21,8 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },
+    hasPending:{
+    },
     pendingCounts: Number
 })
 
@@ -87,6 +89,14 @@ const Tag = !props.external ? Link : 'a'
         >
             {{ title }}
         </span>
+        <Badge
+            v-if="hasPending && (sidebarState.isOpen || sidebarState.isHovered)"
+            class="text-xs text-white "
+            variant="error"
+            :pill="true"
+        >
+            !
+        </Badge>
         <slot name="arrow" />
     </button>
 </template>

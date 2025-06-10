@@ -86,12 +86,12 @@ const closeDialog = () => {
 
 const chips = ref({
     approve: [
-        { label: 'Revoke PAMM successful' },
+        { label: 'PAMM Revocation successful' },
         { label: '您已成功停止绑定' },
     ],
     reject: [
-        { label: 'Withdrawal rejected' },
-        { label: '提款已被拒絕' },
+        { label: 'PAMM Revocation rejected' },
+        { label: '撤销绑定被拒絕' },
     ]
 });
 
@@ -102,6 +102,7 @@ const handleChipClick = (label) => {
 const form = useForm({
     id: '',
     remarks: '',
+    status: '',
 })
 
 const submit = (assetRevokeId) => {
@@ -110,6 +111,7 @@ const submit = (assetRevokeId) => {
     }
 
     form.id = assetRevokeId;
+    form.status = approvalAction.value === 'approve' ? 'successful' : 'rejected'; 
 
     form.post(route('pending.revokeApproval'), {
         onSuccess: () => {
@@ -324,6 +326,13 @@ const handleFilter = (e) => {
 
             </div>
             <div class="flex justify-end items-center pt-5 gap-4 self-stretch sm:pt-7">
+                <Button
+                    variant="error-flat"
+                    class="w-[120px]"
+                    @click="handleApproval('reject')"
+                >
+                    {{ $t('public.reject') }}
+                </Button>
                 <Button
                     variant="success-flat"
                     class="w-[120px]"

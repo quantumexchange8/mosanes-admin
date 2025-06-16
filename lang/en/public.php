@@ -623,4 +623,13 @@ return [
     'last_2_week' => 'Last 2 Week',
     'last_3_week' => 'Last 3 Week',
     "toast_reject_revoke_request" => "You’ve successfully rejected a revoke PAMM request.",
+    'pending_kyc' => 'Pending KYC',
+    'kyc' => 'KYC',
+    'toast_approve_kyc_verification_success' => 'Successfully approved KYC verification!',
+    'toast_reject_kyc_verification_success' => 'Successfully rejected KYC verification!',
+    'submitted_at' => 'Submitted At',
+    'approve_kyc' => 'Approve KYC Verification',
+    'approve_kyc_message' => 'Are you sure you want to approve KYC verification of :name ? The user will gain full access to all features and this action cannot be undone.',
+    'submission_date' => 'Submission Date',
+    'uploaded_files' => 'Uploaded Files',
 ];

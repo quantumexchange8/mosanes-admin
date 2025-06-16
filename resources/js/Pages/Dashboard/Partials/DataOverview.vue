@@ -30,7 +30,7 @@ const getPendingData = async () => {
     try {
         const response = await axios.get('/getPendingData');
         pendingWithdrawal.value = parseFloat(response.data.pendingWithdrawal);
-        pendingWithdrawalCount.value = parseFloat(response.data.pendingWithdrawal);
+        pendingWithdrawalCount.value = parseFloat(response.data.pendingWithdrawalCounts);
         pendingBonus.value = parseFloat(response.data.pendingBonus);
         pendingBonusCount.value = parseFloat(response.data.pendingBonusCount);
     } catch (error) {

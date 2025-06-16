@@ -49,11 +49,15 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::get('/withdrawal', [PendingController::class, 'withdrawal'])->name('pending.withdrawal')->middleware('role_and_permission:admin,access_withdrawal_request');
         Route::get('/revoke_pamm', [PendingController::class, 'revokePamm'])->name('pending.revoke_pamm')->middleware('role_and_permission:admin,access_pamm_request');
         Route::get('/bonus', [PendingController::class, 'bonus'])->name('pending.bonus')->middleware('role_and_permission:admin,access_bonus_request');
+        Route::get('/kyc', [PendingController::class, 'kyc'])->name('pending.kyc')->middleware('role_and_permission:admin,access_kyc_request');
         Route::get('/getPendingWithdrawalData', [PendingController::class, 'getPendingWithdrawalData'])->name('pending.getPendingWithdrawalData')->middleware('role_and_permission:admin,access_withdrawal_request');
         Route::get('/getPendingRevokeData', [PendingController::class, 'getPendingRevokeData'])->name('pending.getPendingRevokeData');
+        Route::get('/getPendingKycData', [PendingController::class, 'getPendingKycData'])->name('pending.getPendingKycData')->middleware('role_and_permission:admin,access_kyc_request');
 
         Route::post('withdrawalApproval', [PendingController::class, 'withdrawalApproval'])->name('pending.withdrawalApproval');
         Route::post('revokeApproval', [PendingController::class, 'revokeApproval'])->name('pending.revokeApproval');
+        Route::post('kycApproval', [PendingController::class, 'kycApproval'])->name('pending.kycApproval');
+
     });
 
     /**

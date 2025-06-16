@@ -27,6 +27,7 @@ const pendingWithdrawals = ref(0);
 const pendingPammAllocate = ref(0);
 const pendingBonusWithdrawal = ref(0);
 const pendingPammRequest = ref(0);
+const pendingKyc = ref(0);
 
 const getPendingCounts = async () => {
     try {
@@ -35,6 +36,7 @@ const getPendingCounts = async () => {
         pendingPammAllocate.value = response.data.pendingPammAllocate
         pendingPammRequest.value = response.data.pendingPammRequest
         pendingBonusWithdrawal.value = response.data.pendingBonusWithdrawal
+        pendingKyc.value = response.data.pendingKyc
     } catch (error) {
         console.error('Error pending counts:', error);
     }
@@ -76,7 +78,8 @@ watchEffect(() => {
             :pendingCounts="[
                 pendingPammRequest,
                 pendingBonusWithdrawal,
-                pendingWithdrawals
+                pendingWithdrawals,
+                pendingKyc
             ]"
             v-if="hasRole('super-admin') || hasPermission([
                 'access_withdrawal_request',
@@ -91,6 +94,7 @@ watchEffect(() => {
                 :title="$t('public.withdrawal')"
                 :href="route('pending.withdrawal')"
                 :active="route().current('pending.withdrawal')"
+                :pendingCounts="pendingWithdrawals"
                 v-if="hasRole('super-admin') || hasPermission('access_withdrawal_request')"
             />
 
@@ -108,6 +112,15 @@ watchEffect(() => {
                 :active="route().current('pending.bonus')"
                 :pendingCounts="pendingBonusWithdrawal"
                 v-if="hasRole('super-admin') || hasPermission('access_bonus_request')"
+            />
+
+            
+            <SidebarCollapsibleItem
+                :title="$t('public.kyc')"
+                :href="route('pending.kyc')"
+                :active="route().current('pending.kyc')"
+                :pendingCounts="pendingKyc"
+                v-if="hasRole('super-admin') || hasPermission('access_kyc')"
             />
         </SidebarCollapsible>
 

@@ -46,6 +46,9 @@ class DashboardController extends Controller
         $pendingPammRequest =  AssetRevoke::where('status', 'pending')
             ->count();
 
+        $pendingKyc = User::where('kyc_status', 'pending')
+            ->count();
+
         $activeMasters = AssetMaster::where('status', 'active')->get();
 
         foreach ($activeMasters as $master) {
@@ -63,6 +66,7 @@ class DashboardController extends Controller
             'pendingPammAllocate' => $pendingPammAllocate,
             'pendingBonusWithdrawal' => $pendingBonusWithdrawal,
             'pendingPammRequest' => $pendingPammRequest,
+            'pendingKyc' => $pendingKyc,
         ]);
     }
 

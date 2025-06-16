@@ -16,6 +16,8 @@ use Illuminate\Support\Facades\Log;
 use App\Services\RunningNumberService;
 use App\Services\ChangeTraderBalanceType;
 use Illuminate\Validation\ValidationException;
+use App\Models\User;
+use Illuminate\Support\Facades\Validator;
 
 class PendingController extends Controller
 {
@@ -39,6 +41,11 @@ class PendingController extends Controller
         return Inertia::render('Pending/Bonus');
     }
 
+    public function kyc()
+    {
+        return Inertia::render('Pending/Kyc');
+    }
+    
     public function getPendingWithdrawalData(Request $request)
     {
         $pendingWithdrawals = Transaction::with([
@@ -57,6 +64,7 @@ class PendingController extends Controller
                     'user_name' => $transaction->user->name,
                     'user_email' => $transaction->user->email,
                     'user_profile_photo' => $transaction->user->getFirstMediaUrl('profile_photo'),
+                    'user_kyc_status' => $transaction->user->kyc_status,
                     'from' => $transaction->category == 'trading_account' ? $transaction->from_meta_login : 'rebate_wallet',
                     'balance' => $transaction->category == 'trading_account' ? $transaction->from_meta_login->balance : $transaction->from_wallet->balance,
                     'amount' => $transaction->amount,
@@ -267,6 +275,70 @@ class PendingController extends Controller
         // Return a success response
         return redirect()->back()->with('toast', [
             'title' => trans($request->status === 'successful' ? 'public.toast_approve_revoke_request' : 'public.toast_reject_revoke_request'),
+            'type' => 'success'
+        ]);
+    }
+
+    public function getPendingKycData()
+    {
+        $pendingKycs = User::with(['media'])
+        ->where('kyc_status', 'pending')
+        ->get()
+        ->map(function ($user) {
+            $media = $user->getMedia('kyc_verification');
+            $submittedAt = $media->min('created_at'); // Use min() if there are 2 files
+
+            return [
+                'id' => $user->id,
+                'user_name' => $user->name,
+                'user_email' => $user->email,
+                'user_profile_photo' => $user->getFirstMediaUrl('profile_photo'),
+                'submitted_at' => $submittedAt,
+                'kyc_files' => $media,
+            ];
+        })
+        ->sortByDesc('submitted_at') // sort the final result
+        ->values(); // reset index
+    
+        return response()->json([
+            'pendingKycs' => $pendingKycs,
+        ]);
+    }
+
+    public function kycApproval(Request $request)
+    {
+        $action = $request->action;
+        $status = $action == 'approve' ? 'verified' : 'unverified';
+        $user_id = $request->user_id;
+
+        $rules = [
+            'remarks' => $request->action === 'reject' ? 'required' : 'nullable', // Only require if 'reject'
+        ];
+        
+        $validator = Validator::make($request->all(), $rules);
+        
+        $validator->setAttributeNames([
+            'remarks' => trans('public.remarks'),
+        ]);
+        
+        $validator->validate();
+    
+        $user = User::find($user_id);
+        $user->update([
+            'kyc_status' => $status,
+            'kyc_approval_description' => $request->remarks ?? null ,
+            'kyc_approved_at' => now(),
+        ]);
+
+        $messages = [
+            'verified' => trans('public.toast_approve_kyc_verification_success'),
+            'unverified' => trans('public.toast_reject_kyc_verification_success'),
+        ];
+        $message = $messages[$status];
+    
+        // Return success message if no error occurred
+        return redirect()->back()->with('toast', [
+            'title' => $message,
             'type' => 'success'
         ]);
     }

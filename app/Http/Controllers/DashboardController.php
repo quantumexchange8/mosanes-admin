@@ -7,6 +7,7 @@ use App\Models\AssetMasterProfitDistribution;
 use App\Models\ForumPost;
 use Inertia\Inertia;
 use App\Models\AccountType;
+use App\Models\AssetRevoke;
 use App\Models\Transaction;
 use Illuminate\Http\Request;
 use App\Models\TradingAccount;
@@ -42,6 +43,12 @@ class DashboardController extends Controller
 
         $pendingPammAllocate = 0;
 
+        $pendingPammRequest =  AssetRevoke::where('status', 'pending')
+            ->count();
+
+        $pendingKyc = User::where('kyc_status', 'pending')
+            ->count();
+
         $activeMasters = AssetMaster::where('status', 'active')->get();
 
         foreach ($activeMasters as $master) {
@@ -58,6 +65,8 @@ class DashboardController extends Controller
             'pendingWithdrawals' => $pendingWithdrawals,
             'pendingPammAllocate' => $pendingPammAllocate,
             'pendingBonusWithdrawal' => $pendingBonusWithdrawal,
+            'pendingPammRequest' => $pendingPammRequest,
+            'pendingKyc' => $pendingKyc,
         ]);
     }
 

@@ -71,6 +71,7 @@ class RoleAndPermissionMiddleware
             'access_account_type'       => 'accountType',
             'access_admin_role'         => 'adminRole',
             'access_pamm'               => 'pamm_allocate',
+            'access_pamm_request'       => 'kyc',
         ];
 
         // Find the first permission the user has and redirect to its route

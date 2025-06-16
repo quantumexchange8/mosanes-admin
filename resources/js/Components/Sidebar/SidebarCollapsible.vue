@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import SidebarLink from '@/Components/Sidebar/SidebarLink.vue'
 import { EmptyCircleIcon } from '@/Components/Icons/outline'
 import { sidebarState } from '@/Composables'
@@ -14,6 +14,10 @@ const props = defineProps({
     },
     active: {
         type: Boolean,
+    },
+    pendingCounts: {
+        type: Array,
+        default: () => [],
     },
 })
 
@@ -36,11 +40,15 @@ const beforeLeave = (el) => {
 const leave = (el) => {
     el.style.maxHeight = `0px`
 }
+
+const hasPending = computed(() =>
+    Array.isArray(props.pendingCounts) && props.pendingCounts.some(count => count > 0)
+);
 </script>
 
 <template>
     <div class="relative w-full">
-        <SidebarLink @click="isOpen = !isOpen" :title="title" :active="active">
+        <SidebarLink @click="isOpen = !isOpen" :title="title" :active="active" :hasPending="hasPending">
             <template #icon>
                 <slot name="icon">
                     <EmptyCircleIcon

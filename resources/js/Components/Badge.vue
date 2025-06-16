@@ -20,7 +20,8 @@ const baseClasses = [
 
 const variantClasses = (variant) => ({
     'bg-info-400': variant === 'info',
-    'bg-info-400 rounded px-1 py-[1px]': variant === 'numberbadge'
+    'bg-info-400 rounded px-1 py-[1px]': variant === 'numberbadge',
+    'bg-error-500': variant === 'error',
 })
 
 const classes = computed(() => [

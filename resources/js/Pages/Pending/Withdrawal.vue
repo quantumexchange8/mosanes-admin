@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {h, ref, watchEffect} from "vue";
-import {IconCircleXFilled, IconSearch} from "@tabler/icons-vue";
+import {IconCircleCheckFilled, IconCircleXFilled, IconClockFilled, IconSearch, IconExclamationCircleFilled } from "@tabler/icons-vue";
 import Loader from "@/Components/Loader.vue";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
@@ -178,7 +178,7 @@ const handleFilter = (e) => {
                 </div>
             </template>
             <template v-if="pendingWithdrawals?.length > 0 && filteredValueCount > 0">
-                <Column field="created_at" sortable style="width: 25%" headerClass="hidden md:table-cell">
+                <Column field="created_at" sortable style="width: 25%" class="hidden md:table-cell">
                     <template #header>
                         <span class="hidden md:block">{{ $t('public.requested_date') }}</span>
                     </template>
@@ -186,15 +186,22 @@ const handleFilter = (e) => {
                         {{ dayjs(slotProps.data.created_at).format('YYYY/MM/DD HH:mm:ss') }}
                     </template>
                 </Column>
-                <Column field="name" sortable :header="$t('public.member')" style="width: 25%" headerClass="hidden md:table-cell">
+                <Column field="name" sortable :header="$t('public.member')" style="width: 25%" class="hidden md:table-cell">
                     <template #body="slotProps">
                         <div class="flex items-center gap-3">
-                            <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                                <div v-if="slotProps.data.user_profile_photo">
-                                    <img :src="slotProps.data.user_profile_photo" alt="Profile Photo" />
+                            <div class="relative infline-flex items-center">
+                                <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
+                                    <div v-if="slotProps.data.user_profile_photo">
+                                        <img :src="slotProps.data.user_profile_photo" alt="Profile Photo" />
+                                    </div>
+                                    <div v-else>
+                                        <DefaultProfilePhoto />
+                                    </div>
                                 </div>
-                                <div v-else>
-                                    <DefaultProfilePhoto />
+                                 <div class="absolute -right-0.5 -bottom-1 bg-white rounded-full">
+                                    <IconCircleCheckFilled v-if="slotProps.data.user_kyc_status === 'verified'" size="12" stroke-width="1.25" class="text-success-500 grow-0 shrink-0" />
+                                    <IconClockFilled v-else-if="slotProps.data.user_kyc_status === 'pending'" size="12" stroke-width="1.25" class="text-warning-500 grow-0 shrink-0" />
+                                    <IconExclamationCircleFilled v-else size="12" stroke-width="1.25" class="text-error-500 grow-0 shrink-0" />
                                 </div>
                             </div>
                             <div class="flex flex-col items-start">
@@ -208,7 +215,7 @@ const handleFilter = (e) => {
                         </div>
                     </template>
                 </Column>
-                <Column field="from" style="width: 25%" headerClass="hidden md:table-cell">
+                <Column field="from" style="width: 25%" class="hidden md:table-cell">
                     <template #header>
                         <span class="hidden md:block items-center justify-center w-full">{{ $t('public.from') }}</span>
                     </template>
@@ -216,7 +223,7 @@ const handleFilter = (e) => {
                         {{ slotProps.data.from === 'rebate_wallet' ? $t(`public.${slotProps.data.from}`) : slotProps.data.from }}
                     </template>
                 </Column>
-                <Column field="amount" header="" sortable style="width: 25%" headerClass="hidden md:table-cell">
+                <Column field="amount" header="" sortable style="width: 25%" class="hidden md:table-cell">
                     <template #header>
                         <span class="hidden md:block items-center justify-center">{{ $t('public.amount') }} ($)</span>
                     </template>
@@ -246,8 +253,20 @@ const handleFilter = (e) => {
                     <template #body="slotProps">
                         <div class="flex items-center justify-between">
                             <div class="flex items-center gap-3">
-                                <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
-                                    <DefaultProfilePhoto />
+                                <div class="relative infline-flex items-center">
+                                    <div class="w-7 h-7 rounded-full overflow-hidden grow-0 shrink-0">
+                                        <div v-if="slotProps.data.user_profile_photo">
+                                            <img :src="slotProps.data.user_profile_photo" alt="Profile Photo" />
+                                        </div>
+                                        <div v-else>
+                                            <DefaultProfilePhoto />
+                                        </div>
+                                    </div>
+                                    <div class="absolute -right-0.5 -bottom-1 bg-white rounded-full">
+                                        <IconCircleCheckFilled v-if="slotProps.data.user_kyc_status === 'verified'" size="12" stroke-width="1.25" class="text-success-500 grow-0 shrink-0" />
+                                        <IconClockFilled v-else-if="slotProps.data.user_kyc_status === 'pending'" size="12" stroke-width="1.25" class="text-warning-500 grow-0 shrink-0" />
+                                        <IconExclamationCircleFilled v-else size="12" stroke-width="1.25" class="text-error-500 grow-0 shrink-0" />
+                                    </div>
                                 </div>
                                 <div class="flex flex-col items-start">
                                     <div class="text-sm font-semibold">
@@ -283,12 +302,19 @@ const handleFilter = (e) => {
             <div class="flex flex-col items-center gap-4 divide-y self-stretch">
                 <div class="flex flex-col-reverse md:flex-row md:items-center gap-3 self-stretch w-full">
                     <div class="flex items-center gap-3 self-stretch w-full">
-                        <div class="w-9 h-9 rounded-full overflow-hidden grow-0 shrink-0">
-                            <div v-if="pendingData.user_profile_photo">
-                                <img :src="pendingData.user_profile_photo" alt="Profile Photo" />
+                        <div class="relative infline-flex items-center">
+                            <div class="w-9 h-9 rounded-full overflow-hidden grow-0 shrink-0">
+                                <div v-if="pendingData.user_profile_photo">
+                                    <img :src="pendingData.user_profile_photo" alt="Profile Photo" />
+                                </div>
+                                <div v-else>
+                                    <DefaultProfilePhoto />
+                                </div>
                             </div>
-                            <div v-else>
-                                <DefaultProfilePhoto />
+                            <div class="absolute -right-0.5 -bottom-1 bg-white rounded-full">
+                                <IconCircleCheckFilled v-if="pendingData.user_kyc_status === 'verified'" size="15" stroke-width="1.25" class="text-success-500 grow-0 shrink-0" />
+                                <IconClockFilled v-else-if="pendingData.user_kyc_status === 'pending'" size="15" stroke-width="1.25" class="text-warning-500 grow-0 shrink-0" />
+                                <IconExclamationCircleFilled v-else size="15" stroke-width="1.25" class="text-error-500 grow-0 shrink-0" />
                             </div>
                         </div>
                         <div class="flex flex-col items-start w-full">

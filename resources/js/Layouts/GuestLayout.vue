@@ -49,7 +49,7 @@ const changeLanguage = async (langVal) => {
                         <slot />
                     </div>
                 </div>
-                <div class="text-center text-gray-500 text-xs mt-auto">© {{ dayjs().year() }} mosanes. All rights reserved.</div>
+                <div class="text-center text-gray-500 text-xs mt-auto">© {{ dayjs().year() }} MTL. All rights reserved.</div>
             </div>
         </div>
     </div>

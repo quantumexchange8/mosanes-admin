@@ -8,7 +8,7 @@
             <meta http-equiv="Content-Security-Policy" content="upgrade-insecure-requests">
         @endif
 
-        <title inertia>{{ config('app.name', 'Mosanes Admin') }}</title>
+        <title inertia>{{ config('app.name', 'MTL Admin') }}</title>
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

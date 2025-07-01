@@ -22,7 +22,7 @@ return [
     "group" => "Group",
     "transaction" => "Transaction",
     "account_type" => "Account Type",
-    "greeting" => "Welcome Back, Mosanes Admin!",
+    "greeting" => "Welcome Back, MTL Admin!",
     "greeting_caption" => "Ready to grow your trading community? Let's get started!",
     "account_balance_equity" => "Account Balance and Equity",
     "balance" => "Balance",

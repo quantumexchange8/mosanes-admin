@@ -1,7 +1,7 @@
 <script setup>
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout.vue";
 import {h, ref, watchEffect} from "vue";
-import {IconCircleCheckFilled, IconCircleXFilled, IconClockFilled, IconSearch, IconExclamationCircleFilled } from "@tabler/icons-vue";
+import {IconCircleCheckFilled, IconCircleXFilled, IconClockFilled, IconSearch, IconExclamationCircle } from "@tabler/icons-vue";
 import Loader from "@/Components/Loader.vue";
 import DataTable from "primevue/datatable";
 import InputText from "primevue/inputtext";
@@ -201,7 +201,7 @@ const handleFilter = (e) => {
                                  <div class="absolute -right-0.5 -bottom-1 bg-white rounded-full">
                                     <IconCircleCheckFilled v-if="slotProps.data.user_kyc_status === 'verified'" size="12" stroke-width="1.25" class="text-success-500 grow-0 shrink-0" />
                                     <IconClockFilled v-else-if="slotProps.data.user_kyc_status === 'pending'" size="12" stroke-width="1.25" class="text-warning-500 grow-0 shrink-0" />
-                                    <IconExclamationCircleFilled v-else size="12" stroke-width="1.25" class="text-error-500 grow-0 shrink-0" />
+                                    <IconExclamationCircle v-else size="12" stroke-width="1.25" class="text-error-500 grow-0 shrink-0" />
                                 </div>
                             </div>
                             <div class="flex flex-col items-start">
@@ -265,7 +265,7 @@ const handleFilter = (e) => {
                                     <div class="absolute -right-0.5 -bottom-1 bg-white rounded-full">
                                         <IconCircleCheckFilled v-if="slotProps.data.user_kyc_status === 'verified'" size="12" stroke-width="1.25" class="text-success-500 grow-0 shrink-0" />
                                         <IconClockFilled v-else-if="slotProps.data.user_kyc_status === 'pending'" size="12" stroke-width="1.25" class="text-warning-500 grow-0 shrink-0" />
-                                        <IconExclamationCircleFilled v-else size="12" stroke-width="1.25" class="text-error-500 grow-0 shrink-0" />
+                                        <IconExclamationCircle v-else size="12" stroke-width="1.25" class="text-error-500 grow-0 shrink-0" />
                                     </div>
                                 </div>
                                 <div class="flex flex-col items-start">
@@ -314,7 +314,7 @@ const handleFilter = (e) => {
                             <div class="absolute -right-0.5 -bottom-1 bg-white rounded-full">
                                 <IconCircleCheckFilled v-if="pendingData.user_kyc_status === 'verified'" size="15" stroke-width="1.25" class="text-success-500 grow-0 shrink-0" />
                                 <IconClockFilled v-else-if="pendingData.user_kyc_status === 'pending'" size="15" stroke-width="1.25" class="text-warning-500 grow-0 shrink-0" />
-                                <IconExclamationCircleFilled v-else size="15" stroke-width="1.25" class="text-error-500 grow-0 shrink-0" />
+                                <IconExclamationCircle v-else size="15" stroke-width="1.25" class="text-error-500 grow-0 shrink-0" />
                             </div>
                         </div>
                         <div class="flex flex-col items-start w-full">

@@ -68,6 +68,9 @@ export default {
             // Spacing
             'p-4',
 
+            // Size
+            'rounded-bl-3xl',
+
             // Colors
             'bg-black/90',
 
@@ -160,7 +163,10 @@ export default {
             'flex items-center justify-center',
 
             // Spacing
-            'p-4',
+            'p-1',
+
+            // Sizing
+            'rounded-bl-3xl',
 
             // Indicators Position
             {
@@ -192,7 +198,7 @@ export default {
     indicatorbutton: ({ context }) => ({
         class: [
             // Size
-            'w-4 h-4',
+            'w-2 h-2',
 
             // Appearance
             'rounded-full transition duration-200',

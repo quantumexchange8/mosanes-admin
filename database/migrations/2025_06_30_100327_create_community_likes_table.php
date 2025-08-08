@@ -9,8 +9,8 @@ return new class extends Migration {
     {
         Schema::create('community_likes', function (Blueprint $table) {
             $table->id();
-            $table->unsignedBigInteger('user_id')->unique();
-            $table->unsignedBigInteger('community_post_id')->unique();
+            $table->unsignedBigInteger('user_id');
+            $table->unsignedBigInteger('community_post_id');
             $table->timestamps();
 
             $table->foreign('user_id')
@@ -22,6 +22,8 @@ return new class extends Migration {
                 ->references('id')
                 ->on('community_posts')
                 ->onDelete('cascade');
+
+            $table->unique(['user_id', 'community_post_id']);
         });
     }
 

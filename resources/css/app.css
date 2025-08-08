@@ -94,6 +94,9 @@
     }
 
     .dialog-lg {
+        @media (min-width: 640px) {
+            width: 90vw;
+        }
         @media (min-width: 768px) {
             width: 700px;
         }
@@ -101,4 +104,13 @@
             width: 800px;
         }
     }
+}
+
+/* tiptap editor */
+.tiptap p.is-editor-empty:first-child::before {
+  color: #98A2B3;
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
 }

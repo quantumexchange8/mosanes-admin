@@ -631,4 +631,6 @@ return [
     'approve_kyc_message' => '您确定要批准 :name 的KYC验证吗？该用户将获得对所有功能的完全访问权限，此操作无法撤销。',
     'submission_date' => '提交日期',
     'uploaded_files' => '上传的文件',
+    'toast_create_community_post_success' => '您的帖子已发布成功',
+    'toast_edit_post_success' => '您的修改已保存',
 ];

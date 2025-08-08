@@ -18,6 +18,7 @@ use App\Http\Controllers\TransactionController;
 use App\Http\Controllers\ForumController;
 use App\Http\Controllers\AdminRoleController;
 use Illuminate\Support\Facades\Session;
+use App\Http\Controllers\CommunityController;
 
 Route::get('locale/{locale}', function ($locale) {
     App::setLocale($locale);
@@ -107,6 +108,28 @@ Route::middleware(['auth', 'role:super-admin|admin'])->group(function () {
         Route::post('/createPost', [ForumController::class, 'createPost'])->name('member.createPost');
         Route::post('/updatePostPermission', [ForumController::class, 'updatePostPermission'])->name('member.updatePostPermission');
         Route::delete('/deletePost', [ForumController::class, 'deletePost'])->name('member.deletePost');
+
+        //Community
+        Route::get('/community', [CommunityController::class, 'index'])->name('member.community')->middleware('role_and_permission:admin,access_member_community');
+        Route::get('/community/profile/{user_id?}', [CommunityController::class, 'communityProfile'])->name('member.communityProfile');
+        Route::post('/updateCommunityIntro', [CommunityController::class, 'updateCommunityIntro'])->name('member.updateCommunityIntro');
+        Route::post('/updateCoverImage', [CommunityController::class, 'updateCoverImage'])->name('member.updateCoverImage');
+
+        Route::post('/createCommunityPost', [CommunityController::class, 'createCommunityPost'])->name('member.createCommunityPost');
+        Route::get('/getCommunityPosts', [CommunityController::class, 'getCommunityPosts'])->name('member.getCommunityPosts');
+        Route::post('/updateCommunityPost', [CommunityController::class, 'updateCommunityPost'])->name('member.updateCommunityPost');
+        Route::delete('/deleteCommunityPost', [CommunityController::class, 'deleteCommunityPost'])->name('member.deleteCommunityPost');
+        Route::get('/getTrendingPosts', [CommunityController::class, 'getTrendingPosts'])->name('member.getTrendingPosts');
+        Route::get('/getPopularTags', [CommunityController::class, 'getPopularTags'])->name('member.getPopularTags');
+        Route::get('/getActivityFeed', [CommunityController::class, 'getActivityFeed'])->name('member.getActivityFeed');
+        Route::post('/markFeedAsRead', [CommunityController::class, 'markFeedAsRead'])->name('member.markFeedAsRead');
+        Route::post('/likeCommunityPost', [CommunityController::class, 'likeCommunityPost'])->name('member.likeCommunityPost');
+        Route::post('/createComment', [CommunityController::class, 'createComment'])->name('member.createComment');
+        Route::get('/getComments/{postId}', [CommunityController::class, 'getComments'])->name('member.getComments');
+        Route::post('/updateComment', [CommunityController::class, 'updateComment'])->name('member.updateComment');
+        Route::delete('/deleteComment', [CommunityController::class, 'deleteComment'])->name('member.deleteComment');
+        
+        Route::get('/getHashtags', [CommunityController::class, 'getHashtags'])->name('getHashtags');
 
         // account listing
         Route::get('/account_listing', [TradingAccountController::class, 'index'])->name('member.account_listing')->middleware('role_and_permission:admin,access_account_listing');

@@ -132,6 +132,21 @@ class User extends Authenticatable implements HasMedia
         return $this->hasMany(RebateAllocation::class, 'user_id', 'id');
     }
 
+    public function communityPosts(): HasMany
+    {
+        return $this->hasMany(CommunityPost::class, 'user_id', 'id');
+    }
+
+    public function communityLikes()
+    {
+        return $this->hasMany(CommunityLike::class);
+    }
+
+    public function likedPosts()
+    {
+        return $this->belongsToMany(CommunityPost::class, 'community_likes');
+    }
+
     // Logs
     public function getActivitylogOptions(): LogOptions
     {
@@ -170,6 +185,7 @@ class User extends Authenticatable implements HasMedia
                 'status',
                 'remarks',
                 'rebate_amount',
+                'community_intro',
                 'remember_token',
             ])
             ->setDescriptionForEvent(function (string $eventName) use ($user) {

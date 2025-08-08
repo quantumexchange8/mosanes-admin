@@ -177,6 +177,7 @@ const submitForm = () => {
                             {{ $t('public.message') }}
                         </InputLabel>
                         <TipTapEditor
+                            class="min-h-24 max-h-60 overflow-y-auto"
                             v-model="form.message"
                         />
                         <InputError :message="form.errors.message" />

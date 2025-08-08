@@ -161,6 +161,13 @@ watchEffect(() => {
             />
 
             <SidebarCollapsibleItem
+                :title="$t('public.community')"
+                :href="route('member.community')"
+                :active="route().current('member.community') || route().current('member.communityProfile')"
+                v-if="hasRole('super-admin') || hasPermission('access_member_forum')"
+            />
+
+            <SidebarCollapsibleItem
                 :title="$t('public.account_listing')"
                 :href="route('member.account_listing')"
                 :active="route().current('member.account_listing')"
